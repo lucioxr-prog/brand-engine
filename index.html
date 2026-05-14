@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Brand DNA Engine · Luciano Bettoli</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #0a0a0f;
+    --paper: #f5f2eb;
+    --gold: #c9a84c;
+    --gold-light: #e8d49a;
+    --gold-pale: #f7f0d8;
+    --accent: #2c1810;
+    --muted: #7a7060;
+    --border: #d4c89a;
+    --surface: #faf8f2;
+    --success: #1a5c2a;
+    --radius: 2px;
+    --transition: all 0.3s cubic-bezier(0.4,0,0.2,1);
+    --shadow: 0 4px 32px rgba(10,10,15,0.12);
+  }
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'DM Sans',sans-serif;background:var(--paper);color:var(--ink);min-height:100vh;overflow-x:hidden}
+  body::before{content:'';position:fixed;inset:0;background-image:radial-gradient(ellipse 80% 60% at 10% 20%,rgba(201,168,76,.08) 0%,transparent 60%),radial-gradient(ellipse 60% 80% at 90% 80%,rgba(44,24,16,.06) 0%,transparent 60%);pointer-events:none;z-index:0}
+
+  /* LOGIN */
+  #login-screen{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;z-index:1000;background:var(--ink)}
+  #login-screen::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 70% 50% at 30% 40%,rgba(201,168,76,.15) 0%,transparent 60%),radial-gradient(ellipse 50% 70% at 80% 70%,rgba(201,168,76,.08) 0%,transparent 60%)}
+  .login-card{position:relative;width:440px;padding:56px 48px;border:1px solid rgba(201,168,76,.3);background:rgba(10,10,15,.92);backdrop-filter:blur(20px)}
+  .login-card::before{content:'';position:absolute;top:0;left:32px;right:32px;height:1px;background:linear-gradient(90deg,transparent,var(--gold),transparent)}
+  .login-logo{text-align:center;margin-bottom:36px}
+  .monogram{font-family:'Playfair Display',serif;font-size:52px;font-weight:900;color:var(--gold);line-height:1;letter-spacing:-2px}
+  .login-logo .sub{font-family:'DM Mono',monospace;font-size:9px;color:rgba(201,168,76,.5);letter-spacing:4px;text-transform:uppercase;margin-top:8px}
+  .login-title{font-family:'Playfair Display',serif;font-size:22px;color:var(--paper);margin-bottom:6px;text-align:center}
+  .sec-badge{display:flex;align-items:center;justify-content:center;gap:6px;font-family:'DM Mono',monospace;font-size:9px;color:rgba(201,168,76,.45);letter-spacing:2px;text-transform:uppercase;margin-bottom:28px}
+  .fg{margin-bottom:14px}
+  .fg label{display:block;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:rgba(201,168,76,.7);font-family:'DM Mono',monospace;margin-bottom:7px}
+  .fg input{width:100%;padding:13px 15px;background:rgba(245,242,235,.05);border:1px solid rgba(201,168,76,.2);color:var(--paper);font-family:'DM Mono',monospace;font-size:14px;outline:none;transition:var(--transition);border-radius:var(--radius)}
+  .fg input:focus{border-color:var(--gold);background:rgba(201,168,76,.05)}
+  .fg input.err{border-color:#8b2020!important}
+  .api-sep{margin-top:22px;padding-top:22px;border-top:1px solid rgba(201,168,76,.15)}
+  .api-note{font-size:10px;color:rgba(245,242,235,.28);font-family:'DM Mono',monospace;margin-top:6px;line-height:1.7}
+  .login-btn{width:100%;padding:15px;background:var(--gold);color:var(--ink);border:none;font-family:'DM Mono',monospace;font-size:11px;letter-spacing:3px;text-transform:uppercase;font-weight:500;cursor:pointer;transition:var(--transition);margin-top:8px;border-radius:var(--radius)}
+  .login-btn:hover{background:var(--gold-light)}
+  .login-btn:active{transform:scale(.98)}
+  .login-err{margin-top:10px;padding:9px 14px;background:rgba(139,32,32,.2);border:1px solid rgba(139,32,32,.4);color:#e88;font-size:11px;font-family:'DM Mono',monospace;text-align:center;display:none;border-radius:var(--radius)}
+  .att-left{font-size:10px;color:rgba(201,168,76,.4);font-family:'DM Mono',monospace;text-align:center;margin-top:8px;letter-spacing:1px}
+
+  /* APP */
+  #app{display:none;position:relative;z-index:1;min-height:100vh}
+  .app-header{display:flex;align-items:center;justify-content:space-between;padding:20px 48px;border-bottom:1px solid var(--border);background:rgba(245,242,235,.85);backdrop-filter:blur(20px);position:sticky;top:0;z-index:100}
+  .hbrand{display:flex;align-items:center;gap:14px}
+  .bmark{width:40px;height:40px;background:var(--ink);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+  .bmark span{font-family:'Playfair Display',serif;font-size:20px;font-weight:900;color:var(--gold)}
+  .bname{font-family:'Playfair Display',serif;font-size:18px;font-weight:700;color:var(--ink);line-height:1.2}
+  .btag{font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:2px;text-transform:uppercase}
+  .hact{display:flex;align-items:center;gap:11px}
+  .dna-status{display:flex;align-items:center;gap:8px;padding:6px 14px;border:1px solid var(--border);font-family:'DM Mono',monospace;font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);border-radius:var(--radius);transition:var(--transition)}
+  .dna-status.active{border-color:var(--success);color:var(--success);background:rgba(26,92,42,.06)}
+  .dna-dot{width:6px;height:6px;border-radius:50%;background:var(--border);transition:var(--transition)}
+  .dna-status.active .dna-dot{background:var(--success);box-shadow:0 0 8px rgba(26,92,42,.5);animation:pdot 2s infinite}
+  @keyframes pdot{0%,100%{opacity:1}50%{opacity:.4}}
+  .sess-info{font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;padding:6px 12px;border:1px solid var(--border);border-radius:var(--radius)}
+  .logout-btn{padding:8px 16px;background:transparent;border:1px solid var(--border);color:var(--muted);font-family:'DM Mono',monospace;font-size:10px;letter-spacing:1px;text-transform:uppercase;cursor:pointer;transition:var(--transition);border-radius:var(--radius)}
+  .logout-btn:hover{border-color:var(--ink);color:var(--ink)}
+
+  .app-main{max-width:1400px;margin:0 auto;padding:48px;display:grid;grid-template-columns:1fr 1fr;gap:32px;align-items:start}
+  .panel{background:var(--surface);border:1px solid var(--border);overflow:hidden;box-shadow:var(--shadow)}
+  .ph{padding:20px 28px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;background:white}
+  .ptw{display:flex;align-items:center;gap:12px}
+  .pnum{width:28px;height:28px;background:var(--ink);display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-size:13px;font-weight:700;color:var(--gold);flex-shrink:0}
+  .ptitle{font-family:'Playfair Display',serif;font-size:16px;font-weight:700;color:var(--ink)}
+  .pdesc{font-size:11px;color:var(--muted);font-family:'DM Mono',monospace;letter-spacing:.5px;margin-top:2px}
+  .pb{padding:24px 28px}
+  textarea{width:100%;min-height:200px;padding:16px;background:white;border:1px solid var(--border);color:var(--ink);font-family:'DM Sans',sans-serif;font-size:13px;line-height:1.7;outline:none;resize:vertical;transition:var(--transition);border-radius:var(--radius)}
+  textarea:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,168,76,.1)}
+  textarea::placeholder{color:var(--muted);opacity:.6}
+  .btn{display:inline-flex;align-items:center;gap:8px;padding:12px 24px;font-family:'DM Mono',monospace;font-size:11px;letter-spacing:2px;text-transform:uppercase;font-weight:500;cursor:pointer;border:none;transition:var(--transition);border-radius:var(--radius)}
+  .btn-primary{background:var(--ink);color:var(--gold)}
+  .btn-primary:hover{background:var(--accent);transform:translateY(-1px);box-shadow:0 6px 20px rgba(10,10,15,.2)}
+  .btn-gold{background:var(--gold);color:var(--ink)}
+  .btn-gold:hover{background:var(--gold-light);transform:translateY(-1px);box-shadow:0 6px 20px rgba(201,168,76,.3)}
+  .btn-outline{background:transparent;color:var(--ink);border:1px solid var(--border)}
+  .btn-outline:hover{border-color:var(--ink);background:rgba(10,10,15,.04)}
+  .btn:disabled{opacity:.4;cursor:not-allowed;transform:none!important}
+  .btn-row{display:flex;gap:10px;margin-top:16px;flex-wrap:wrap}
+  .char-count{text-align:right;font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);margin-top:6px;letter-spacing:1px}
+  .loading-wrap{display:none;align-items:center;gap:12px;padding:14px 18px;background:var(--gold-pale);border:1px solid var(--border);margin-top:12px;border-radius:var(--radius)}
+  .loading-wrap.visible{display:flex}
+  .spinner{width:18px;height:18px;border:2px solid var(--border);border-top-color:var(--gold);border-radius:50%;animation:spin .8s linear infinite;flex-shrink:0}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .loading-text{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);letter-spacing:1px}
+
+  #dna-panel{grid-column:1/-1;display:none}
+  .dna-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--border);border:1px solid var(--border);margin-bottom:20px}
+  .dna-cell{background:white;padding:18px 20px;transition:var(--transition)}
+  .dna-cell:hover{background:var(--gold-pale)}
+  .dna-cell-label{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--gold);margin-bottom:8px;display:flex;align-items:center;gap:6px}
+  .dna-cell-label::before{content:'';display:inline-block;width:14px;height:1px;background:var(--gold)}
+  .dna-cell-value{font-size:12px;color:var(--ink);line-height:1.6;font-family:'DM Sans',sans-serif}
+  .rules-list{list-style:none}
+  .rules-list li{padding:10px 0;border-bottom:1px solid var(--border);font-size:13px;color:var(--ink);display:flex;gap:10px;align-items:flex-start;line-height:1.5}
+  .rules-list li:last-child{border-bottom:none}
+  .rule-num{font-family:'Playfair Display',serif;font-size:16px;font-weight:700;color:var(--gold);line-height:1;flex-shrink:0;width:20px}
+
+  .output-area{min-height:200px;padding:20px;background:white;border:1px solid var(--border);font-size:13px;line-height:1.8;color:var(--ink);white-space:pre-wrap;font-family:'DM Sans',sans-serif;border-radius:var(--radius)}
+  .output-empty{display:flex;align-items:center;justify-content:center;height:200px;color:var(--muted);font-family:'DM Mono',monospace;font-size:11px;letter-spacing:2px;text-transform:uppercase;flex-direction:column;gap:12px;opacity:.5}
+  .output-empty::before{content:'◈';font-size:28px;opacity:.4}
+
+  .history-section{grid-column:1/-1;margin-top:8px}
+  .history-header{display:flex;align-items:center;justify-content:space-between;padding:16px 0;border-top:1px solid var(--border);margin-bottom:16px}
+  .history-title{font-family:'Playfair Display',serif;font-size:14px;font-weight:700;color:var(--ink)}
+  .history-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px}
+  .history-item{padding:16px;background:white;border:1px solid var(--border);cursor:pointer;transition:var(--transition);border-radius:var(--radius)}
+  .history-item:hover{border-color:var(--gold);box-shadow:0 4px 16px rgba(201,168,76,.12);transform:translateY(-2px)}
+  .history-item-date{font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:1px;margin-bottom:6px;text-transform:uppercase}
+  .history-item-preview{font-size:12px;color:var(--ink);line-height:1.5;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+
+  .ornament-divider{grid-column:1/-1;display:flex;align-items:center;gap:16px;color:var(--gold);font-family:'Playfair Display',serif;font-size:18px;opacity:.4;margin:8px 0}
+  .ornament-divider::before,.ornament-divider::after{content:'';flex:1;height:1px;background:var(--border)}
+  .app-footer{text-align:center;padding:24px;border-top:1px solid var(--border);font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-top:40px}
+  .toast{position:fixed;bottom:32px;right:32px;padding:14px 20px;background:var(--ink);color:var(--gold);font-family:'DM Mono',monospace;font-size:11px;letter-spacing:1px;z-index:9999;transform:translateY(80px);opacity:0;transition:all .4s cubic-bezier(.4,0,.2,1);border-left:3px solid var(--gold);border-radius:var(--radius)}
+  .toast.show{transform:translateY(0);opacity:1}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+  .fade-in{animation:fadeIn .5s cubic-bezier(.4,0,.2,1) forwards}
+  @media(max-width:900px){.app-main{grid-template-columns:1fr;padding:24px}.dna-grid{grid-template-columns:1fr 1fr}.app-header{padding:16px 24px}#dna-panel,.ornament-divider,.history-section{grid-column:1}.sess-info{display:none}}
+  @media(max-width:600px){.dna-grid{grid-template-columns:1fr}.login-card{width:92%;padding:40px 22px}}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="login-screen">
+  <div class="login-card">
+    <div class="login-logo">
+      <div class="monogram">LB</div>
+      <div class="sub">Brand DNA Engine</div>
+    </div>
+    <h1 class="login-title">Accesso Riservato</h1>
+    <div class="sec-badge">🔐 SHA-256 Protected</div>
+
+    <div class="fg">
+      <label>Password di accesso</label>
+      <input type="password" id="pwd" placeholder="••••••••••••" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()">
+    </div>
+
+    <div class="api-sep">
+      <div class="fg">
+        <label>Anthropic API Key</label>
+        <input type="password" id="akey" placeholder="sk-ant-api03-..." autocomplete="off" onkeydown="if(event.key==='Enter')doLogin()">
+        <p class="api-note">Usata solo localmente nel browser — mai inviata a server terzi.</p>
+      </div>
+    </div>
+
+    <button class="login-btn" onclick="doLogin()">Entra nel Sistema →</button>
+    <div class="login-err" id="lerr"></div>
+    <div class="att-left" id="att"></div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app">
+  <header class="app-header">
+    <div class="hbrand">
+      <div class="bmark"><span>B</span></div>
+      <div>
+        <div class="bname">Brand DNA Engine</div>
+        <div class="btag">Document Styling &amp; Brand Consistency</div>
+      </div>
+    </div>
+    <div class="hact">
+      <div class="dna-status" id="dna-status"><div class="dna-dot"></div><span>DNA Non Acquisito</span></div>
+      <div class="sess-info" id="sess-info">Sessione attiva</div>
+      <button class="logout-btn" onclick="doLogout()">⎋ Esci</button>
+    </div>
+  </header>
+
+  <main class="app-main">
+
+    <div class="panel">
+      <div class="ph">
+        <div class="ptw"><div class="pnum">1</div><div><div class="ptitle">Master Template</div><div class="pdesc">Il documento che definisce il tuo brand</div></div></div>
+      </div>
+      <div class="pb">
+        <textarea id="master-doc" placeholder="Incolla qui il tuo documento master — lettera professionale, email tipo, report, proposta commerciale...&#10;&#10;Tutto ciò che usi come 'standard' del tuo stile comunicativo." oninput="cc('master-doc','mc')"></textarea>
+        <div class="char-count" id="mc">0 caratteri</div>
+        <div class="loading-wrap" id="ml"><div class="spinner"></div><span class="loading-text">Analisi Brand DNA in corso...</span></div>
+        <div class="btn-row">
+          <button class="btn btn-primary" onclick="analyzeDNA()">◈ Analizza Brand DNA</button>
+          <button class="btn btn-outline" onclick="clr('master-doc','mc')">Svuota</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="ph">
+        <div class="ptw"><div class="pnum">2</div><div><div class="ptitle">Documento da Stilizzare</div><div class="pdesc">Applica il Brand DNA a qualsiasi testo</div></div></div>
+      </div>
+      <div class="pb">
+        <textarea id="target-doc" placeholder="Incolla qui il documento che vuoi riformattare nel tuo stile...&#10;&#10;Il contenuto verrà preservato, il Brand DNA verrà applicato." oninput="cc('target-doc','tc')"></textarea>
+        <div class="char-count" id="tc">0 caratteri</div>
+        <div class="loading-wrap" id="tl"><div class="spinner"></div><span class="loading-text">Applicazione Brand DNA in corso...</span></div>
+        <div class="btn-row">
+          <button class="btn btn-gold" id="apply-btn" onclick="applyDNA()" disabled>✦ Applica Brand Kit</button>
+          <button class="btn btn-outline" onclick="clr('target-doc','tc')">Svuota</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel" id="dna-panel">
+      <div class="ph">
+        <div class="ptw"><div class="pnum">◈</div><div><div class="ptitle">Brand DNA Acquisito</div><div class="pdesc">Identità stilistica estratta dal Master Template</div></div></div>
+        <button class="btn btn-outline" onclick="clearDNA()" style="font-size:10px;padding:8px 14px">Reset DNA</button>
+      </div>
+      <div class="pb">
+        <div class="dna-grid" id="dna-grid"></div>
+        <div>
+          <div class="dna-cell-label" style="margin-bottom:12px">◈ Regole Stilistiche</div>
+          <ul class="rules-list" id="rules-list"></ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="ornament-divider">✦</div>
+
+    <div class="panel" style="grid-column:1/-1">
+      <div class="ph">
+        <div class="ptw"><div class="pnum">3</div><div><div class="ptitle">Output — Documento Stilizzato</div><div class="pdesc">Risultato con Brand DNA applicato</div></div></div>
+        <div style="display:flex;gap:8px">
+          <button class="btn btn-outline" id="copy-btn" onclick="copyOut()" style="font-size:10px;padding:8px 14px;display:none">⎘ Copia</button>
+          <button class="btn btn-outline" id="save-btn" onclick="saveHist()" style="font-size:10px;padding:8px 14px;display:none">+ Salva</button>
+        </div>
+      </div>
+      <div class="pb">
+        <div class="output-area" id="out"><div class="output-empty">Nessun output ancora</div></div>
+      </div>
+    </div>
+
+    <div class="history-section" id="hist-sec" style="display:none">
+      <div class="history-header">
+        <div class="history-title">◈ Cronologia Documenti</div>
+        <button class="btn btn-outline" onclick="clearHist()" style="font-size:10px;padding:8px 14px">Cancella tutto</button>
+      </div>
+      <div class="history-list" id="hist-list"></div>
+    </div>
+
+  </main>
+
+  <footer class="app-footer">Brand DNA Engine · Luciano Bettoli · Claude Sonnet · SHA-256 Auth</footer>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ════════════════════════════════════════════
+//  SECURITY — SHA-256 hashed password
+//
+//  Password corrente : brandDNA2025
+//  Hash SHA-256      : (vedere sotto)
+//
+//  Per cambiare password:
+//  1. Vai su https://emn178.github.io/online-tools/sha256.html
+//  2. Digita la nuova password e copia l'hash
+//  3. Sostituisci il valore di PASSWORD_HASH
+//  4. La password NON appare mai in chiaro nel sorgente
+// ════════════════════════════════════════════
+const PASSWORD_HASH = 'f9fd29e7f06bf4938fd4de1d1a3ad09d41757fb49cc65e9e4f283623be03c4bd';
+const MAX_ATT = 5;
+const LOCK_MS = 5 * 60 * 1000; // 5 min
+
+let apiKey = '';
+let brandDNA = null;
+let outputText = '';
+let hist = JSON.parse(localStorage.getItem('bdHist') || '[]');
+let attempts = +localStorage.getItem('bdAtt') || 0;
+let lockUntil = +localStorage.getItem('bdLock') || 0;
+
+// SHA-256 via Web Crypto (nativo, zero dipendenze)
+async function sha256(str) {
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
+}
+
+async function doLogin() {
+  const now = Date.now();
+  if (lockUntil > now) {
+    const m = Math.ceil((lockUntil - now) / 60000);
+    err(`Sistema bloccato. Riprova tra ${m} minuto/i.`); return;
+  }
+  const pwd = document.getElementById('pwd').value;
+  const key = document.getElementById('akey').value.trim();
+  if (!pwd) { err('Inserisci la password.'); return; }
+
+  const h = await sha256(pwd);
+  if (h !== PASSWORD_HASH) {
+    attempts++;
+    localStorage.setItem('bdAtt', attempts);
+    const rem = MAX_ATT - attempts;
+    if (attempts >= MAX_ATT) {
+      const lock = Date.now() + LOCK_MS;
+      localStorage.setItem('bdLock', lock);
+      localStorage.setItem('bdAtt', 0);
+      lockUntil = lock; attempts = 0;
+      err('Accesso bloccato per 5 minuti.');
+    } else {
+      err(`Password errata — ${rem} tentativo/i rimanenti.`);
+      document.getElementById('pwd').classList.add('err');
+    }
+    return;
+  }
+  if (!key || !key.startsWith('sk-ant')) {
+    err('API Key Anthropic non valida (deve iniziare con sk-ant-).');
+    document.getElementById('akey').classList.add('err'); return;
+  }
+  attempts = 0; localStorage.setItem('bdAtt','0');
+  apiKey = key;
+  const t = new Date().toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit'});
+  document.getElementById('sess-info').textContent = 'Login ' + t;
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('app').style.display = 'block';
+  document.getElementById('app').classList.add('fade-in');
+  renderHist(); toast('Accesso effettuato — Benvenuto, Luciano');
+}
+
+function err(msg) {
+  const el = document.getElementById('lerr');
+  el.textContent = msg; el.style.display = 'block';
+}
+
+function doLogout() {
+  document.getElementById('login-screen').style.display = 'flex';
+  document.getElementById('app').style.display = 'none';
+  ['pwd','akey'].forEach(id => { const el = document.getElementById(id); el.value=''; el.classList.remove('err'); });
+  document.getElementById('lerr').style.display = 'none';
+  apiKey = ''; brandDNA = null; outputText = '';
+}
+
+// Char count
+function cc(tid, cid) {
+  document.getElementById(cid).textContent = document.getElementById(tid).value.length.toLocaleString('it') + ' caratteri';
+}
+
+// Clear textarea
+function clr(tid, cid) {
+  document.getElementById(tid).value = '';
+  document.getElementById(cid).textContent = '0 caratteri';
+}
+
+// Claude API
+async function callClaude(sys, user) {
+  const res = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-api-key': apiKey,
+      'anthropic-version': '2023-06-01',
+      'anthropic-dangerous-direct-browser-access': 'true'
+    },
+    body: JSON.stringify({
+      model: 'claude-sonnet-4-20250514',
+      max_tokens: 4096,
+      system: sys,
+      messages: [{ role:'user', content:user }]
+    })
+  });
+  if (!res.ok) { const e = await res.json(); throw new Error(e.error?.message || 'API Error '+res.status); }
+  return (await res.json()).content[0].text;
+}
+
+// ANALYZE DNA
+async function analyzeDNA() {
+  const master = document.getElementById('master-doc').value.trim();
+  if (!master) { toast('Inserisci prima il documento master'); return; }
+  const ml = document.getElementById('ml');
+  ml.classList.add('visible');
+  const sys = `Sei un esperto di brand identity. Analizza il documento e restituisci SOLO JSON valido (no markdown, no backtick, no testo extra):
+{"tone":"...","structure":"...","density":"...","lists":"...","opening":"...","closing":"...","vocabulary":"...","formality":"...","rules":["regola1","regola2","regola3","regola4","regola5","regola6"]}`;
+  try {
+    const raw = await callClaude(sys, 'Analizza:\n\n' + master);
+    brandDNA = JSON.parse(raw.replace(/```json|```/g,'').trim());
+    renderDNA(brandDNA);
+    setDNAStatus(true);
+    document.getElementById('apply-btn').disabled = false;
+    toast('Brand DNA acquisito con successo');
+  } catch(e) { toast('Errore: '+e.message); console.error(e); }
+  finally { ml.classList.remove('visible'); }
+}
+
+function renderDNA(dna) {
+  const fields = [
+    ['Tono','tone'],['Struttura','structure'],['Densità','density'],['Liste','lists'],
+    ['Apertura','opening'],['Chiusura','closing'],['Vocabolario','vocabulary'],['Formalità','formality']
+  ];
+  document.getElementById('dna-grid').innerHTML = fields.map(([l,k]) =>
+    `<div class="dna-cell"><div class="dna-cell-label">${l}</div><div class="dna-cell-value">${dna[k]||'—'}</div></div>`
+  ).join('');
+  document.getElementById('rules-list').innerHTML = (dna.rules||[]).map((r,i) =>
+    `<li><span class="rule-num">${i+1}</span><span>${r}</span></li>`
+  ).join('');
+  const p = document.getElementById('dna-panel');
+  p.style.display = 'block'; p.classList.add('fade-in');
+}
+
+function setDNAStatus(active) {
+  const el = document.getElementById('dna-status');
+  el.classList.toggle('active', active);
+  el.querySelector('span').textContent = active ? 'Brand DNA Attivo' : 'DNA Non Acquisito';
+}
+
+// APPLY DNA
+async function applyDNA() {
+  const target = document.getElementById('target-doc').value.trim();
+  if (!target) { toast('Inserisci il documento da stilizzare'); return; }
+  if (!brandDNA) { toast('Analizza prima il Master Template'); return; }
+  const tl = document.getElementById('tl');
+  tl.classList.add('visible');
+  const sys = `Sei un esperto di brand consistency.
+Riscrivi il documento preservando TUTTO il contenuto informativo originale (dati, fatti, numeri, tecnicismi).
+Adatta esclusivamente forma, stile e struttura al Brand DNA.
+Brand DNA: ${JSON.stringify(brandDNA,null,2)}
+Restituisci SOLO il documento riscritto, senza commenti o spiegazioni.`;
+  try {
+    const result = await callClaude(sys, 'Applica Brand DNA:\n\n' + target);
+    outputText = result;
+    const o = document.getElementById('out');
+    o.innerHTML = ''; o.style.whiteSpace = 'pre-wrap'; o.textContent = result;
+    o.classList.add('fade-in');
+    document.getElementById('copy-btn').style.display = 'inline-flex';
+    document.getElementById('save-btn').style.display = 'inline-flex';
+    toast('Brand DNA applicato con successo');
+  } catch(e) { toast('Errore: '+e.message); console.error(e); }
+  finally { tl.classList.remove('visible'); }
+}
+
+function clearDNA() {
+  brandDNA = null;
+  document.getElementById('dna-panel').style.display = 'none';
+  document.getElementById('apply-btn').disabled = true;
+  setDNAStatus(false);
+  toast('Brand DNA resettato');
+}
+
+async function copyOut() {
+  if (!outputText) return;
+  try { await navigator.clipboard.writeText(outputText); toast('Copiato negli appunti'); }
+  catch { toast('Seleziona il testo manualmente'); }
+}
+
+function saveHist() {
+  if (!outputText) return;
+  hist.unshift({ id:Date.now(), date:new Date().toLocaleString('it-IT'), preview:outputText.slice(0,200), full:outputText });
+  if (hist.length > 20) hist.pop();
+  localStorage.setItem('bdHist', JSON.stringify(hist));
+  renderHist(); toast('Salvato nella cronologia');
+}
+
+function renderHist() {
+  if (!hist.length) { document.getElementById('hist-sec').style.display = 'none'; return; }
+  document.getElementById('hist-sec').style.display = 'block';
+  document.getElementById('hist-list').innerHTML = hist.map(it =>
+    `<div class="history-item" onclick="loadHist(${it.id})">
+      <div class="history-item-date">${it.date}</div>
+      <div class="history-item-preview">${it.preview}...</div>
+    </div>`
+  ).join('');
+}
+
+function loadHist(id) {
+  const it = hist.find(h => h.id === id); if (!it) return;
+  outputText = it.full;
+  const o = document.getElementById('out');
+  o.innerHTML = ''; o.textContent = it.full;
+  document.getElementById('copy-btn').style.display = 'inline-flex';
+  document.getElementById('save-btn').style.display = 'none';
+  toast('Documento ripristinato dalla cronologia');
+  o.scrollIntoView({ behavior:'smooth', block:'start' });
+}
+
+function clearHist() {
+  hist = []; localStorage.removeItem('bdHist');
+  renderHist(); toast('Cronologia cancellata');
+}
+
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3200);
+}
+</script>
+</body>
+</html>
