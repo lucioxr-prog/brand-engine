@@ -360,6 +360,20 @@
   /* ══ FOOTER ══ */
   .app-footer { border-top:1px solid var(--border); padding:12px 28px; text-align:center; font-size:9px; letter-spacing:2px; text-transform:uppercase; color:var(--text-muted); font-family:var(--mono); }
 
+
+  /* ══ BRAND SELECTOR ══ */
+  .brand-opt {
+    display: flex; align-items: center; gap: 10px;
+    padding: 9px 14px; background: var(--bg);
+    border: 1px solid var(--border); border-radius: var(--radius);
+    cursor: pointer; transition: all .2s; flex: 1; min-width: 160px;
+  }
+  .brand-opt:hover { border-color: var(--gold-dim); }
+  .brand-opt.active { border-color: var(--gold); background: var(--gold-glow); }
+  .brand-opt-dot { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; }
+  .brand-opt-name { font-size: 12px; color: var(--text); font-family: var(--mono); font-weight: 500; }
+  .brand-opt-desc { font-size: 10px; color: var(--text-muted); font-family: var(--mono); }
+
   /* ══ RESPONSIVE ══ */
   @media(max-width:900px) {
     .app-main { grid-template-columns:1fr; padding:16px; }
@@ -479,6 +493,35 @@
         </div>
         <div class="char-count" id="target-count">0 caratteri</div>
 
+        <!-- Brand Selector -->
+        <div style="margin-bottom:12px;">
+          <div style="font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--gold-dim);font-family:var(--mono);margin-bottom:8px;">◈ Brand da Applicare</div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;" id="brand-selector">
+            <div class="brand-opt active" id="brand-sintesi" onclick="selectBrand('sintesi')">
+              <div class="brand-opt-dot" style="background:#FF6600"></div>
+              <div><div class="brand-opt-name">🟠 SintesiDigitale</div><div class="brand-opt-desc">Brand Kit precaricato</div></div>
+            </div>
+            <div class="brand-opt" id="brand-master" onclick="selectBrand('master')">
+              <div class="brand-opt-dot" style="background:var(--gold)"></div>
+              <div><div class="brand-opt-name">🎨 Brand da Master</div><div class="brand-opt-desc">DNA estratto dal template</div></div>
+            </div>
+            <div class="brand-opt" id="brand-custom" onclick="selectBrand('custom')">
+              <div class="brand-opt-dot" style="background:var(--text-dim)"></div>
+              <div><div class="brand-opt-name">➕ Brand Personalizzato</div><div class="brand-opt-desc">Configura manualmente</div></div>
+            </div>
+          </div>
+          <div id="custom-brand-inputs" style="display:none;margin-top:10px;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);padding:12px;">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+              <div><label style="font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--text-dim);font-family:var(--mono);display:block;margin-bottom:5px">Nome Brand</label><input type="text" id="cb-name" placeholder="Es. Acme Srl" style="width:100%;padding:7px 10px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-size:12px;font-family:var(--mono)"></div>
+              <div><label style="font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--text-dim);font-family:var(--mono);display:block;margin-bottom:5px">Colore Primario</label><div style="display:flex;gap:6px;align-items:center"><input type="color" id="cb-primary" value="#FF6600" style="width:36px;height:30px;border:none;background:none;cursor:pointer" oninput="document.getElementById('cb-primary-hex').value=this.value"><input type="text" id="cb-primary-hex" placeholder="#FF6600" style="flex:1;padding:7px 10px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-size:12px;font-family:var(--mono)"></div></div>
+              <div><label style="font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--text-dim);font-family:var(--mono);display:block;margin-bottom:5px">Colore Secondario</label><div style="display:flex;gap:6px;align-items:center"><input type="color" id="cb-secondary" value="#000000" style="width:36px;height:30px;border:none;background:none;cursor:pointer" oninput="document.getElementById('cb-secondary-hex').value=this.value"><input type="text" id="cb-secondary-hex" placeholder="#000000" style="flex:1;padding:7px 10px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-size:12px;font-family:var(--mono)"></div></div>
+              <div><label style="font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--text-dim);font-family:var(--mono);display:block;margin-bottom:5px">Font Titoli</label><select id="cb-font-head" style="width:100%;padding:7px 10px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-size:12px;font-family:var(--mono)"><option value="Montserrat">Montserrat</option><option value="Orbitron">Orbitron</option><option value="Playfair Display">Playfair Display</option><option value="Poppins">Poppins</option><option value="Raleway">Raleway</option></select></div>
+              <div><label style="font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--text-dim);font-family:var(--mono);display:block;margin-bottom:5px">Font Corpo</label><select id="cb-font-body" style="width:100%;padding:7px 10px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-size:12px;font-family:var(--mono)"><option value="Inter">Inter</option><option value="Roboto">Roboto</option><option value="DM Sans">DM Sans</option><option value="Open Sans">Open Sans</option></select></div>
+              <div><label style="font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--text-dim);font-family:var(--mono);display:block;margin-bottom:5px">Tagline</label><input type="text" id="cb-tagline" placeholder="Es. Premium Digital Solutions" style="width:100%;padding:7px 10px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-size:12px;font-family:var(--mono)"></div>
+            </div>
+          </div>
+        </div>
+
         <!-- Numerazione pagine -->
         <div class="page-opts">
           <span class="page-opts-label">◈ Num. Pagine</span>
@@ -578,6 +621,102 @@
 <div id="toast"></div>
 
 <script>
+let selectedBrand = 'sintesi';
+
+// ══ BRAND SINTESIDIGITALE KIT ══
+const SINTESI_BRAND = {
+  name: 'SintesiDigitale',
+  tagline: 'Premium Digital Solutions · AI • Automation • Marketing',
+  primary: '#FF6600',
+  secondary: '#000000',
+  white: '#FFFFFF',
+  fontHead: 'Montserrat',
+  fontBody: 'Inter',
+  logo: '⬡',
+  rules: [
+    'Header con sfondo nero (#000000), logo esagonale arancione e testo bianco',
+    'Colore primario azione: #FF6600 (Sintesi Action) per pulsanti, accenti, bordi colorati',
+    'Tipografia titoli: Montserrat Bold o Orbitron per look tech',
+    'Tipografia corpo: Inter o Roboto per massima leggibilità',
+    'Tabelle con header sfondo nero, testo bianco, righe alternate grigio chiaro',
+    'Footer con sfondo nero, testo bianco/arancione, copyright',
+    'Design flat: no ombre esterne, no gradienti, no effetti',
+    'Margini generosi, spaziatura pulita e professionale',
+    'Link e accenti sempre in #FF6600',
+    'Versione negativa: testo nero su sfondi chiari, simbolo sempre arancione'
+  ]
+};
+
+function selectBrand(brand) {
+  selectedBrand = brand;
+  document.querySelectorAll('.brand-opt').forEach(el => el.classList.remove('active'));
+  document.getElementById('brand-' + brand).classList.add('active');
+  document.getElementById('custom-brand-inputs').style.display = brand === 'custom' ? 'block' : 'none';
+
+  if (brand === 'sintesi') {
+    toast('🟠 Brand SintesiDigitale attivo');
+  } else if (brand === 'master') {
+    if (!brandDNA) toast('⚠ Analizza prima il Master Template');
+    else toast('🎨 Brand da Master attivo');
+  } else {
+    toast('➕ Configura il brand personalizzato');
+  }
+}
+
+function getBrandContext() {
+  if (selectedBrand === 'sintesi') {
+    return `
+BRAND KIT ATTIVO: SintesiDigitale
+- Nome brand: ${SINTESI_BRAND.name}
+- Tagline: ${SINTESI_BRAND.tagline}
+- Colore primario (Sintesi Action): ${SINTESI_BRAND.primary}
+- Colore secondario (Deep Neural): ${SINTESI_BRAND.secondary}
+- Colore sfondo puro (Data Pure): ${SINTESI_BRAND.white}
+- Font titoli: ${SINTESI_BRAND.fontHead} Bold (alternativa: Orbitron per look tech)
+- Font corpo: ${SINTESI_BRAND.fontBody} (alternativa: Roboto)
+- Logo simbolo: griglia esagonale ⬡ in arancione ${SINTESI_BRAND.primary}
+- Regole brand:
+${SINTESI_BRAND.rules.map((r,i) => `  ${i+1}. ${r}`).join('\n')}
+`;
+  } else if (selectedBrand === 'master' && brandDNA) {
+    return `
+BRAND DA MASTER TEMPLATE:
+- Brand: ${brandDNA.brand_name||''}
+- Tono: ${brandDNA.tone}
+- Struttura: ${brandDNA.structure}
+- Tabelle: ${brandDNA.tables}
+- Emoji/Icone: ${brandDNA.emoji}
+- Intestazioni: ${brandDNA.headers}
+- Colori: ${brandDNA.colors_mentioned||''}
+- Regole: ${(brandDNA.rules||[]).join('; ')}
+${visualDNA ? `
+VISUAL DNA:
+- Colori: ${JSON.stringify(visualDNA.colors)}
+- Header: ${visualDNA.header_style}
+- Footer: ${visualDNA.footer_style}
+- Tabelle: ${visualDNA.table_style}
+` : ''}
+`;
+  } else if (selectedBrand === 'custom') {
+    const name = document.getElementById('cb-name').value || 'Brand';
+    const primary = document.getElementById('cb-primary-hex').value || document.getElementById('cb-primary').value;
+    const secondary = document.getElementById('cb-secondary-hex').value || document.getElementById('cb-secondary').value;
+    const fontHead = document.getElementById('cb-font-head').value;
+    const fontBody = document.getElementById('cb-font-body').value;
+    const tagline = document.getElementById('cb-tagline').value;
+    return `
+BRAND PERSONALIZZATO:
+- Nome brand: ${name}
+- Tagline: ${tagline}
+- Colore primario: ${primary}
+- Colore secondario: ${secondary}
+- Font titoli: ${fontHead}
+- Font corpo: ${fontBody}
+`;
+  }
+  return '';
+}
+
 // ══ CONFIG ══
 const PWD_HASH = 'fcd476b39d0442520601f01fe534a16267371685e4235855da7e8aeafbae5eda'; // brandDNA2026
 
@@ -858,29 +997,20 @@ function renderVisualDNA(v) {
 async function applyDNA() {
   const target = document.getElementById('target-doc').value.trim();
   if (!target) { toast('Inserisci il documento da elaborare'); return; }
-  if (!brandDNA) { toast('Analizza prima il Master Template'); return; }
+  if (selectedBrand === 'master' && !brandDNA) { toast('⚠ Analizza prima il Master Template'); return; }
+  if (selectedBrand === 'custom' && !document.getElementById('cb-name').value) { toast('⚠ Inserisci il nome del brand personalizzato'); return; }
 
   const tl = document.getElementById('target-loading');
   tl.classList.add('visible');
-
-  // Costruisci il contesto visivo se disponibile
-  const visualContext = visualDNA ? `
-BRAND DNA VISIVO:
-- Colori principali: ${JSON.stringify(visualDNA.colors)}
-- Header: ${visualDNA.header_style}
-- Footer: ${visualDNA.footer_style}
-- Tabelle: ${visualDNA.table_style}
-- Layout: ${visualDNA.layout}
-- Stile grafico: ${visualDNA.style}
-- Mood: ${visualDNA.mood}
-` : '';
 
   const pageCfg = getPageCfg();
   const pageInstructions = pageCfg.enabled ?
     `- Aggiungi numerazione pagine: formato "${pageCfg.fmt}", posizione "${pageCfg.pos}", partendo da ${pageCfg.start}` :
     '- Non aggiungere numerazione pagine';
 
-  const sys = `Sei un esperto di brand consistency e document design. Il tuo compito è riscrivere un documento in HTML che sia VISIVAMENTE SPECULARE al Master Template.
+  const brandContext = getBrandContext();
+
+  const sys = `Sei un esperto di brand consistency e document design. Il tuo compito è riscrivere un documento in HTML che rispetti ESATTAMENTE il Brand Kit fornito.
 
 REGOLE FONDAMENTALI:
 1. Preserva TUTTO il contenuto informativo originale — nessun dato, fatto o numero deve andare perso
@@ -889,33 +1019,18 @@ REGOLE FONDAMENTALI:
 4. Usa CSS inline per garantire la stampa corretta
 5. Il documento deve sembrare uscito dalla stessa stampante del master
 
-BRAND DNA TESTUALE:
-- Brand/Azienda: ${brandDNA.brand_name||''}
-- Tono: ${brandDNA.tone}
-- Struttura: ${brandDNA.structure}
-- Tabelle: ${brandDNA.tables}
-- Emoji/Icone: ${brandDNA.emoji}
-- Intestazioni: ${brandDNA.headers}
-- Apertura: ${brandDNA.opening}
-- Chiusura: ${brandDNA.closing}
-- Vocabolario: ${brandDNA.vocabulary}
-- Formalità: ${brandDNA.formality}
-- Colori/Elementi visivi nel testo: ${brandDNA.colors_mentioned||''}
+${brandContext}
 
-Regole stilistiche specifiche:
-${(brandDNA.rules||[]).map((r,i)=>`${i+1}. ${r}`).join('\n')}
-
-${visualContext}
-
-ISTRUZIONI HTML:
+ISTRUZIONI HTML OBBLIGATORIE:
 - Inizia con <!DOCTYPE html> e includi tutto il CSS nel <head>
-- Usa font Google: importa Playfair Display per titoli, DM Sans per corpo
-- Crea un header visivo con sfondo scuro/colorato come nel master, logo/nome brand, titolo documento
-- Usa tabelle HTML con bordi, padding e colori come nel master
-- Replica gli stili delle celle (sfondo header tabella scuro, righe alternate)
-- Footer professionale con nome brand, autore, data, copyright
-- CSS per stampa: @media print { ... } con margini corretti
-- Usa colori esatti estratti dal master visivo (o colori professionali se non disponibili)
+- Importa i font Google specificati nel Brand Kit via @import
+- HEADER: sfondo con colore secondario/scuro del brand, logo/simbolo in colore primario, nome brand e titolo documento in bianco
+- BODY: sfondo bianco, testo scuro, massima leggibilità
+- TABELLE: header con sfondo colore secondario e testo bianco, righe alternate con sfondo grigio chiaro (#f5f5f5), bordi sottili
+- FOOTER: sfondo colore secondario, testo bianco/colore primario, nome brand + tagline + data + copyright
+- Accenti, link, bordi evidenziati: sempre nel colore primario del brand
+- CSS per stampa @media print: margini 15mm, no box-shadow, background-color-adjust: exact
+- Carta A4: max-width 800px, padding generoso
 ${pageInstructions}
 - Carta A4: max-width 210mm, padding 15mm
 
@@ -931,7 +1046,8 @@ Restituisci SOLO il documento HTML completo, nessun testo prima o dopo.`;
     outputHTML = html;
     outputText = target;
     renderOutput(html);
-    toast('✓ Documento elaborato con Brand DNA');
+    const brandName = selectedBrand==='sintesi' ? 'SintesiDigitale' : selectedBrand==='master' ? 'Master' : 'Custom';
+    toast(`✓ Documento elaborato — Brand ${brandName}`);
   } catch(e) { toast('Errore: '+e.message); console.error(e); }
   finally { tl.classList.remove('visible'); }
 }
