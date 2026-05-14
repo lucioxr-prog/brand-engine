@@ -559,6 +559,26 @@
           <button class="btn btn-outline" onclick="clearPanel('master-doc','master-count')">Svuota</button>
         </div>
 
+        <!-- Analisi visiva -->
+        <div style="margin-top:16px;border-top:1px solid var(--border);padding-top:16px;">
+          <div style="font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:var(--gold-dim);font-family:var(--font-mono);margin-bottom:10px;">🎨 Analisi Visiva Brand (opzionale)</div>
+          <div class="upload-row">
+            <button class="upload-btn" onclick="document.getElementById('visual-file').click()">
+              🖼 Carica Screenshot / PDF
+            </button>
+            <span class="upload-label">analizza colori, font e stile grafico</span>
+            <input type="file" id="visual-file" accept="image/*,.pdf" onchange="handleVisualFile(event)">
+          </div>
+          <div id="visual-preview" style="display:none;margin-top:10px;">
+            <img id="visual-img" style="max-width:100%;max-height:180px;border-radius:4px;border:1px solid var(--border);">
+            <div class="loading-wrap" id="visual-loading" style="margin-top:10px;">
+              <div class="spinner"></div>
+              <span class="loading-text">Analisi visiva in corso...</span>
+            </div>
+            <div id="visual-results" style="display:none;margin-top:12px;"></div>
+          </div>
+        </div>
+
       </div>
     </div>
 
@@ -674,7 +694,8 @@
         </div>
         <div class="output-actions" id="output-actions" style="display:none">
           <button class="btn btn-primary" onclick="copyOutput()">⎘ Copia Testo</button>
-          <button class="btn btn-outline" onclick="downloadOutput()">↓ Scarica .txt</button>
+          <button class="btn btn-outline" onclick="downloadOutput('md')">↓ Scarica .md</button>
+          <button class="btn btn-outline" onclick="downloadOutput('html')">↓ Scarica .html</button>
           <button class="btn btn-outline" onclick="saveToHistory()">◈ Salva in Storia</button>
         </div>
       </div>
@@ -1120,14 +1141,206 @@ function copyOutput() {
   navigator.clipboard.writeText(outputText).then(() => toast('✓ Testo copiato negli appunti'));
 }
 
-function downloadOutput() {
-  const blob = new Blob([outputText], { type: 'text/plain;charset=utf-8' });
+function downloadOutput(format = 'md') {
+  const date = new Date().toISOString().slice(0,10);
+  let blob, filename;
+
+  if (format === 'md') {
+    blob = new Blob([outputText], { type: 'text/markdown;charset=utf-8' });
+    filename = `brand-dna-output-${date}.md`;
+  } else if (format === 'html') {
+    // Converti markdown base in HTML con stile
+    const htmlContent = `<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<title>Brand DNA Output - ${date}</title>
+<style>
+  body { font-family: Georgia, serif; max-width: 800px; margin: 40px auto; padding: 0 24px; line-height: 1.8; color: #2a2a2a; }
+  h1,h2,h3 { font-weight: 600; margin-top: 2em; }
+  h1 { font-size: 26px; border-bottom: 2px solid #c9a84c; padding-bottom: 8px; }
+  h2 { font-size: 20px; }
+  h3 { font-size: 16px; }
+  p { margin: 1em 0; }
+  ul,ol { margin: 1em 0; padding-left: 2em; }
+  li { margin: 0.4em 0; }
+  strong { font-weight: 700; }
+  em { font-style: italic; }
+  table { border-collapse: collapse; width: 100%; margin: 1em 0; }
+  th,td { border: 1px solid #ddd; padding: 8px 12px; text-align: left; }
+  th { background: #f5f0e8; font-weight: 600; }
+  code { background: #f5f0e8; padding: 2px 6px; border-radius: 3px; font-family: monospace; }
+  .footer { margin-top: 3em; padding-top: 1em; border-top: 1px solid #ddd; font-size: 12px; color: #888; }
+</style>
+</head>
+<body>
+${markdownToHtml(outputText)}
+<div class="footer">Brand DNA Engine · Luciano Bettoli · ${date}</div>
+</body>
+</html>`;
+    blob = new Blob([htmlContent], { type: 'text/html;charset=utf-8' });
+    filename = `brand-dna-output-${date}.html`;
+  }
+
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
-  a.download = 'brand-dna-output-' + new Date().toISOString().slice(0,10) + '.txt';
+  a.download = filename;
   a.click();
   URL.revokeObjectURL(a.href);
-  toast('✓ File scaricato');
+  toast(`✓ File ${format.toUpperCase()} scaricato`);
+}
+
+function markdownToHtml(md) {
+  return md
+    .replace(/^### (.+)$/gm, '<h3>$1</h3>')
+    .replace(/^## (.+)$/gm, '<h2>$1</h2>')
+    .replace(/^# (.+)$/gm, '<h1>$1</h1>')
+    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+    .replace(/\*(.+?)\*/g, '<em>$1</em>')
+    .replace(/`(.+?)`/g, '<code>$1</code>')
+    .replace(/^\- (.+)$/gm, '<li>$1</li>')
+    .replace(/^\d+\. (.+)$/gm, '<li>$1</li>')
+    .replace(/(<li>.*<\/li>\n?)+/g, s => `<ul>${s}</ul>`)
+    .replace(/\n\n/g, '</p><p>')
+    .replace(/^(?!<[hul])/gm, '')
+    .replace(/^(.+)$/gm, m => m.startsWith('<') ? m : `<p>${m}</p>`)
+    .replace(/<p><\/p>/g, '');
+}
+
+// ══ ANALISI VISIVA ══
+let visualImageBase64 = null;
+
+async function handleVisualFile(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  event.target.value = '';
+
+  const preview = document.getElementById('visual-preview');
+  const img = document.getElementById('visual-img');
+  const loading = document.getElementById('visual-loading');
+  const results = document.getElementById('visual-results');
+
+  // Mostra preview
+  const reader = new FileReader();
+  reader.onload = async (e) => {
+    const dataUrl = e.target.result;
+    visualImageBase64 = dataUrl.split(',')[1];
+    const mimeType = file.type || 'image/png';
+
+    img.src = dataUrl;
+    preview.style.display = 'block';
+    loading.classList.add('visible');
+    results.style.display = 'none';
+
+    try {
+      const analysis = await analyzeVisualBrand(visualImageBase64, mimeType);
+      renderVisualAnalysis(analysis);
+      results.style.display = 'block';
+      toast('✓ Analisi visiva completata');
+    } catch(e) {
+      toast('Errore analisi visiva: ' + e.message);
+    } finally {
+      loading.classList.remove('visible');
+    }
+  };
+  reader.readAsDataURL(file);
+}
+
+async function analyzeVisualBrand(base64, mimeType) {
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
+
+  const prompt = `Analizza questo documento/screenshot e estrai il profilo visivo del brand. 
+Restituisci SOLO JSON valido (no markdown, no backtick):
+{
+  "colors": {
+    "primary": "#hex e nome colore primario",
+    "secondary": "#hex e nome colore secondario", 
+    "accent": "#hex e nome colore accento",
+    "background": "#hex e nome sfondo",
+    "text": "#hex e nome testo"
+  },
+  "typography": {
+    "headings": "descrizione font titoli",
+    "body": "descrizione font corpo testo",
+    "style": "serif/sans-serif/monospace/misto"
+  },
+  "style": "descrizione stile grafico generale (es: minimalista, corporate, creativo...)",
+  "layout": "descrizione layout e spaziatura",
+  "mood": "mood/atmosfera del brand (es: professionale, elegante, dinamico...)",
+  "recommendations": ["consiglio1", "consiglio2", "consiglio3"]
+}`;
+
+  const resp = await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      contents: [{
+        role: 'user',
+        parts: [
+          { inline_data: { mime_type: mimeType, data: base64 } },
+          { text: prompt }
+        ]
+      }],
+      generationConfig: { maxOutputTokens: 1024, temperature: 0.3 }
+    })
+  });
+
+  if (!resp.ok) {
+    const err = await resp.json();
+    throw new Error(err.error?.message || 'Errore API visiva');
+  }
+  const data = await resp.json();
+  const raw = data.candidates[0].content.parts[0].text;
+  return JSON.parse(raw.replace(/```json|```/g,'').trim());
+}
+
+function renderVisualAnalysis(v) {
+  const results = document.getElementById('visual-results');
+  const colors = v.colors || {};
+  const colorSwatches = Object.entries(colors).map(([name, val]) => {
+    const hex = val.match(/#[0-9a-fA-F]{3,6}/)?.[0] || '#888';
+    return `<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+      <div style="width:24px;height:24px;border-radius:4px;background:${hex};border:1px solid var(--border);flex-shrink:0;"></div>
+      <div style="font-size:11px;font-family:var(--font-mono);color:var(--text-dim);">${name}: <span style="color:var(--text)">${val}</span></div>
+    </div>`;
+  }).join('');
+
+  results.innerHTML = `
+    <div style="background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:14px;">
+      <div style="font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--gold);font-family:var(--font-mono);margin-bottom:12px;">🎨 Profilo Visivo Brand</div>
+      
+      <div style="margin-bottom:12px;">
+        <div style="font-size:10px;color:var(--text-muted);font-family:var(--font-mono);margin-bottom:6px;text-transform:uppercase;letter-spacing:1px;">Palette Colori</div>
+        ${colorSwatches}
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;">
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:10px;">
+          <div style="font-size:10px;color:var(--gold-dim);font-family:var(--font-mono);margin-bottom:4px;">TIPOGRAFIA</div>
+          <div style="font-size:12px;color:var(--text);">Titoli: ${v.typography?.headings || '—'}</div>
+          <div style="font-size:12px;color:var(--text-dim);">Corpo: ${v.typography?.body || '—'}</div>
+        </div>
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:10px;">
+          <div style="font-size:10px;color:var(--gold-dim);font-family:var(--font-mono);margin-bottom:4px;">MOOD</div>
+          <div style="font-size:12px;color:var(--text);">${v.mood || '—'}</div>
+        </div>
+      </div>
+
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:10px;margin-bottom:10px;">
+        <div style="font-size:10px;color:var(--gold-dim);font-family:var(--font-mono);margin-bottom:4px;">STILE GRAFICO</div>
+        <div style="font-size:12px;color:var(--text);">${v.style || '—'}</div>
+      </div>
+
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:10px;">
+        <div style="font-size:10px;color:var(--gold-dim);font-family:var(--font-mono);margin-bottom:8px;">RACCOMANDAZIONI</div>
+        ${(v.recommendations||[]).map((r,i) => `
+          <div style="display:flex;gap:8px;margin-bottom:6px;align-items:flex-start;">
+            <div style="background:var(--gold);color:#1a1712;font-size:9px;font-weight:700;width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-family:var(--font-mono);">${i+1}</div>
+            <div style="font-size:12px;color:var(--text);line-height:1.5;">${r}</div>
+          </div>`).join('')}
+      </div>
+    </div>
+  `;
 }
 
 function saveToHistory() {
