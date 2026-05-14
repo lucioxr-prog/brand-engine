@@ -903,6 +903,11 @@ function formatPageNumber(n, total, format) {
 
 function renderOutputWithPages(text, pageConfig) {
   const outputArea = document.getElementById('output-area');
+  if (!outputArea) return;
+
+  // Nascondi empty state prima di tutto
+  const emptyEl = outputArea.querySelector('#empty-output') || document.getElementById('empty-output');
+  if (emptyEl) emptyEl.style.display = 'none';
 
   if (!pageConfig.enabled) {
     outputArea.innerHTML = '';
@@ -1093,8 +1098,10 @@ Restituisci SOLO il documento riscritto, senza commenti o introduzioni.`;
     const pageConfig = getPageConfig();
     renderOutputWithPages(result, pageConfig);
 
-    document.getElementById('empty-output').style.display = 'none';
-    document.getElementById('output-actions').style.display = 'flex';
+    const emptyEl = document.getElementById('empty-output');
+    if (emptyEl) emptyEl.style.display = 'none';
+    const actionsEl = document.getElementById('output-actions');
+    if (actionsEl) actionsEl.style.display = 'flex';
     toast('✓ Brand DNA applicato con successo');
   } catch(e) {
     toast('Errore: ' + e.message);
