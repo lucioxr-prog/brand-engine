@@ -1048,6 +1048,9 @@ STRUTTURA PAGINA:
 - Usa -webkit-print-color-adjust: exact e print-color-adjust: exact nel CSS
 - Orientamento SEMPRE verticale (portrait): @page { size: A4 portrait; margin: 20mm 15mm 25mm 15mm; }
 - Carta A4 verticale: max-width: 794px, margin: 0 auto, padding: 0 20px
+- NASCONDERE in stampa: data/ora browser, URL pagina, intestazioni browser
+- CSS OBBLIGATORIO: @media print { @page { margin: 20mm 15mm 25mm 15mm; } }
+- Per nascondere header/footer browser: @page { margin-top: 20mm; } — questo nasconde data/ora e URL del browser
 
 FONT SIZE — TUTTO PIÙ PICCOLO:
 - body: font-size: 11px
@@ -1064,13 +1067,11 @@ PRIMO FOGLIO (solo prima pagina, class .cover):
 - Sottotitolo tagline in Inter italic, font-size: 14px, color: #333
 - NON mettere sfondo nero sul cover — solo grigio chiaro
 
-HEADER GLOBALE (class .page-header):
-- NON usare position:fixed — causerebbe sovrapposizioni
-- Sfondo nero (#000000), padding: 10px 20px
-- Testo inline: "— [TITOLO-DOC] | " + span con nome brand in #FF6600
-- Linea arancione SOLO in basso: border-bottom: 2px solid #FF6600
-- NON mettere linea arancione separata come elemento extra — solo border-bottom
-- font-size: 11px, color: #ffffff, font-family: Montserrat
+HEADER GLOBALE:
+- NON inserire NESSUNA banda nera con testo nel documento
+- NON inserire .page-header con sfondo nero nel body del documento
+- L'unico header permesso è quello della cover (primo foglio)
+- Usa SOLO una linea decorativa arancione (border: 2px solid #FF6600) come separatore tra sezioni se necessario
 
 BODY:
 - background: #FFFFFF
@@ -1081,20 +1082,20 @@ BODY:
 - Contenuto in div.content con padding: 20px
 
 FOOTER GLOBALE (class .page-footer):
-- NON usare position:fixed — causerebbe sovrapposizioni
-- Sfondo nero (#000000), padding: 8px 20px
-- Linea arancione SOLO in alto: border-top: 2px solid #FF6600
-- NON mettere linea arancione separata come elemento extra — solo border-top
-- Testo centrato: "[Brand] — [Tagline] | Pagina N" in color: #aaaaaa, font-size: 10px
-- NON sovrapporre testo al contenuto
+- Inserisci UN SOLO footer alla fine del documento (non su ogni pagina)
+- Sfondo nero (#000000), padding: 12px 20px
+- Linea arancione in alto: border-top: 3px solid #FF6600
+- Testo centrato: "SINTESIDIGITALE — Premium Digital Solutions" in color: #aaaaaa, font-size: 10px
+- Sotto: anno copyright in color: #666, font-size: 9px
+- NON inserire URL, NON inserire numeri pagina nel footer HTML (il browser li aggiunge da solo in stampa)
 
 STAMPA @media print:
-- @page { size: A4 portrait; margin: 20mm 15mm 25mm 15mm; }
-- body { background: #FFFFFF !important; color: #000000 !important; font-size: 10px !important; }
-- h1,h2,h3 { color: #FF6600 !important; }
-- .page-header { background: #000000 !important; -webkit-print-color-adjust: exact; }
-- .page-footer { background: #000000 !important; -webkit-print-color-adjust: exact; }
-- NON nascondere header e footer in stampa
+- @page { size: A4 portrait; margin: 15mm; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+- body { background: #FFFFFF !important; color: #000000 !important; font-size: 10px !important; -webkit-print-color-adjust: exact; }
+- h1,h2,h3 { color: #FF6600 !important; -webkit-print-color-adjust: exact; }
+- .cover { background: #f4f4f4 !important; -webkit-print-color-adjust: exact; }
+- .page-footer { background: #000000 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+- IMPORTANTE: il CSS @page con margin toglie automaticamente data/ora e URL del browser dalla stampa
 
 ICONE E TONO:
 - VIETATO: emoji decorative, razzo, graffetta, occhio e simili
@@ -1110,8 +1111,15 @@ Restituisci SOLO il documento HTML completo, nessun testo prima o dopo.`;
     const rawHTML = await callGemini(sys, `Documento da elaborare:\n\n${target}`);
     // Estrai HTML pulito
     let html = rawHTML;
-    if (html.includes('```html')) html = html.split('```html')[1].split('```')[0].trim();
-    else if (html.includes('```')) html = html.split('```')[1].split('```')[0].trim();
+    // Rimuovi backtick markdown se presenti
+    html = html.replace(/^```html\s*/i, '').replace(/^```\s*/i, '').replace(/\s*```$/i, '').trim();
+    // Assicurati che inizi con DOCTYPE
+    if (!html.startsWith('<!DOCTYPE') && !html.startsWith('<html')) {
+      const docStart = html.indexOf('<!DOCTYPE');
+      const htmlStart = html.indexOf('<html');
+      const start = docStart !== -1 ? docStart : htmlStart !== -1 ? htmlStart : 0;
+      html = html.slice(start);
+    }
 
     outputHTML = html;
     outputText = target;
@@ -1143,8 +1151,8 @@ REGOLE CSS OBBLIGATORIE:
 - body { font-size: 11px; background: #fff; color: #1a1a1a; font-family: Inter; max-width: 794px; margin: 0 auto; }
 - h1 { font-size: 18px; color: #FF6600; } h2 { font-size: 15px; color: #FF6600; } h3 { font-size: 13px; color: #FF6600; }
 - .cover { background: #f4f4f4; padding: 40px 30px; }
-- .page-header { background: #000; color: #fff; padding: 10px 20px; border-bottom: 2px solid #FF6600; font-size: 11px; }
-- .page-footer { background: #000; color: #aaa; padding: 8px 20px; border-top: 2px solid #FF6600; text-align: center; font-size: 10px; }
+- .page-footer { background: #000; color: #aaa; padding: 12px 20px; border-top: 3px solid #FF6600; text-align: center; font-size: 10px; margin-top: 40px; }
+- @media print { @page { size: A4 portrait; margin: 15mm; } body { font-size: 10px !important; } .cover, .page-footer { -webkit-print-color-adjust: exact; print-color-adjust: exact; } }
 - .content { padding: 20px; }
 - table { width: 100%; border-collapse: collapse; font-size: 11px; }
 - thead tr { background: #000; color: #fff; }
