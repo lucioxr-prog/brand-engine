@@ -626,24 +626,26 @@ let selectedBrand = 'sintesi';
 // ══ BRAND SINTESIDIGITALE KIT ══
 const SINTESI_BRAND = {
   name: 'SintesiDigitale',
-  tagline: 'Premium Digital Solutions · AI • Automation • Marketing',
+  tagline: 'Premium Digital Solutions',
   primary: '#FF6600',
   secondary: '#000000',
   white: '#FFFFFF',
   fontHead: 'Montserrat',
   fontBody: 'Inter',
-  logo: '⬡',
+  logo: 'SINTESIDIGITALE',
   rules: [
-    'Header con sfondo nero (#000000), logo esagonale arancione e testo bianco',
-    'Colore primario azione: #FF6600 (Sintesi Action) per pulsanti, accenti, bordi colorati',
-    'Tipografia titoli: Montserrat Bold o Orbitron per look tech',
-    'Tipografia corpo: Inter o Roboto per massima leggibilità',
-    'Tabelle con header sfondo nero, testo bianco, righe alternate grigio chiaro',
-    'Footer con sfondo nero, testo bianco/arancione, copyright',
-    'Design flat: no ombre esterne, no gradienti, no effetti',
-    'Margini generosi, spaziatura pulita e professionale',
-    'Link e accenti sempre in #FF6600',
-    'Versione negativa: testo nero su sfondi chiari, simbolo sempre arancione'
+    'PRIMO FOGLIO: Grande intestazione con nome SINTESIDIGITALE in arancione (#FF6600) bold maiuscolo, sottotitolo "Premium Digital Solutions" in corsivo nero su sfondo grigio chiaro (#f0f0f0)',
+    'HEADER GLOBALE (tutte le pagine): sfondo nero (#000000), testo "— Vademecum Operativo SINTESIDIGITALE | Control Panel" con SINTESIDIGITALE in arancione, separatore arancione in basso',
+    'FOOTER GLOBALE (tutte le pagine): sfondo nero (#000000), separatore arancione in alto, testo centrato "Sintesidigitale — Premium Digital Solutions | Pagina N" in grigio chiaro',
+    'SCHERMO: sfondo body nero (#000000), testo bianco (#FFFFFF), titoli H1/H2/H3 in arancione (#FF6600)',
+    'STAMPA @media print: sfondo bianco (#FFFFFF), testo nero (#000000), titoli H1/H2/H3 in arancione (#FF6600)',
+    'NESSUNA icona informale o decorativa (no razzo, no graffetta, no emoji decorative) — solo icone funzionali indispensabili',
+    'Tipografia titoli: Montserrat Bold, corpo: Inter',
+    'Tabelle: header sfondo nero testo bianco, righe alternate #1a1a1a (schermo) / #f5f5f5 (stampa)',
+    'Indice/TOC: voci in arancione (#FF6600)',
+    'Accenti, link, bordi: sempre #FF6600',
+    'Design flat: no ombre, no gradienti, no effetti decorativi',
+    'Documento formale e professionale — tono tecnico-operativo'
   ]
 };
 
@@ -1021,16 +1023,49 @@ REGOLE FONDAMENTALI:
 
 ${brandContext}
 
-ISTRUZIONI HTML OBBLIGATORIE:
-- Inizia con <!DOCTYPE html> e includi tutto il CSS nel <head>
-- Importa i font Google specificati nel Brand Kit via @import
-- HEADER: sfondo con colore secondario/scuro del brand, logo/simbolo in colore primario, nome brand e titolo documento in bianco
-- BODY: sfondo bianco, testo scuro, massima leggibilità
-- TABELLE: header con sfondo colore secondario e testo bianco, righe alternate con sfondo grigio chiaro (#f5f5f5), bordi sottili
-- FOOTER: sfondo colore secondario, testo bianco/colore primario, nome brand + tagline + data + copyright
-- Accenti, link, bordi evidenziati: sempre nel colore primario del brand
-- CSS per stampa @media print: margini 15mm, no box-shadow, background-color-adjust: exact
-- Carta A4: max-width 800px, padding generoso
+ISTRUZIONI HTML OBBLIGATORIE — SEGUI ESATTAMENTE:
+
+STRUTTURA PAGINA:
+- Importa Google Fonts: @import url Montserrat (400,700,900) e Inter (400,500,600)
+- Usa -webkit-print-color-adjust: exact e print-color-adjust: exact nel CSS
+
+PRIMO FOGLIO (solo prima pagina):
+- Una sezione .cover-header con sfondo grigio chiarissimo (#f0f0f0), padding 30px
+- Nome brand "SINTESIDIGITALE" in Montserrat 900 maiuscolo colore primario, grande
+- Linea separatrice arancione sotto il nome
+- Sottotitolo tagline in corsivo, colore scuro
+
+HEADER GLOBALE (class .page-header, su TUTTE le pagine):
+- Sfondo nero (#000000), padding 12px 20px
+- Testo: "— Vademecum Operativo [NOME-BRAND] | [TITOLO-DOC]"
+- Il nome brand in colore primario arancione, il resto testo bianco
+- Linea separatrice arancione 2px in basso all'header
+
+BODY SCHERMO:
+- background: #000000 (nero)
+- color: #FFFFFF (bianco)
+- H1, H2, H3: color #FF6600 (arancione), font Montserrat Bold
+- Indice/TOC: voci in #FF6600
+- Tabelle: header sfondo #000 testo bianco, righe alternate #1a1a1a
+
+BODY STAMPA @media print:
+- background: #FFFFFF !important
+- color: #000000 !important  
+- H1, H2, H3: color #FF6600 !important (mantieni arancione anche in stampa)
+- Tabelle: header sfondo #000 testo bianco, righe alternate #f5f5f5
+- Margini: 15mm
+
+FOOTER GLOBALE (class .page-footer, su TUTTE le pagine):
+- Sfondo nero (#000000)
+- Linea separatrice arancione 2px in cima al footer
+- Testo centrato: "[Brand] — [Tagline] | Pagina" in grigio chiaro (#aaaaaa)
+
+ICONE E TONO:
+- VIETATO: emoji decorative, razzo 🚀, graffetta 📎, occhio 👁, e simili non funzionali
+- PERMESSO: solo simboli strettamente funzionali (es. ⚠️ per avvisi critici, ✅ per stati)
+- Tono formale e professionale, document design tecnico-operativo
+
+NESSUN TESTO PRIMA O DOPO L'HTML — restituisci solo il documento HTML completo.
 ${pageInstructions}
 - Carta A4: max-width 210mm, padding 15mm
 
