@@ -854,7 +854,7 @@ async function callGemini(system, userMsg, imageData=null, imageMime=null) {
   const body = {
     system_instruction: { parts: [{ text: system }] },
     contents: [{ role: 'user', parts }],
-    generationConfig: { maxOutputTokens: 8192, temperature: 0.4 }
+    generationConfig: { maxOutputTokens: 65536, temperature: 0.4 }
   };
 
   const resp = await fetch(url, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body) });
@@ -1001,6 +1001,12 @@ async function applyDNA() {
   if (!target) { toast('Inserisci il documento da elaborare'); return; }
   if (selectedBrand === 'master' && !brandDNA) { toast('⚠ Analizza prima il Master Template'); return; }
   if (selectedBrand === 'custom' && !document.getElementById('cb-name').value) { toast('⚠ Inserisci il nome del brand personalizzato'); return; }
+  
+  // Se documento lungo, dividi in chunks
+  if (target.length > 8000) {
+    await applyDNAChunked(target);
+    return;
+  }
 
   const tl = document.getElementById('target-loading');
   tl.classList.add('visible');
@@ -1083,6 +1089,77 @@ Restituisci SOLO il documento HTML completo, nessun testo prima o dopo.`;
     renderOutput(html);
     const brandName = selectedBrand==='sintesi' ? 'SintesiDigitale' : selectedBrand==='master' ? 'Master' : 'Custom';
     toast(`✓ Documento elaborato — Brand ${brandName}`);
+  } catch(e) { toast('Errore: '+e.message); console.error(e); }
+  finally { tl.classList.remove('visible'); }
+}
+
+async function applyDNAChunked(target) {
+  const tl = document.getElementById('target-loading');
+  tl.classList.add('visible');
+  
+  const brandContext = getBrandContext();
+  const pageCfg = getPageCfg();
+  const pageInstructions = pageCfg.enabled ?
+    `- Aggiungi numerazione pagine: formato "${pageCfg.fmt}", posizione "${pageCfg.pos}", partendo da ${pageCfg.start}` :
+    '- Non aggiungere numerazione pagine';
+
+  try {
+    // STEP 1: Genera CSS e struttura HTML
+    toast('Step 1/2 — Generazione template brand...');
+    const cssSystem = `Sei un esperto di document design. Genera SOLO il blocco CSS completo per un documento HTML branded SintesiDigitale.
+${brandContext}
+Restituisci SOLO il codice CSS (senza tag <style>, senza HTML), completo e pronto per essere inserito in un tag <style>.
+Includi: body, h1/h2/h3, tabelle, .cover-header, .page-header, .page-footer, .content, @media print.`;
+    
+    const css = await callGemini(cssSystem, 'Genera il CSS completo per il documento branded SintesiDigitale.');
+
+    // STEP 2: Genera contenuto HTML
+    toast('Step 2/2 — Elaborazione contenuto...');
+    const contentSystem = `Sei un esperto di document design. Converti il testo fornito in HTML semantico professionale.
+NON includere DOCTYPE, html, head, style o body tags — solo il contenuto interno.
+Usa classi: .cover-header per cover prima pagina, .page-header per header, .page-footer per footer, .content per contenuto.
+${brandContext}
+REGOLE:
+- Preserva TUTTO il contenuto originale
+- Converti titoli in <h1><h2><h3>
+- Converti liste in <ul><li> o <ol><li>
+- Converti tabelle in <table><thead><tbody>
+- NESSUNA emoji decorativa, solo funzionali
+- Tono formale e professionale
+- Cover prima pagina con nome brand e titolo documento
+- Header su ogni sezione principale
+- Footer in fondo al documento`;
+
+    const bodyContent = await callGemini(contentSystem, `Converti in HTML questo documento:
+
+${target}`);
+
+    // Assembla HTML completo
+    const today = new Date().toLocaleDateString('it-IT', {day:'2-digit', month:'long', year:'numeric'});
+    const html = `<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Documento SintesiDigitale — ${today}</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Montserrat:wght@400;700;900&display=swap');
+-webkit-print-color-adjust: exact;
+print-color-adjust: exact;
+${css}
+</style>
+</head>
+<body>
+${bodyContent}
+</body>
+</html>`;
+
+    outputHTML = html;
+    outputText = target;
+    renderOutput(html);
+    const brandName = selectedBrand==='sintesi' ? 'SintesiDigitale' : selectedBrand==='master' ? 'Master' : 'Custom';
+    toast(`✓ Documento elaborato — Brand ${brandName}`);
+    
   } catch(e) { toast('Errore: '+e.message); console.error(e); }
   finally { tl.classList.remove('visible'); }
 }
