@@ -482,8 +482,8 @@
     <div class="api-sep">
       <div class="fg">
         <label>Anthropic API Key</label>
-        <input type="password" id="akey" placeholder="sk-ant-api03-..." autocomplete="off" onkeydown="if(event.key==='Enter')doLogin()">
-        <p class="api-note">Usata solo localmente nel browser — mai inviata a server terzi.</p>
+        <input type="password" id="akey" placeholder="AIza..." autocomplete="off" onkeydown="if(event.key==='Enter')doLogin()" value="AIzaSyDGBx6oE2Cf3JEk8Silz5L_XQ1QUb9yMm0">
+        <p class="api-note">Google Gemini API Key — usata solo localmente nel browser.</p>
       </div>
     </div>
 
@@ -694,7 +694,7 @@
   </main>
 
   <footer class="app-footer">
-    Brand DNA Engine · Luciano Bettoli · Claude Sonnet · SHA-256 Auth
+    Brand DNA Engine · Luciano Bettoli · Google Gemini · SHA-256 Auth
   </footer>
 </div>
 
@@ -702,9 +702,7 @@
 
 <script>
 // ══ CONFIG ══
-const PWD_HASH = 'fcd476b39d0442520601f01fe534a16267371685e4235855da7e8aeafbae5eda'; // 'password'
-// SHA-256 di "password" — cambia con la tua password reale
-// Per generare: https://emn178.github.io/online-tools/sha256.html
+const PWD_HASH = 'fcd476b39d0442520601f01fe534a16267371685e4235855da7e8aeafbae5eda'; // 'brandDNA2026'
 
 let apiKey = '';
 let brandDNA = null;
@@ -724,7 +722,7 @@ async function doLogin() {
   const lerr = document.getElementById('lerr');
 
   if (!pwd || !key) { lerr.textContent = 'Inserisci password e API key.'; return; }
-  if (!key.startsWith('sk-ant-')) { lerr.textContent = 'API Key non valida (deve iniziare con sk-ant-).'; return; }
+  if (!key.startsWith('AIza')) { lerr.textContent = 'API Key non valida (deve iniziare con AIza).'; return; }
 
   const hash = await sha256(pwd);
   if (hash !== PWD_HASH) {
@@ -989,29 +987,27 @@ function toast(msg, duration = 3000) {
   setTimeout(() => el.classList.remove('show'), duration);
 }
 
-// ══ API ══
+// ══ API GOOGLE GEMINI ══
 async function callClaude(system, userMsg) {
-  const resp = await fetch('https://api.anthropic.com/v1/messages', {
+  const model = 'gemini-2.0-flash';
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+
+  const resp = await fetch(url, {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'x-api-key': apiKey,
-      'anthropic-version': '2023-06-01',
-      'anthropic-dangerous-direct-browser-access': 'true'
-    },
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
-      model: 'claude-sonnet-4-20250514',
-      max_tokens: 4096,
-      system,
-      messages: [{ role: 'user', content: userMsg }]
+      system_instruction: { parts: [{ text: system }] },
+      contents: [{ role: 'user', parts: [{ text: userMsg }] }],
+      generationConfig: { maxOutputTokens: 4096, temperature: 0.7 }
     })
   });
+
   if (!resp.ok) {
     const err = await resp.json();
-    throw new Error(err.error?.message || 'API error');
+    throw new Error(err.error?.message || 'Gemini API error');
   }
   const data = await resp.json();
-  return data.content[0].text;
+  return data.candidates[0].content.parts[0].text;
 }
 
 // ══ ANALYZE DNA ══
