@@ -814,7 +814,36 @@ async function readFile(file, taId, countId) {
       toast(`✓ DOCX caricato: ${file.name}`);
     } catch(e) { toast('⚠ Errore DOCX — incolla il testo manualmente'); }
   } else if (name.endsWith('.pdf')) {
-    toast('⚠ PDF: incolla il testo manualmente per risultati migliori');
+    toast('📄 PDF rilevato — estrazione testo in corso...');
+    try {
+      const ab = await file.arrayBuffer();
+      const base64 = btoa(String.fromCharCode(...new Uint8Array(ab)));
+      // Usa Gemini per estrarre testo dal PDF
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
+      const resp = await fetch(url, {
+        method: 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({
+          contents: [{
+            role: 'user',
+            parts: [
+              { inline_data: { mime_type: 'application/pdf', data: base64 } },
+              { text: 'Estrai tutto il testo da questo PDF mantenendo la struttura originale (titoli, paragrafi, liste, tabelle). Restituisci SOLO il testo estratto, nessun commento.' }
+            ]
+          }],
+          generationConfig: { maxOutputTokens: 32768, temperature: 0 }
+        })
+      });
+      if (!resp.ok) throw new Error('Errore API');
+      const data = await resp.json();
+      const text = data.candidates[0].content.parts[0].text;
+      ta.value = text.trim();
+      updateCount(taId, countId);
+      toast(`✓ PDF caricato: ${file.name}`);
+    } catch(e) {
+      toast('⚠ Errore PDF — incolla il testo manualmente');
+      console.error(e);
+    }
   } else {
     toast('⚠ Formato non supportato');
   }
