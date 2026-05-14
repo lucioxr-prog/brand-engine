@@ -5,6 +5,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Brand DNA Engine · Luciano Bettoli</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
 <style>
   :root {
     --bg: #1a1712;
@@ -482,7 +483,7 @@
     <div class="api-sep">
       <div class="fg">
         <label>Anthropic API Key</label>
-        <input type="password" id="akey" placeholder="AIza..." autocomplete="off" onkeydown="if(event.key==='Enter')doLogin()" value="AIzaSyAm_TAsynLcYq7Kqm3Am__uoZJeXNBsmlk">
+        <input type="password" id="akey" placeholder="AIza..." autocomplete="off" onkeydown="if(event.key==='Enter')doLogin()" value="AIzaSyDGBx6oE2Cf3JEk8Silz5L_XQ1QUb9yMm0">
         <p class="api-note">Google Gemini API Key — usata solo localmente nel browser.</p>
       </div>
     </div>
@@ -843,20 +844,24 @@ async function extractPDFText(arrayBuffer) {
 }
 
 async function extractDOCXText(file) {
-  // Estrazione testo da DOCX (ZIP con XML)
-  const JSZip = window.JSZip;
-  if (!JSZip) {
-    // Fallback: leggi come testo grezzo
-    const text = await file.text();
-    return text.replace(/<[^>]+>/g,' ').replace(/\s+/g,' ').trim();
+  // Usa mammoth.js per estrazione testo professionale da DOCX
+  if (window.mammoth) {
+    const arrayBuffer = await file.arrayBuffer();
+    const result = await mammoth.extractRawText({ arrayBuffer });
+    if (result.value && result.value.trim()) return result.value.trim();
   }
-  const zip = await JSZip.loadAsync(file);
-  const xml = await zip.file('word/document.xml').async('string');
-  const text = xml
-    .replace(/<w:p[ >]/g, '\n<w:p ')
+  // Fallback manuale
+  const arrayBuffer = await file.arrayBuffer();
+  const bytes = new Uint8Array(arrayBuffer);
+  const decoder = new TextDecoder('utf-8', { fatal: false });
+  const raw = decoder.decode(bytes);
+  const text = raw
+    .replace(/<w:p[ >][^>]*>/g, '\n')
     .replace(/<[^>]+>/g, '')
-    .replace(/\s+/g, ' ')
+    .replace(/[^\x20-\x7E\u00C0-\u024F\u0400-\u04FF\n\r\t]/g, '')
+    .replace(/\s{3,}/g, '\n\n')
     .trim();
+  if (!text) throw new Error('Impossibile estrarre testo dal DOCX');
   return text;
 }
 
