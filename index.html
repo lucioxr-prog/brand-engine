@@ -843,7 +843,7 @@ function getPageCfg() {
 }
 
 // ══ GEMINI API ══
-async function callGemini(system, userMsg, imageData=null, imageMime=null) {
+async function callGemini(system, userMsg, imageData=null, imageMime=null, retries=3) {
   const model = 'gemini-2.5-flash';
   const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
 
@@ -857,10 +857,22 @@ async function callGemini(system, userMsg, imageData=null, imageMime=null) {
     generationConfig: { maxOutputTokens: 65536, temperature: 0.4 }
   };
 
-  const resp = await fetch(url, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body) });
-  if (!resp.ok) { const e = await resp.json(); throw new Error(e.error?.message || 'Gemini error'); }
-  const data = await resp.json();
-  return data.candidates[0].content.parts[0].text;
+  for (let attempt = 1; attempt <= retries; attempt++) {
+    const resp = await fetch(url, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body) });
+    if (resp.ok) {
+      const data = await resp.json();
+      return data.candidates[0].content.parts[0].text;
+    }
+    const e = await resp.json();
+    const msg = e.error?.message || 'Gemini error';
+    // Se 503 (overload) riprova dopo attesa
+    if (resp.status === 503 && attempt < retries) {
+      toast(`⏳ Gemini sovraccarico — riprovo (${attempt}/${retries})...`);
+      await new Promise(r => setTimeout(r, 4000 * attempt));
+      continue;
+    }
+    throw new Error(msg);
+  }
 }
 
 // ══ ANALYZE DNA ══
@@ -1170,18 +1182,23 @@ function renderOutput(html) {
 
   rendered.style.display = 'none';
   iframe.style.display = 'block';
+  iframe.style.height = '600px';
 
-  const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
-  iframe.src = URL.createObjectURL(blob);
+  try {
+    const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    iframe.src = url;
+    iframe.onload = () => {
+      try {
+        const h = iframe.contentDocument?.body?.scrollHeight || 600;
+        iframe.style.height = Math.max(h + 40, 400) + 'px';
+      } catch(e) { iframe.style.height = '600px'; }
+    };
+  } catch(e) {
+    console.error('renderOutput error:', e);
+  }
 
-  iframe.onload = () => {
-    // Adatta altezza al contenuto
-    try {
-      const h = iframe.contentDocument.body.scrollHeight;
-      iframe.style.height = Math.max(h + 40, 400) + 'px';
-    } catch(e) { iframe.style.height = '600px'; }
-  };
-
+  // Mostra sempre i bottoni
   document.getElementById('output-actions').style.display = 'flex';
 }
 
