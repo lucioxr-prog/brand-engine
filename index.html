@@ -439,12 +439,15 @@
       </div>
       <div class="panel-body">
         <div class="upload-row">
-          <button class="upload-btn" onclick="document.getElementById('master-file').click()">📎 Carica File</button>
-          <span class="upload-hint">trascina .txt · .md · .docx · .pdf</span>
-          <input type="file" id="master-file" accept=".txt,.md,.pdf,.docx" onchange="handleFileInput(event,'master-doc','master-count')">
+          <label for="master-file" class="upload-btn" style="cursor:pointer;">📎 Carica File</label>
+          <span class="upload-hint">oppure trascina · .txt · .md · .docx</span>
+          <input type="file" id="master-file" accept=".txt,.md,.pdf,.docx" style="display:none" onchange="handleFileInput(event,'master-doc','master-count')">
         </div>
-        <div class="drop-zone" id="master-drop">
-          <textarea id="master-doc" placeholder="Incolla qui il tuo documento master — lettera, report, proposta commerciale, vademecum...&#10;&#10;Sarà la base per clonare stile, struttura, colori e formattazione." oninput="updateCount('master-doc','master-count')"></textarea>
+        <div class="drop-zone" id="master-drop"
+          ondragover="event.preventDefault();this.classList.add('drag-over')"
+          ondragleave="this.classList.remove('drag-over')"
+          ondrop="handleDrop(event,'master-doc','master-count');this.classList.remove('drag-over')">
+          <textarea id="master-doc" placeholder="Incolla qui il tuo documento master — lettera, report, proposta commerciale, vademecum...&#10;&#10;Puoi anche trascinare un file .txt .md .docx qui sopra." oninput="updateCount('master-doc','master-count')"></textarea>
           <div class="drop-hint-bar">⬇ Drag & drop .txt · .md · .docx · .pdf</div>
         </div>
         <div class="char-count" id="master-count">0 caratteri</div>
@@ -483,12 +486,15 @@
       </div>
       <div class="panel-body">
         <div class="upload-row">
-          <button class="upload-btn" onclick="document.getElementById('target-file').click()">📎 Carica File</button>
-          <span class="upload-hint">trascina .txt · .md · .docx · .pdf</span>
-          <input type="file" id="target-file" accept=".txt,.md,.pdf,.docx" onchange="handleFileInput(event,'target-doc','target-count')">
+          <label for="target-file" class="upload-btn" style="cursor:pointer;">📎 Carica File</label>
+          <span class="upload-hint">oppure trascina · .txt · .md · .docx</span>
+          <input type="file" id="target-file" accept=".txt,.md,.pdf,.docx" style="display:none" onchange="handleFileInput(event,'target-doc','target-count')">
         </div>
-        <div class="drop-zone" id="target-drop">
-          <textarea id="target-doc" placeholder="Incolla qui il documento da elaborare...&#10;&#10;Il contenuto verrà preservato integralmente.&#10;La formattazione verrà resa speculare al Master Template." oninput="updateCount('target-doc','target-count')"></textarea>
+        <div class="drop-zone" id="target-drop" 
+          ondragover="event.preventDefault();this.classList.add('drag-over')"
+          ondragleave="this.classList.remove('drag-over')"
+          ondrop="handleDrop(event,'target-doc','target-count');this.classList.remove('drag-over')">
+          <textarea id="target-doc" placeholder="Incolla qui il documento da elaborare...&#10;&#10;Puoi anche trascinare un file .txt .md .docx qui sopra." oninput="updateCount('target-doc','target-count')"></textarea>
           <div class="drop-hint-bar">⬇ Drag & drop .txt · .md · .docx · .pdf</div>
         </div>
         <div class="char-count" id="target-count">0 caratteri</div>
@@ -771,13 +777,22 @@ function startTimer() {
 }
 
 // ══ DRAG & DROP ══
+async function handleDrop(ev, taId, countId) {
+  ev.preventDefault();
+  ev.stopPropagation();
+  const file = ev.dataTransfer?.files?.[0];
+  if (file) await readFile(file, taId, countId);
+}
+
 function setupDrop(zoneId, taId, countId) {
+  // Fallback per browser che non supportano gli attributi inline
   const zone = document.getElementById(zoneId);
-  ['dragenter','dragover'].forEach(e => zone.addEventListener(e, ev => { ev.preventDefault(); zone.classList.add('drag-over'); }));
-  ['dragleave','dragend'].forEach(e => zone.addEventListener(e, ev => { if(!zone.contains(ev.relatedTarget)) zone.classList.remove('drag-over'); }));
+  if (!zone) return;
+  zone.addEventListener('dragover', ev => { ev.preventDefault(); zone.classList.add('drag-over'); });
+  zone.addEventListener('dragleave', ev => { if(!zone.contains(ev.relatedTarget)) zone.classList.remove('drag-over'); });
   zone.addEventListener('drop', async ev => {
     ev.preventDefault(); zone.classList.remove('drag-over');
-    const file = ev.dataTransfer.files[0];
+    const file = ev.dataTransfer?.files?.[0];
     if (file) await readFile(file, taId, countId);
   });
 }
