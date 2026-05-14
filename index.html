@@ -989,7 +989,7 @@ function toast(msg, duration = 3000) {
 
 // ══ API GOOGLE GEMINI ══
 async function callClaude(system, userMsg) {
-  const model = 'gemini-2.0-flash-001';
+  const model = 'gemini-2.5-flash';
   const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
 
   const resp = await fetch(url, {
