@@ -1044,48 +1044,65 @@ ${brandContext}
 ISTRUZIONI HTML OBBLIGATORIE — SEGUI ESATTAMENTE:
 
 STRUTTURA PAGINA:
-- Importa Google Fonts: @import url Montserrat (400,700,900) e Inter (400,500,600)
+- Importa Google Fonts: @import url Montserrat (400,700,900) e Inter (400,500;600)
 - Usa -webkit-print-color-adjust: exact e print-color-adjust: exact nel CSS
+- Orientamento SEMPRE verticale (portrait): @page { size: A4 portrait; margin: 20mm 15mm 25mm 15mm; }
+- Carta A4 verticale: max-width: 794px, margin: 0 auto, padding: 0 20px
 
-PRIMO FOGLIO (solo prima pagina):
-- Una sezione .cover-header con sfondo grigio chiarissimo (#f0f0f0), padding 30px
-- Nome brand "SINTESIDIGITALE" in Montserrat 900 maiuscolo colore primario, grande
-- Linea separatrice arancione sotto il nome
-- Sottotitolo tagline in corsivo, colore scuro
+FONT SIZE — TUTTO PIÙ PICCOLO:
+- body: font-size: 11px
+- h1: font-size: 18px
+- h2: font-size: 15px  
+- h3: font-size: 13px
+- p, li, td: font-size: 11px
+- small: font-size: 10px
 
-HEADER GLOBALE (class .page-header, su TUTTE le pagine):
-- Sfondo nero (#000000), padding 12px 20px
-- Testo: "— Vademecum Operativo [NOME-BRAND] | [TITOLO-DOC]"
-- Il nome brand in colore primario arancione, il resto testo bianco
-- Linea separatrice arancione 2px in basso all'header
+PRIMO FOGLIO (solo prima pagina, class .cover):
+- Sfondo grigio chiarissimo (#f4f4f4), padding: 40px 30px 30px 30px
+- Nome brand "SINTESIDIGITALE" in Montserrat 900, font-size: 36px, color: #FF6600, letter-spacing: 2px
+- Linea sottile arancione (border-bottom: 3px solid #FF6600) sotto il nome, margin: 8px 0 12px 0
+- Sottotitolo tagline in Inter italic, font-size: 14px, color: #333
+- NON mettere sfondo nero sul cover — solo grigio chiaro
 
-BODY SCHERMO:
-- background: #FFFFFF (bianco)
-- color: #1a1a1a (quasi nero per leggibilità)
-- H1, H2, H3: color #FF6600 (arancione), font Montserrat Bold
+HEADER GLOBALE (class .page-header):
+- NON usare position:fixed — causerebbe sovrapposizioni
+- Sfondo nero (#000000), padding: 10px 20px
+- Testo inline: "— [TITOLO-DOC] | " + span con nome brand in #FF6600
+- Linea arancione SOLO in basso: border-bottom: 2px solid #FF6600
+- NON mettere linea arancione separata come elemento extra — solo border-bottom
+- font-size: 11px, color: #ffffff, font-family: Montserrat
+
+BODY:
+- background: #FFFFFF
+- color: #1a1a1a
+- H1, H2, H3: color #FF6600, font-family: Montserrat Bold
 - Indice/TOC: voci in #FF6600
-- Tabelle: header sfondo #000000 testo bianco, righe alternate #f5f5f5
+- Tabelle: header sfondo #000000 testo bianco, righe alternate #f9f9f9, font-size: 11px
+- Contenuto in div.content con padding: 20px
 
-BODY STAMPA @media print:
-- background: #FFFFFF !important
-- color: #000000 !important  
-- H1, H2, H3: color #FF6600 !important (mantieni arancione anche in stampa)
-- Tabelle: header sfondo #000 testo bianco, righe alternate #f5f5f5
-- Margini: 15mm
+FOOTER GLOBALE (class .page-footer):
+- NON usare position:fixed — causerebbe sovrapposizioni
+- Sfondo nero (#000000), padding: 8px 20px
+- Linea arancione SOLO in alto: border-top: 2px solid #FF6600
+- NON mettere linea arancione separata come elemento extra — solo border-top
+- Testo centrato: "[Brand] — [Tagline] | Pagina N" in color: #aaaaaa, font-size: 10px
+- NON sovrapporre testo al contenuto
 
-FOOTER GLOBALE (class .page-footer, su TUTTE le pagine):
-- Sfondo nero (#000000)
-- Linea separatrice arancione 2px in cima al footer
-- Testo centrato: "[Brand] — [Tagline] | Pagina" in grigio chiaro (#aaaaaa)
+STAMPA @media print:
+- @page { size: A4 portrait; margin: 20mm 15mm 25mm 15mm; }
+- body { background: #FFFFFF !important; color: #000000 !important; font-size: 10px !important; }
+- h1,h2,h3 { color: #FF6600 !important; }
+- .page-header { background: #000000 !important; -webkit-print-color-adjust: exact; }
+- .page-footer { background: #000000 !important; -webkit-print-color-adjust: exact; }
+- NON nascondere header e footer in stampa
 
 ICONE E TONO:
-- VIETATO: emoji decorative, razzo 🚀, graffetta 📎, occhio 👁, e simili non funzionali
-- PERMESSO: solo simboli strettamente funzionali (es. ⚠️ per avvisi critici, ✅ per stati)
-- Tono formale e professionale, document design tecnico-operativo
+- VIETATO: emoji decorative, razzo, graffetta, occhio e simili
+- PERMESSO: solo ⚠️ per avvisi critici, ✅ per stati completati
+- Tono formale, professionale, tecnico-operativo
+- Font monospace SOLO per codice/URL, non per testo normale
 
-NESSUN TESTO PRIMA O DOPO L'HTML — restituisci solo il documento HTML completo.
 ${pageInstructions}
-- Carta A4: max-width 210mm, padding 15mm
 
 Restituisci SOLO il documento HTML completo, nessun testo prima o dopo.`;
 
@@ -1121,7 +1138,20 @@ async function applyDNAChunked(target) {
     const cssSystem = `Sei un esperto di document design. Genera SOLO il blocco CSS completo per un documento HTML branded SintesiDigitale.
 ${brandContext}
 Restituisci SOLO il codice CSS (senza tag <style>, senza HTML), completo e pronto per essere inserito in un tag <style>.
-Includi: body, h1/h2/h3, tabelle, .cover-header, .page-header, .page-footer, .content, @media print.`;
+REGOLE CSS OBBLIGATORIE:
+- @page { size: A4 portrait; margin: 20mm 15mm 25mm 15mm; }
+- body { font-size: 11px; background: #fff; color: #1a1a1a; font-family: Inter; max-width: 794px; margin: 0 auto; }
+- h1 { font-size: 18px; color: #FF6600; } h2 { font-size: 15px; color: #FF6600; } h3 { font-size: 13px; color: #FF6600; }
+- .cover { background: #f4f4f4; padding: 40px 30px; }
+- .page-header { background: #000; color: #fff; padding: 10px 20px; border-bottom: 2px solid #FF6600; font-size: 11px; }
+- .page-footer { background: #000; color: #aaa; padding: 8px 20px; border-top: 2px solid #FF6600; text-align: center; font-size: 10px; }
+- .content { padding: 20px; }
+- table { width: 100%; border-collapse: collapse; font-size: 11px; }
+- thead tr { background: #000; color: #fff; }
+- tbody tr:nth-child(even) { background: #f9f9f9; }
+- td, th { padding: 6px 10px; border: 1px solid #ddd; }
+- @media print { @page { size: A4 portrait; } body { font-size: 10px !important; } .page-header, .page-footer { -webkit-print-color-adjust: exact; print-color-adjust: exact; } }
+Includi: body, h1/h2/h3, tabelle, .cover, .page-header, .page-footer, .content, @media print.`;
     
     const css = await callGemini(cssSystem, 'Genera il CSS completo per il documento branded SintesiDigitale.');
 
