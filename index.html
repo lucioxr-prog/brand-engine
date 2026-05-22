@@ -438,19 +438,45 @@
         </div>
       </div>
       <div class="panel-body">
-        <div class="upload-row">
-          <label for="master-file" class="upload-btn" style="cursor:pointer;">📎 Carica File</label>
-          <span class="upload-hint">oppure trascina · .txt · .md · .docx</span>
-          <input type="file" id="master-file" accept=".txt,.md,.pdf,.docx" style="display:none" onchange="handleFileInput(event,'master-doc','master-count')">
+
+        <!-- ═══ MODIFICA 1: Notice SintesiDigitale precaricato ═══ -->
+        <div id="master-sintesi-notice" style="
+          display:flex; align-items:flex-start; gap:12px;
+          padding:14px 16px;
+          background:rgba(255,102,0,0.07);
+          border:1px solid rgba(255,102,0,0.35);
+          border-radius:4px;
+          margin-bottom:12px;">
+          <span style="font-size:18px;line-height:1;margin-top:1px">🟠</span>
+          <div>
+            <div style="font-family:var(--mono);font-size:11px;font-weight:600;color:#FF6600;letter-spacing:.5px;margin-bottom:4px">
+              SintesiDigitale Brand Kit — precaricato
+            </div>
+            <div style="font-family:var(--mono);font-size:10px;color:var(--text-dim);line-height:1.6">
+              Layout, colori (#FF6600 / #000000), tipografia (Montserrat + Inter),
+              regole header/footer e stile tabelle sono già configurati.<br>
+              Il documento Master Template non è necessario.<br>
+              <span style="color:var(--text-muted)">Seleziona "Brand da Master" per caricare un template personalizzato.</span>
+            </div>
+          </div>
         </div>
-        <div class="drop-zone" id="master-drop"
-          ondragover="event.preventDefault();this.classList.add('drag-over')"
-          ondragleave="this.classList.remove('drag-over')"
-          ondrop="handleDrop(event,'master-doc','master-count');this.classList.remove('drag-over')">
-          <textarea id="master-doc" placeholder="Incolla qui il tuo documento master — lettera, report, proposta commerciale, vademecum...&#10;&#10;Puoi anche trascinare un file .txt .md .docx qui sopra." oninput="updateCount('master-doc','master-count')"></textarea>
-          <div class="drop-hint-bar">⬇ Drag & drop .txt · .md · .docx · .pdf</div>
+
+        <!-- ═══ MODIFICA 1: Wrapper area upload (nascosta per sintesi) ═══ -->
+        <div id="master-upload-area" style="display:none;">
+          <div class="upload-row">
+            <label for="master-file" class="upload-btn" style="cursor:pointer;">📎 Carica File</label>
+            <span class="upload-hint">oppure trascina · .txt · .md · .docx</span>
+            <input type="file" id="master-file" accept=".txt,.md,.pdf,.docx" style="display:none" onchange="handleFileInput(event,'master-doc','master-count')">
+          </div>
+          <div class="drop-zone" id="master-drop"
+            ondragover="event.preventDefault();this.classList.add('drag-over')"
+            ondragleave="this.classList.remove('drag-over')"
+            ondrop="handleDrop(event,'master-doc','master-count');this.classList.remove('drag-over')">
+            <textarea id="master-doc" placeholder="Incolla qui il tuo documento master — lettera, report, proposta commerciale, vademecum...&#10;&#10;Puoi anche trascinare un file .txt .md .docx qui sopra." oninput="updateCount('master-doc','master-count')"></textarea>
+            <div class="drop-hint-bar">⬇ Drag & drop .txt · .md · .docx · .pdf</div>
+          </div>
+          <div class="char-count" id="master-count">0 caratteri</div>
         </div>
-        <div class="char-count" id="master-count">0 caratteri</div>
 
         <!-- Analisi visiva -->
         <div class="visual-section">
@@ -655,19 +681,36 @@ const SINTESI_BRAND = {
   ]
 };
 
+// ═══ MODIFICA 2: selectBrand() con logica condizionale Master Template ═══
 function selectBrand(brand) {
   selectedBrand = brand;
   document.querySelectorAll('.brand-opt').forEach(el => el.classList.remove('active'));
   document.getElementById('brand-' + brand).classList.add('active');
   document.getElementById('custom-brand-inputs').style.display = brand === 'custom' ? 'block' : 'none';
 
+  const uploadArea    = document.getElementById('master-upload-area');
+  const sintesiNotice = document.getElementById('master-sintesi-notice');
+  const applyBtn      = document.getElementById('apply-btn');
+
   if (brand === 'sintesi') {
-    toast('🟠 Brand SintesiDigitale attivo');
-  } else if (brand === 'master') {
-    if (!brandDNA) toast('⚠ Analizza prima il Master Template');
-    else toast('🎨 Brand da Master attivo');
+    // Brand Kit precaricato: nasconde upload, abilita subito il pulsante
+    uploadArea.style.display    = 'none';
+    sintesiNotice.style.display = 'flex';
+    applyBtn.disabled = false;
+    toast('🟠 Brand SintesiDigitale attivo — template non necessario');
   } else {
-    toast('➕ Configura il brand personalizzato');
+    // Altri brand: mostra area upload, ripristina vincoli
+    uploadArea.style.display    = 'block';
+    sintesiNotice.style.display = 'none';
+    if (brand === 'master') {
+      applyBtn.disabled = !brandDNA;
+      if (!brandDNA) toast('⚠ Analizza prima il Master Template');
+      else toast('🎨 Brand da Master attivo');
+    } else {
+      // custom: non richiede DNA, abilita direttamente
+      applyBtn.disabled = false;
+      toast('➕ Configura il brand personalizzato');
+    }
   }
 }
 
@@ -785,7 +828,6 @@ async function handleDrop(ev, taId, countId) {
 }
 
 function setupDrop(zoneId, taId, countId) {
-  // Fallback per browser che non supportano gli attributi inline
   const zone = document.getElementById(zoneId);
   if (!zone) return;
   zone.addEventListener('dragover', ev => { ev.preventDefault(); zone.classList.add('drag-over'); });
@@ -818,7 +860,6 @@ async function readFile(file, taId, countId) {
     try {
       const ab = await file.arrayBuffer();
       const base64 = btoa(String.fromCharCode(...new Uint8Array(ab)));
-      // Usa Gemini per estrarre testo dal PDF
       const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
       const resp = await fetch(url, {
         method: 'POST',
@@ -909,7 +950,6 @@ async function callGemini(system, userMsg, imageData=null, imageMime=null, retri
     }
     const e = await resp.json();
     const msg = e.error?.message || 'Gemini error';
-    // Se 503 (overload) riprova dopo attesa
     if (resp.status === 503 && attempt < retries) {
       toast(`⏳ Gemini sovraccarico — riprovo (${attempt}/${retries})...`);
       await new Promise(r => setTimeout(r, 4000 * attempt));
@@ -1058,7 +1098,6 @@ async function applyDNA() {
   if (selectedBrand === 'master' && !brandDNA) { toast('⚠ Analizza prima il Master Template'); return; }
   if (selectedBrand === 'custom' && !document.getElementById('cb-name').value) { toast('⚠ Inserisci il nome del brand personalizzato'); return; }
   
-  // Se documento lungo, dividi in chunks
   if (target.length > 8000) {
     await applyDNAChunked(target);
     return;
@@ -1153,11 +1192,8 @@ Restituisci SOLO il documento HTML completo, nessun testo prima o dopo.`;
 
   try {
     const rawHTML = await callGemini(sys, `Documento da elaborare:\n\n${target}`);
-    // Estrai HTML pulito
     let html = rawHTML;
-    // Rimuovi backtick markdown se presenti
     html = html.replace(/^```html\s*/i, '').replace(/^```\s*/i, '').replace(/\s*```$/i, '').trim();
-    // Assicurati che inizi con DOCTYPE
     if (!html.startsWith('<!DOCTYPE') && !html.startsWith('<html')) {
       const docStart = html.indexOf('<!DOCTYPE');
       const htmlStart = html.indexOf('<html');
@@ -1185,7 +1221,6 @@ async function applyDNAChunked(target) {
     '- Non aggiungere numerazione pagine';
 
   try {
-    // STEP 1: Genera CSS e struttura HTML
     toast('Step 1/2 — Generazione template brand...');
     const cssSystem = `Sei un esperto di document design. Genera SOLO il blocco CSS completo per un documento HTML branded SintesiDigitale.
 ${brandContext}
@@ -1207,7 +1242,6 @@ Includi: body, h1/h2/h3, tabelle, .cover, .page-header, .page-footer, .content, 
     
     const css = await callGemini(cssSystem, 'Genera il CSS completo per il documento branded SintesiDigitale.');
 
-    // STEP 2: Genera contenuto HTML
     toast('Step 2/2 — Elaborazione contenuto...');
     const contentSystem = `Sei un esperto di document design. Converti il testo fornito in HTML semantico professionale.
 NON includere DOCTYPE, html, head, style o body tags — solo il contenuto interno.
@@ -1224,11 +1258,8 @@ REGOLE:
 - Header su ogni sezione principale
 - Footer in fondo al documento`;
 
-    const bodyContent = await callGemini(contentSystem, `Converti in HTML questo documento:
+    const bodyContent = await callGemini(contentSystem, `Converti in HTML questo documento:\n\n${target}`);
 
-${target}`);
-
-    // Assembla HTML completo
     const today = new Date().toLocaleDateString('it-IT', {day:'2-digit', month:'long', year:'numeric'});
     const html = `<!DOCTYPE html>
 <html lang="it">
@@ -1280,7 +1311,6 @@ function renderOutput(html) {
     console.error('renderOutput error:', e);
   }
 
-  // Mostra sempre i bottoni
   document.getElementById('output-actions').style.display = 'flex';
 }
 
@@ -1335,10 +1365,17 @@ function loadHistory(i) {
 
 function clearHistory() { sessionHistory=[]; renderHistory(); toast('Storia svuotata'); }
 
-// ══ INIT ══
+// ═══ MODIFICA 3: DOMContentLoaded — stato iniziale per brand sintesi (default) ═══
 window.addEventListener('DOMContentLoaded', () => {
   setupDrop('master-drop','master-doc','master-count');
   setupDrop('target-drop','target-doc','target-count');
+
+  // Sintesi è il brand default → nascondi upload, abilita pulsante subito
+  if (selectedBrand === 'sintesi') {
+    document.getElementById('master-upload-area').style.display    = 'none';
+    document.getElementById('master-sintesi-notice').style.display = 'flex';
+    document.getElementById('apply-btn').disabled = false;
+  }
 });
 </script>
 </body>
