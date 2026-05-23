@@ -638,9 +638,9 @@
           <button class="btn btn-outline" onclick="copyOutput()">⎘ Copia Testo</button>
           <button class="btn btn-outline" onclick="saveToHistory()">◈ Salva in Storia</button>
         </div>
-        <!-- TIP STAMPA: visibile dopo elaborazione -->
+        <!-- TIP STAMPA -->
         <div class="print-tip" id="print-tip">
-          💡 <strong>Tip stampa pulita:</strong> nella finestra di stampa vai su <em>Altre impostazioni</em> → deseleziona <em>"Intestazioni e piè di pagina"</em> per rimuovere data e numero pagina del browser.
+          💡 <strong>Tip stampa pulita:</strong> header e footer del browser vengono soppressi automaticamente — solo il numero pagina rimane in basso a destra.
         </div>
       </div>
     </div>
@@ -659,7 +659,7 @@
   </main>
 
   <footer class="app-footer">
-    Brand DNA Engine · Luciano Bettoli · Google Gemini · SHA-256 Auth · v3.1
+    Brand DNA Engine · Luciano Bettoli · Google Gemini · SHA-256 Auth · v3.2
   </footer>
 </div>
 
@@ -1100,27 +1100,42 @@ function renderVisualDNA(v) {
   document.getElementById('visual-dna-panel').classList.add('visible');
 }
 
-// ══ CLEAN HTML OUTPUT — FIX 1 ══
-// Rimuove in modo robusto i markdown fences che Gemini talvolta aggiunge
+// ══ CLEAN HTML OUTPUT ══
 function cleanGeminiHTML(raw) {
   let html = raw.trim();
-  // Rimuove ```html o ``` iniziale (con eventuale \r\n o spazi)
   html = html.replace(/^```(?:html)?\s*\r?\n?/im, '');
-  // Rimuove ``` finale
   html = html.replace(/\r?\n?```\s*$/im, '');
   html = html.trim();
-  // Trova l'inizio reale del documento HTML
   if (!html.startsWith('<!DOCTYPE') && !html.startsWith('<html')) {
     const docStart = html.indexOf('<!DOCTYPE');
     const htmlStart = html.indexOf('<html');
     const start = docStart !== -1 ? docStart : (htmlStart !== -1 ? htmlStart : 0);
     html = html.slice(start);
   }
-  // Taglia tutto ciò che viene dopo </html> (fence residue o testo spurio)
   const closeTag = html.lastIndexOf('</html>');
   if (closeTag !== -1) html = html.slice(0, closeTag + 7);
   return html;
 }
+
+// ══ CSS @PAGE — sopprime header/footer browser, mantiene solo numero pagina ══
+// MODIFICA v3.2: Questo blocco viene iniettato in printOutput() per garantire
+// output pulito indipendentemente da ciò che Gemini genera.
+const PAGE_CLEAN_CSS = `
+<style id="page-clean-override">
+@page {
+  @top-left   { content: none !important; }
+  @top-center { content: none !important; }
+  @top-right  { content: none !important; }
+  @bottom-left { content: none !important; }
+  @bottom-center { content: none !important; }
+  @bottom-right {
+    content: counter(page) " / " counter(pages) !important;
+    font-size: 9px;
+    font-family: Inter, sans-serif;
+    color: #666666;
+  }
+}
+</style>`;
 
 // ══ APPLY DNA ══
 async function applyDNA() {
@@ -1139,8 +1154,8 @@ async function applyDNA() {
 
   const pageCfg = getPageCfg();
   const pageInstructions = pageCfg.enabled ?
-    `- Aggiungi numerazione pagine: formato "${pageCfg.fmt}", posizione "${pageCfg.pos}", partendo da ${pageCfg.start}` :
-    '- Non aggiungere numerazione pagine';
+    `- Aggiungi numerazione pagine nel HTML: formato "${pageCfg.fmt}", posizione "${pageCfg.pos}", partendo da ${pageCfg.start}` :
+    '- Non aggiungere numerazione pagine nel HTML (viene gestita automaticamente dal sistema di stampa)';
 
   const brandContext = getBrandContext();
 
@@ -1163,6 +1178,17 @@ STRUTTURA PAGINA:
 - Orientamento SEMPRE verticale (portrait): @page { size: A4 portrait; margin: 20mm 15mm 25mm 15mm; }
 - Carta A4 verticale: max-width: 794px, margin: 0 auto, padding: 0 20px
 - CSS OBBLIGATORIO: @media print { @page { margin: 20mm 15mm 25mm 15mm; } }
+
+SOPPRESSIONE HEADER/FOOTER BROWSER — OBBLIGATORIO:
+Nel blocco @page includi SEMPRE queste regole per sopprimere data, titolo e URL del browser:
+@page {
+  @top-left   { content: none; }
+  @top-center { content: none; }
+  @top-right  { content: none; }
+  @bottom-left { content: none; }
+  @bottom-center { content: none; }
+  @bottom-right { content: counter(page) " / " counter(pages); font-size: 9px; font-family: Inter, sans-serif; color: #666; }
+}
 
 FONT SIZE — TUTTO PIÙ PICCOLO:
 - body: font-size: 11px
@@ -1223,7 +1249,6 @@ ${pageInstructions}`;
 
   try {
     const rawHTML = await callGemini(sys, `Documento da elaborare:\n\n${target}`);
-    // FIX 1: pulizia robusta del response Gemini
     const html = cleanGeminiHTML(rawHTML);
     outputHTML = html;
     outputText = target;
@@ -1241,8 +1266,8 @@ async function applyDNAChunked(target) {
   const brandContext = getBrandContext();
   const pageCfg = getPageCfg();
   const pageInstructions = pageCfg.enabled ?
-    `- Aggiungi numerazione pagine: formato "${pageCfg.fmt}", posizione "${pageCfg.pos}", partendo da ${pageCfg.start}` :
-    '- Non aggiungere numerazione pagine';
+    `- Aggiungi numerazione pagine nel HTML: formato "${pageCfg.fmt}", posizione "${pageCfg.pos}", partendo da ${pageCfg.start}` :
+    '- Non aggiungere numerazione pagine nel HTML (viene gestita automaticamente dal sistema di stampa)';
 
   try {
     toast('Step 1/2 — Generazione template brand...');
@@ -1251,6 +1276,8 @@ ${brandContext}
 Restituisci SOLO il codice CSS (senza tag <style>, senza HTML, senza markdown fences), completo e pronto per essere inserito in un tag <style>.
 REGOLE CSS OBBLIGATORIE:
 - @page { size: A4 portrait; margin: 20mm 15mm 25mm 15mm; }
+- SOPPRESSIONE HEADER/FOOTER BROWSER — includi SEMPRE nel @page queste regole:
+  @page { @top-left { content: none; } @top-center { content: none; } @top-right { content: none; } @bottom-left { content: none; } @bottom-center { content: none; } @bottom-right { content: counter(page) " / " counter(pages); font-size: 9px; font-family: Inter, sans-serif; color: #666; } }
 - body { font-size: 11px; background: #fff; color: #1a1a1a; font-family: Inter; max-width: 794px; margin: 0 auto; }
 - h1 { font-size: 18px; color: #FF6600; } h2 { font-size: 15px; color: #FF6600; } h3 { font-size: 13px; color: #FF6600; }
 - .cover { background: #f4f4f4; padding: 40px 30px; }
@@ -1261,10 +1288,9 @@ REGOLE CSS OBBLIGATORIE:
 - thead tr { background: #000; color: #fff; }
 - tbody tr:nth-child(even) { background: #f9f9f9; }
 - td, th { padding: 6px 10px; border: 1px solid #ddd; }
-Includi: body, h1/h2/h3, tabelle, .cover, .page-footer, .content, @media print.`;
+Includi: body, h1/h2/h3, tabelle, .cover, .page-footer, .content, @page margin boxes, @media print.`;
 
     const cssRaw = await callGemini(cssSystem, 'Genera il CSS completo per il documento branded SintesiDigitale.');
-    // Pulisce eventuali fence dal CSS
     const css = cssRaw.replace(/^```(?:css)?\s*\r?\n?/im,'').replace(/\r?\n?```\s*$/im,'').trim();
 
     toast('Step 2/2 — Elaborazione contenuto...');
@@ -1336,22 +1362,27 @@ function renderOutput(html) {
   }
 
   document.getElementById('output-actions').style.display = 'flex';
-  // Mostra il tip stampa
   document.getElementById('print-tip').classList.add('visible');
 }
 
 // ══ OUTPUT ACTIONS ══
 
-// FIX 2: printOutput senza blob URL nel footer del browser
+// MODIFICA v3.2: printOutput inietta PAGE_CLEAN_CSS per sopprimere
+// data/ora, titolo e URL del browser — mantiene solo il numero pagina in basso a destra
 function printOutput() {
-  // Apre una finestra bianca (about:blank) — nessun URL stampato nel footer
   const win = window.open('', '_blank', 'width=960,height=800');
   if (!win) {
     toast('⚠ Popup bloccato — abilita i popup per questo sito');
     return;
   }
+
+  // Inietta il CSS di pulizia pagina nell'HTML generato
+  const modifiedHTML = outputHTML.includes('</head>')
+    ? outputHTML.replace('</head>', PAGE_CLEAN_CSS + '\n</head>')
+    : PAGE_CLEAN_CSS + outputHTML;
+
   win.document.open();
-  win.document.write(outputHTML);
+  win.document.write(modifiedHTML);
   win.document.close();
   // Attende caricamento font e immagini prima di aprire la finestra stampa
   setTimeout(() => { win.print(); }, 900);
@@ -1360,7 +1391,11 @@ function printOutput() {
 
 function downloadHTML() {
   const date = new Date().toISOString().slice(0,10);
-  const blob = new Blob([outputHTML], { type: 'text/html;charset=utf-8' });
+  // Il file scaricato include già il CSS di pulizia pagina
+  const cleanHTML = outputHTML.includes('</head>')
+    ? outputHTML.replace('</head>', PAGE_CLEAN_CSS + '\n</head>')
+    : PAGE_CLEAN_CSS + outputHTML;
+  const blob = new Blob([cleanHTML], { type: 'text/html;charset=utf-8' });
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
   a.download = `brand-dna-output-${date}.html`;
@@ -1404,7 +1439,6 @@ function clearHistory() { sessionHistory=[]; renderHistory(); toast('Storia svuo
 window.addEventListener('DOMContentLoaded', () => {
   setupDrop('master-drop','master-doc','master-count');
   setupDrop('target-drop','target-doc','target-count');
-  // Sintesi è il brand default → nascondi upload, abilita pulsante subito
   if (selectedBrand === 'sintesi') {
     document.getElementById('master-upload-area').style.display    = 'none';
     document.getElementById('master-sintesi-notice').style.display = 'flex';
