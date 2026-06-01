@@ -7,194 +7,419 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600&display=swap');
+
   :root {
-    --bg:#0f0e0b;--surface:#1a1814;--panel:#1e1c17;--border:#2e2b24;
-    --border-gold:#4a3e28;--gold:#c9a84c;--gold-dim:#7a6030;
-    --gold-glow:rgba(201,168,76,0.12);--text:#ede8dc;--text-dim:#8a8070;
-    --text-muted:#4a4540;--red:#b03030;--green:#2d8a50;--radius:4px;
-    --mono:'DM Mono',monospace;--serif:'Playfair Display',Georgia,serif;
-    --sans:'DM Sans',system-ui,sans-serif;
+    --bg: #0f0e0b;
+    --surface: #1a1814;
+    --panel: #1e1c17;
+    --border: #2e2b24;
+    --border-gold: #4a3e28;
+    --gold: #c9a84c;
+    --gold-dim: #7a6030;
+    --gold-glow: rgba(201,168,76,0.12);
+    --gold-light: #e8c97a;
+    --text: #ede8dc;
+    --text-dim: #8a8070;
+    --text-muted: #4a4540;
+    --red: #b03030;
+    --green: #2d8a50;
+    --radius: 4px;
+    --mono: 'DM Mono', monospace;
+    --serif: 'Playfair Display', Georgia, serif;
+    --sans: 'DM Sans', system-ui, sans-serif;
   }
-  *{box-sizing:border-box;margin:0;padding:0;}
-  body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:13px;min-height:100vh;line-height:1.6;}
 
-  /* LOGIN */
-  #login-screen{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:1000;background-image:radial-gradient(ellipse at 50% 0%,rgba(201,168,76,0.06) 0%,transparent 60%);}
-  #login-screen.hidden{display:none;}
-  .login-card{background:var(--surface);border:1px solid var(--border-gold);border-radius:8px;padding:52px 48px;width:440px;text-align:center;box-shadow:0 40px 80px rgba(0,0,0,0.6);}
-  .login-monogram{width:60px;height:60px;background:linear-gradient(135deg,var(--gold),var(--gold-dim));border-radius:8px;display:flex;align-items:center;justify-content:center;font-family:var(--serif);font-size:24px;font-weight:700;color:#0f0e0b;margin:0 auto 20px;box-shadow:0 8px 24px rgba(201,168,76,0.3);}
-  .login-brand{font-family:var(--serif);font-size:22px;color:var(--gold);margin-bottom:4px;}
-  .login-tagline{font-size:10px;letter-spacing:2.5px;text-transform:uppercase;color:var(--text-dim);font-family:var(--mono);margin-bottom:28px;}
-  .login-badge{display:inline-flex;align-items:center;gap:6px;font-size:10px;letter-spacing:1px;color:var(--text-muted);border:1px solid var(--border);border-radius:20px;padding:4px 14px;margin-bottom:32px;font-family:var(--mono);}
-  .fg{text-align:left;margin-bottom:14px;}
-  .fg label{display:block;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--text-dim);margin-bottom:7px;font-family:var(--mono);}
-  .fg input{width:100%;padding:11px 14px;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-size:13px;font-family:var(--mono);transition:border-color .2s;}
-  .fg input:focus{outline:none;border-color:var(--gold);}
-  .api-note{font-size:10px;color:var(--text-muted);margin-top:5px;font-family:var(--mono);}
-  .api-sep{border-top:1px solid var(--border);padding-top:14px;margin-top:4px;}
-  .login-btn{width:100%;padding:13px;background:linear-gradient(135deg,var(--gold),#a8882e);color:#0f0e0b;border:none;border-radius:var(--radius);font-size:11px;font-weight:600;letter-spacing:2px;cursor:pointer;text-transform:uppercase;font-family:var(--mono);transition:opacity .2s;margin-top:10px;}
-  .login-btn:hover{opacity:.88;}
-  .login-err{color:#e05050;font-size:11px;margin-top:10px;min-height:16px;font-family:var(--mono);}
-  .api-optional{font-size:10px;color:var(--text-muted);font-family:var(--mono);text-align:center;margin-top:8px;}
+  * { box-sizing: border-box; margin: 0; padding: 0; }
 
-  /* APP */
-  #app{display:none;min-height:100vh;flex-direction:column;}
-  #app.visible{display:flex;}
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    font-size: 13px;
+    min-height: 100vh;
+    line-height: 1.6;
+  }
 
-  /* HEADER */
-  .app-header{background:var(--surface);border-bottom:1px solid var(--border);padding:0 28px;height:56px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;}
-  .hbrand{display:flex;align-items:center;gap:12px;}
-  .hmark{width:32px;height:32px;background:linear-gradient(135deg,var(--gold),var(--gold-dim));border-radius:6px;display:flex;align-items:center;justify-content:center;font-family:var(--serif);font-weight:700;color:#0f0e0b;font-size:15px;}
-  .hname{font-family:var(--serif);font-size:15px;color:var(--gold);}
-  .htag{font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--text-dim);font-family:var(--mono);}
-  .hactions{display:flex;align-items:center;gap:12px;}
-  .mode-badge{padding:4px 12px;border:1px solid var(--green);border-radius:20px;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:#4aba78;font-family:var(--mono);}
-  .mode-badge.api{border-color:var(--gold-dim);color:var(--gold-dim);}
-  .sess-time{font-size:10px;color:var(--text-muted);font-family:var(--mono);}
-  .logout-btn{padding:5px 14px;background:transparent;border:1px solid var(--border);border-radius:var(--radius);color:var(--text-dim);font-size:10px;letter-spacing:1px;cursor:pointer;font-family:var(--mono);text-transform:uppercase;transition:all .2s;}
-  .logout-btn:hover{border-color:var(--red);color:#e05050;}
+  /* ══ LOGIN ══ */
+  #login-screen {
+    position: fixed; inset: 0;
+    background: var(--bg);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 1000;
+    background-image: radial-gradient(ellipse at 50% 0%, rgba(201,168,76,0.06) 0%, transparent 60%);
+  }
+  #login-screen.hidden { display: none; }
 
-  /* LAYOUT */
-  .app-main{flex:1;display:grid;grid-template-columns:1fr 1fr;gap:20px;padding:24px 28px;max-width:1440px;margin:0 auto;width:100%;align-content:start;}
+  .login-card {
+    background: var(--surface);
+    border: 1px solid var(--border-gold);
+    border-radius: 8px;
+    padding: 52px 48px;
+    width: 440px;
+    text-align: center;
+    box-shadow: 0 40px 80px rgba(0,0,0,0.6);
+  }
 
-  /* PANELS */
-  .panel{background:var(--panel);border:1px solid var(--border);border-radius:6px;overflow:hidden;}
-  .panel-head{padding:16px 20px;border-bottom:1px solid var(--border);background:var(--surface);display:flex;align-items:center;gap:12px;}
-  .pnum{width:26px;height:26px;background:var(--gold);color:#0f0e0b;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:11px;font-family:var(--mono);flex-shrink:0;}
-  .ptitle{font-family:var(--serif);font-size:15px;color:var(--text);}
-  .pdesc{font-size:10px;color:var(--text-dim);letter-spacing:.5px;font-family:var(--mono);}
-  .panel-body{padding:18px 20px;}
+  .login-monogram {
+    width: 60px; height: 60px;
+    background: linear-gradient(135deg, var(--gold) 0%, var(--gold-dim) 100%);
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--serif); font-size: 24px; font-weight: 700;
+    color: #0f0e0b; margin: 0 auto 20px;
+    box-shadow: 0 8px 24px rgba(201,168,76,0.3);
+  }
+  .login-brand { font-family: var(--serif); font-size: 22px; color: var(--gold); margin-bottom: 4px; }
+  .login-tagline { font-size: 10px; letter-spacing: 2.5px; text-transform: uppercase; color: var(--text-dim); font-family: var(--mono); margin-bottom: 28px; }
+  .login-badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: 10px; letter-spacing: 1px; color: var(--text-muted);
+    border: 1px solid var(--border); border-radius: 20px;
+    padding: 4px 14px; margin-bottom: 32px; font-family: var(--mono);
+  }
 
-  /* UPLOAD */
-  .upload-row{display:flex;align-items:center;gap:8px;margin-bottom:10px;flex-wrap:wrap;}
-  .upload-btn{display:inline-flex;align-items:center;gap:5px;padding:5px 12px;background:transparent;border:1px solid var(--border-gold);border-radius:var(--radius);color:var(--gold-dim);font-size:10px;letter-spacing:1px;text-transform:uppercase;cursor:pointer;font-family:var(--mono);transition:all .2s;}
-  .upload-btn:hover{border-color:var(--gold);color:var(--gold);background:var(--gold-glow);}
-  input[type="file"]{display:none;}
-  .upload-hint{font-size:10px;color:var(--text-muted);font-family:var(--mono);}
+  .fg { text-align: left; margin-bottom: 14px; }
+  .fg label { display: block; font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: var(--text-dim); margin-bottom: 7px; font-family: var(--mono); }
+  .fg input {
+    width: 100%; padding: 11px 14px;
+    background: var(--bg); border: 1px solid var(--border);
+    border-radius: var(--radius); color: var(--text);
+    font-size: 13px; font-family: var(--mono);
+    transition: border-color .2s;
+  }
+  .fg input:focus { outline: none; border-color: var(--gold); }
+  .api-note { font-size: 10px; color: var(--text-muted); margin-top: 5px; font-family: var(--mono); }
+  .api-sep { border-top: 1px solid var(--border); padding-top: 14px; margin-top: 4px; }
 
-  /* DROP ZONE */
-  .drop-zone{position:relative;border:1px dashed var(--border);border-radius:var(--radius);background:var(--bg);transition:all .2s;margin-bottom:6px;}
-  .drop-zone.drag-over{border-color:var(--gold);background:var(--gold-glow);}
-  .drop-zone textarea{width:100%;min-height:220px;background:transparent;border:none;color:var(--text);font-size:12px;font-family:var(--sans);line-height:1.7;padding:13px;resize:vertical;}
-  .drop-zone textarea:focus{outline:none;}
-  .drop-hint-bar{border-top:1px dashed var(--border);padding:6px 13px;font-size:10px;color:var(--text-muted);font-family:var(--mono);}
-  .char-count{font-size:10px;color:var(--text-muted);text-align:right;margin-bottom:12px;font-family:var(--mono);}
+  .login-btn {
+    width: 100%; padding: 13px;
+    background: linear-gradient(135deg, var(--gold) 0%, #a8882e 100%);
+    color: #0f0e0b; border: none; border-radius: var(--radius);
+    font-size: 11px; font-weight: 600; letter-spacing: 2px;
+    cursor: pointer; text-transform: uppercase; font-family: var(--mono);
+    transition: opacity .2s; margin-top: 10px;
+  }
+  .login-btn:hover { opacity: .88; }
+  .login-err { color: #e05050; font-size: 11px; margin-top: 10px; min-height: 16px; font-family: var(--mono); }
 
-  /* LOADING */
-  .loading-wrap{display:none;align-items:center;gap:10px;padding:10px 13px;background:var(--gold-glow);border:1px solid var(--gold-dim);border-radius:var(--radius);margin-bottom:12px;}
-  .loading-wrap.visible{display:flex;}
-  .spinner{width:14px;height:14px;border:2px solid var(--gold-dim);border-top-color:var(--gold);border-radius:50%;animation:spin .8s linear infinite;flex-shrink:0;}
-  @keyframes spin{to{transform:rotate(360deg);}}
-  .loading-text{font-size:11px;color:var(--gold);font-family:var(--mono);}
+  /* ══ APP ══ */
+  #app { display: none; min-height: 100vh; flex-direction: column; }
+  #app.visible { display: flex; }
 
-  /* BUTTONS */
-  .btn-row{display:flex;gap:8px;flex-wrap:wrap;}
-  .btn{padding:9px 18px;border-radius:var(--radius);font-size:10px;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;font-family:var(--mono);transition:all .2s;border:none;}
-  .btn-gold{background:linear-gradient(135deg,var(--gold),#a8882e);color:#0f0e0b;font-weight:700;}
-  .btn-gold:hover{opacity:.88;}
-  .btn-gold:disabled{opacity:.4;cursor:not-allowed;}
-  .btn-outline{background:transparent;border:1px solid var(--border);color:var(--text-dim);}
-  .btn-outline:hover{border-color:var(--gold-dim);color:var(--text);}
-  .btn-api{background:transparent;border:1px solid var(--gold-dim);color:var(--gold-dim);font-size:9px;}
-  .btn-api:hover{border-color:var(--gold);color:var(--gold);background:var(--gold-glow);}
-  .btn-api:disabled{opacity:.3;cursor:not-allowed;}
+  /* ══ HEADER ══ */
+  .app-header {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 0 28px;
+    height: 56px;
+    display: flex; align-items: center; justify-content: space-between;
+    position: sticky; top: 0; z-index: 100;
+  }
+  .hbrand { display: flex; align-items: center; gap: 12px; }
+  .hmark {
+    width: 32px; height: 32px;
+    background: linear-gradient(135deg, var(--gold), var(--gold-dim));
+    border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--serif); font-weight: 700; color: #0f0e0b; font-size: 15px;
+  }
+  .hname { font-family: var(--serif); font-size: 15px; color: var(--gold); }
+  .htag { font-size: 9px; letter-spacing: 2px; text-transform: uppercase; color: var(--text-dim); font-family: var(--mono); }
 
-  /* COST BADGE */
-  .cost-badge{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;background:rgba(45,138,80,0.1);border:1px solid rgba(45,138,80,0.3);border-radius:12px;font-size:9px;color:#4aba78;font-family:var(--mono);margin-left:8px;}
-  .cost-badge.api-cost{background:rgba(201,168,76,0.08);border-color:var(--gold-dim);color:var(--gold-dim);}
+  .hactions { display: flex; align-items: center; gap: 12px; }
+  .dna-pill {
+    display: flex; align-items: center; gap: 7px;
+    padding: 5px 14px; border: 1px solid var(--border);
+    border-radius: 20px; font-size: 10px; letter-spacing: 1px;
+    text-transform: uppercase; color: var(--text-dim); font-family: var(--mono);
+    transition: all .3s;
+  }
+  .dna-pill.active { border-color: var(--green); color: #4aba78; }
+  .dna-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--text-muted); transition: all .3s; }
+  .dna-pill.active .dna-dot { background: #4aba78; box-shadow: 0 0 8px #4aba78; }
+  .sess-time { font-size: 10px; color: var(--text-muted); font-family: var(--mono); }
+  .logout-btn {
+    padding: 5px 14px; background: transparent;
+    border: 1px solid var(--border); border-radius: var(--radius);
+    color: var(--text-dim); font-size: 10px; letter-spacing: 1px;
+    cursor: pointer; font-family: var(--mono); text-transform: uppercase;
+    transition: all .2s;
+  }
+  .logout-btn:hover { border-color: var(--red); color: #e05050; }
 
-  /* VISUAL SECTION */
-  .visual-section{margin-top:14px;padding-top:14px;border-top:1px solid var(--border);}
-  .visual-label{font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--gold-dim);font-family:var(--mono);margin-bottom:8px;display:flex;align-items:center;gap:6px;}
-  #visual-preview{display:none;margin-top:10px;}
-  #visual-img{max-width:100%;max-height:140px;border-radius:4px;border:1px solid var(--border);margin-bottom:8px;}
+  /* ══ LAYOUT ══ */
+  .app-main {
+    flex: 1; display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px; padding: 24px 28px;
+    max-width: 1440px; margin: 0 auto; width: 100%;
+    align-content: start;
+  }
 
-  /* PAGE OPTIONS */
-  .page-opts{display:flex;align-items:center;gap:12px;padding:9px 12px;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:12px;flex-wrap:wrap;}
-  .page-opts-label{font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--text-dim);font-family:var(--mono);flex-shrink:0;}
-  .toggle{position:relative;width:34px;height:18px;background:var(--border);border-radius:9px;cursor:pointer;transition:background .2s;flex-shrink:0;}
-  .toggle.on{background:var(--gold);}
-  .toggle::after{content:'';position:absolute;top:3px;left:3px;width:12px;height:12px;background:white;border-radius:50%;transition:transform .2s;}
-  .toggle.on::after{transform:translateX(16px);}
-  .toggle-lbl{font-size:11px;color:var(--text-dim);font-family:var(--mono);}
-  .pselect{background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);padding:3px 8px;font-size:11px;font-family:var(--mono);cursor:pointer;}
-  .pselect:disabled{opacity:.4;cursor:not-allowed;}
-  .pstart{width:48px;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);padding:3px 6px;font-size:11px;font-family:var(--mono);text-align:center;}
+  /* ══ PANELS ══ */
+  .panel {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 6px; overflow: hidden;
+  }
+  .panel-head {
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface);
+    display: flex; align-items: center; gap: 12px;
+  }
+  .pnum {
+    width: 26px; height: 26px;
+    background: var(--gold); color: #0f0e0b;
+    border-radius: 50%; display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 11px; font-family: var(--mono); flex-shrink: 0;
+  }
+  .ptitle { font-family: var(--serif); font-size: 15px; color: var(--text); }
+  .pdesc { font-size: 10px; color: var(--text-dim); letter-spacing: .5px; font-family: var(--mono); }
+  .panel-body { padding: 18px 20px; }
 
-  /* OUTPUT */
-  .output-panel{grid-column:1/-1;background:var(--panel);border:1px solid var(--border);border-radius:6px;overflow:hidden;}
-  .output-head{background:var(--surface);padding:14px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;}
-  .output-title-wrap{display:flex;align-items:center;gap:12px;}
-  .output-body{padding:20px;}
-  #output-rendered{min-height:300px;background:white;border:1px solid #ddd;border-radius:4px;overflow:hidden;}
-  #output-rendered.empty{display:flex;align-items:center;justify-content:center;flex-direction:column;gap:10px;color:var(--text-muted);}
-  .empty-icon{font-size:28px;opacity:.3;}
-  .empty-txt{font-size:10px;letter-spacing:2px;text-transform:uppercase;font-family:var(--mono);}
-  #output-iframe{width:100%;min-height:600px;border:none;display:none;border-radius:4px;}
-  .output-actions{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap;}
-  .print-tip{display:none;align-items:center;gap:8px;padding:8px 12px;background:rgba(201,168,76,0.08);border:1px solid var(--border-gold);border-radius:var(--radius);font-size:10px;color:var(--text-dim);font-family:var(--mono);margin-top:10px;}
-  .print-tip.visible{display:flex;}
+  /* ══ UPLOAD ══ */
+  .upload-row { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; flex-wrap: wrap; }
+  .upload-btn {
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 5px 12px; background: transparent;
+    border: 1px solid var(--border-gold); border-radius: var(--radius);
+    color: var(--gold-dim); font-size: 10px; letter-spacing: 1px;
+    text-transform: uppercase; cursor: pointer; font-family: var(--mono);
+    transition: all .2s;
+  }
+  .upload-btn:hover { border-color: var(--gold); color: var(--gold); background: var(--gold-glow); }
+  input[type="file"] { display: none; }
 
-  /* DIVIDER */
-  .divider{grid-column:1/-1;display:flex;align-items:center;justify-content:center;color:var(--gold-dim);font-size:16px;}
+  /* ══ DROP ZONE ══ */
+  .drop-zone {
+    position: relative; border: 1px dashed var(--border);
+    border-radius: var(--radius); background: var(--bg);
+    transition: all .2s; margin-bottom: 6px;
+  }
+  .drop-zone.drag-over { border-color: var(--gold); background: var(--gold-glow); }
+  .drop-zone.drag-over::after {
+    content: '⬇ Rilascia qui';
+    position: absolute; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px; color: var(--gold); font-family: var(--mono);
+    background: rgba(15,14,11,0.85); border-radius: var(--radius);
+    pointer-events: none;
+  }
+  .drop-zone textarea {
+    width: 100%; min-height: 190px; background: transparent; border: none;
+    color: var(--text); font-size: 12px; font-family: var(--sans);
+    line-height: 1.7; padding: 13px; resize: vertical;
+  }
+  .drop-zone textarea:focus { outline: none; }
+  .drop-hint-bar {
+    border-top: 1px dashed var(--border); padding: 6px 13px;
+    font-size: 10px; color: var(--text-muted); font-family: var(--mono);
+    display: flex; align-items: center; gap: 6px;
+  }
 
-  /* HISTORY */
-  .history-section{grid-column:1/-1;background:var(--surface);border:1px solid var(--border);border-radius:6px;overflow:hidden;}
-  .history-head{padding:12px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
-  .history-title{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--text-dim);font-family:var(--mono);}
-  .history-list{padding:10px 20px;display:flex;flex-direction:column;gap:6px;max-height:180px;overflow-y:auto;}
-  .history-item{display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);cursor:pointer;transition:all .2s;}
-  .history-item:hover{border-color:var(--gold-dim);}
-  .history-lbl{font-size:11px;color:var(--text);font-family:var(--mono);}
-  .history-date{font-size:10px;color:var(--text-muted);font-family:var(--mono);}
-  .history-empty{font-size:11px;color:var(--text-muted);font-family:var(--mono);padding:10px 0;text-align:center;}
+  .char-count { font-size: 10px; color: var(--text-muted); text-align: right; margin-bottom: 12px; font-family: var(--mono); }
 
-  /* TOAST */
-  #toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(16px);background:var(--surface);border:1px solid var(--gold-dim);border-radius:20px;padding:9px 20px;font-size:11px;font-family:var(--mono);color:var(--gold);opacity:0;transition:all .3s;pointer-events:none;z-index:999;}
-  #toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+  /* ══ VISUAL ANALYSIS ══ */
+  .visual-section {
+    margin-top: 14px; padding-top: 14px;
+    border-top: 1px solid var(--border);
+  }
+  .visual-label {
+    font-size: 10px; letter-spacing: 1.5px; text-transform: uppercase;
+    color: var(--gold-dim); font-family: var(--mono); margin-bottom: 8px;
+    display: flex; align-items: center; gap: 6px;
+  }
+  #visual-preview { display:none; margin-top: 10px; }
+  #visual-img { max-width:100%; max-height:160px; border-radius:4px; border:1px solid var(--border); }
+  #visual-results { margin-top: 10px; }
 
-  /* FOOTER */
-  .app-footer{border-top:1px solid var(--border);padding:12px 28px;text-align:center;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--text-muted);font-family:var(--mono);}
+  /* ══ PAGE OPTIONS ══ */
+  .page-opts {
+    display: flex; align-items: center; gap: 12px;
+    padding: 9px 12px; background: var(--bg);
+    border: 1px solid var(--border); border-radius: var(--radius);
+    margin-bottom: 12px; flex-wrap: wrap;
+  }
+  .page-opts-label { font-size: 10px; letter-spacing: 1px; text-transform: uppercase; color: var(--text-dim); font-family: var(--mono); flex-shrink: 0; }
+  .toggle { position: relative; width: 34px; height: 18px; background: var(--border); border-radius: 9px; cursor: pointer; transition: background .2s; flex-shrink: 0; }
+  .toggle.on { background: var(--gold); }
+  .toggle::after { content:''; position:absolute; top:3px; left:3px; width:12px; height:12px; background:white; border-radius:50%; transition: transform .2s; }
+  .toggle.on::after { transform: translateX(16px); }
+  .toggle-lbl { font-size: 11px; color: var(--text-dim); font-family: var(--mono); }
+  .pselect {
+    background: var(--bg); border: 1px solid var(--border);
+    border-radius: var(--radius); color: var(--text);
+    padding: 3px 8px; font-size: 11px; font-family: var(--mono); cursor: pointer;
+  }
+  .pselect:disabled { opacity:.4; cursor:not-allowed; }
+  .pselect:focus { outline:none; border-color: var(--gold); }
+  .pstart { width:48px; background:var(--bg); border:1px solid var(--border); border-radius:var(--radius); color:var(--text); padding:3px 6px; font-size:11px; font-family:var(--mono); text-align:center; }
+  .pstart:disabled { opacity:.4; }
 
-  /* INFO BOX */
-  .info-box{display:flex;align-items:flex-start;gap:12px;padding:12px 14px;border-radius:var(--radius);margin-bottom:12px;font-family:var(--mono);font-size:10px;line-height:1.6;}
-  .info-box.sintesi{background:rgba(255,102,0,0.07);border:1px solid rgba(255,102,0,0.35);}
-  .info-box.zero{background:rgba(45,138,80,0.07);border:1px solid rgba(45,138,80,0.3);}
-  .info-box.warn{background:rgba(201,168,76,0.07);border:1px solid var(--gold-dim);}
+  /* ══ LOADING ══ */
+  .loading-wrap {
+    display: none; align-items: center; gap: 10px;
+    padding: 10px 13px; background: var(--gold-glow);
+    border: 1px solid var(--gold-dim); border-radius: var(--radius); margin-bottom: 12px;
+  }
+  .loading-wrap.visible { display: flex; }
+  .spinner { width:14px; height:14px; border:2px solid var(--gold-dim); border-top-color:var(--gold); border-radius:50%; animation:spin .8s linear infinite; flex-shrink:0; }
+  @keyframes spin { to { transform:rotate(360deg); } }
+  .loading-text { font-size:11px; color:var(--gold); font-family:var(--mono); }
 
-  @media(max-width:900px){
-    .app-main{grid-template-columns:1fr;padding:16px;}
+  /* ══ BUTTONS ══ */
+  .btn-row { display: flex; gap: 8px; flex-wrap: wrap; }
+  .btn { padding:9px 18px; border-radius:var(--radius); font-size:10px; letter-spacing:1.5px; text-transform:uppercase; cursor:pointer; font-family:var(--mono); transition:all .2s; border:none; }
+  .btn-gold { background:linear-gradient(135deg,var(--gold),#a8882e); color:#0f0e0b; font-weight:700; }
+  .btn-gold:hover { opacity:.88; }
+  .btn-gold:disabled { opacity:.4; cursor:not-allowed; }
+  .btn-outline { background:transparent; border:1px solid var(--border); color:var(--text-dim); }
+  .btn-outline:hover { border-color:var(--gold-dim); color:var(--text); }
+
+  /* ══ DNA PANEL ══ */
+  .dna-panel { grid-column:1/-1; background:var(--panel); border:1px solid var(--gold-dim); border-radius:6px; overflow:hidden; display:none; }
+  .dna-panel.visible { display:block; }
+  .dna-panel-head { background:var(--surface); padding:14px 20px; border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; }
+  .dna-panel-title { font-size:10px; letter-spacing:2px; text-transform:uppercase; color:var(--gold); font-family:var(--mono); }
+  .dna-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:10px; padding:16px 20px 10px; }
+  .dna-cell { background:var(--bg); border:1px solid var(--border); border-radius:var(--radius); padding:10px 12px; }
+  .dna-cell-lbl { font-size:9px; letter-spacing:1.5px; text-transform:uppercase; color:var(--gold-dim); margin-bottom:5px; font-family:var(--mono); }
+  .dna-cell-val { font-size:11px; color:var(--text); line-height:1.5; }
+  .dna-rules { padding:0 20px 16px; }
+  .dna-rules-title { font-size:9px; letter-spacing:1.5px; text-transform:uppercase; color:var(--text-dim); margin-bottom:10px; font-family:var(--mono); }
+  .dna-rules-list { list-style:none; display:flex; flex-direction:column; gap:6px; }
+  .dna-rules-list li { display:flex; gap:10px; align-items:flex-start; }
+  .rnum { background:var(--gold); color:#0f0e0b; font-size:9px; font-weight:700; font-family:var(--mono); width:18px; height:18px; border-radius:50%; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+  .dna-rules-list li span:last-child { font-size:12px; color:var(--text); line-height:1.5; padding-top:1px; }
+
+  /* ══ VISUAL DNA PANEL ══ */
+  .visual-dna-panel { grid-column:1/-1; background:var(--panel); border:1px solid var(--border-gold); border-radius:6px; overflow:hidden; display:none; }
+  .visual-dna-panel.visible { display:block; }
+  .vdna-head { background:var(--surface); padding:14px 20px; border-bottom:1px solid var(--border); }
+  .vdna-title { font-size:10px; letter-spacing:2px; text-transform:uppercase; color:var(--gold); font-family:var(--mono); }
+  .vdna-body { padding:16px 20px; display:grid; grid-template-columns:200px 1fr 1fr; gap:16px; }
+  .vdna-section-title { font-size:9px; letter-spacing:1.5px; text-transform:uppercase; color:var(--gold-dim); font-family:var(--mono); margin-bottom:10px; }
+  .color-swatches { display:flex; flex-direction:column; gap:6px; }
+  .swatch-row { display:flex; align-items:center; gap:8px; }
+  .swatch { width:20px; height:20px; border-radius:3px; border:1px solid rgba(255,255,255,0.1); flex-shrink:0; }
+  .swatch-info { font-size:10px; font-family:var(--mono); color:var(--text-dim); }
+  .swatch-info span { color:var(--text); }
+  .vdna-card { background:var(--bg); border:1px solid var(--border); border-radius:var(--radius); padding:10px 12px; margin-bottom:8px; }
+  .vdna-card-lbl { font-size:9px; letter-spacing:1px; text-transform:uppercase; color:var(--gold-dim); font-family:var(--mono); margin-bottom:4px; }
+  .vdna-card-val { font-size:11px; color:var(--text); line-height:1.5; }
+
+  /* ══ DIVIDER ══ */
+  .divider { grid-column:1/-1; display:flex; align-items:center; justify-content:center; color:var(--gold-dim); font-size:16px; }
+
+  /* ══ OUTPUT PANEL ══ */
+  .output-panel { grid-column:1/-1; background:var(--panel); border:1px solid var(--border); border-radius:6px; overflow:hidden; }
+  .output-head { background:var(--surface); padding:14px 20px; border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px; }
+  .output-title-wrap { display:flex; align-items:center; gap:12px; }
+  .output-body { padding:20px; }
+
+  /* ══ OUTPUT RENDERED ══ */
+  #output-rendered {
+    min-height: 300px;
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    overflow: hidden;
+  }
+  #output-rendered.empty {
+    display: flex; align-items: center; justify-content: center;
+    flex-direction: column; gap: 10px; color: var(--text-muted);
+  }
+  .empty-icon { font-size: 28px; opacity:.3; }
+  .empty-txt { font-size:10px; letter-spacing:2px; text-transform:uppercase; font-family:var(--mono); }
+
+  #output-iframe {
+    width:100%; min-height:600px; border:none; display:none;
+    border-radius: 4px;
+  }
+
+  .output-actions { display:flex; gap:8px; margin-top:14px; flex-wrap:wrap; }
+
+  /* ══ PRINT TIP ══ */
+  .print-tip {
+    display: none;
+    align-items: center; gap: 8px;
+    padding: 8px 12px;
+    background: rgba(201,168,76,0.08);
+    border: 1px solid var(--border-gold);
+    border-radius: var(--radius);
+    font-size: 10px; color: var(--text-dim);
+    font-family: var(--mono); margin-top: 10px;
+  }
+  .print-tip.visible { display: flex; }
+
+  /* ══ HISTORY ══ */
+  .history-section { grid-column:1/-1; background:var(--surface); border:1px solid var(--border); border-radius:6px; overflow:hidden; }
+  .history-head { padding:12px 20px; border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; }
+  .history-title { font-size:10px; letter-spacing:2px; text-transform:uppercase; color:var(--text-dim); font-family:var(--mono); }
+  .history-list { padding:10px 20px; display:flex; flex-direction:column; gap:6px; max-height:180px; overflow-y:auto; }
+  .history-item { display:flex; align-items:center; justify-content:space-between; padding:8px 12px; background:var(--bg); border:1px solid var(--border); border-radius:var(--radius); cursor:pointer; transition:all .2s; }
+  .history-item:hover { border-color:var(--gold-dim); }
+  .history-lbl { font-size:11px; color:var(--text); font-family:var(--mono); }
+  .history-date { font-size:10px; color:var(--text-muted); font-family:var(--mono); }
+  .history-empty { font-size:11px; color:var(--text-muted); font-family:var(--mono); padding:10px 0; text-align:center; }
+
+  /* ══ TOAST ══ */
+  #toast { position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(16px); background:var(--surface); border:1px solid var(--gold-dim); border-radius:20px; padding:9px 20px; font-size:11px; font-family:var(--mono); color:var(--gold); opacity:0; transition:all .3s; pointer-events:none; z-index:999; }
+  #toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
+
+  /* ══ FOOTER ══ */
+  .app-footer { border-top:1px solid var(--border); padding:12px 28px; text-align:center; font-size:9px; letter-spacing:2px; text-transform:uppercase; color:var(--text-muted); font-family:var(--mono); }
+
+  /* ══ BRAND SELECTOR ══ */
+  .brand-opt {
+    display: flex; align-items: center; gap: 10px;
+    padding: 9px 14px; background: var(--bg);
+    border: 1px solid var(--border); border-radius: var(--radius);
+    cursor: pointer; transition: all .2s; flex: 1; min-width: 160px;
+  }
+  .brand-opt:hover { border-color: var(--gold-dim); }
+  .brand-opt.active { border-color: var(--gold); background: var(--gold-glow); }
+  .brand-opt-dot { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; }
+  .brand-opt-name { font-size: 12px; color: var(--text); font-family: var(--mono); font-weight: 500; }
+  .brand-opt-desc { font-size: 10px; color: var(--text-muted); font-family: var(--mono); }
+
+  /* ══ RESPONSIVE ══ */
+  @media(max-width:900px) {
+    .app-main { grid-template-columns:1fr; padding:16px; }
+    .dna-grid { grid-template-columns:repeat(2,1fr); }
+    .vdna-body { grid-template-columns:1fr; }
   }
 </style>
 </head>
 <body>
 
-<!-- LOGIN -->
+<!-- ══ LOGIN ══ -->
 <div id="login-screen">
   <div class="login-card">
     <div class="login-monogram">LB</div>
     <div class="login-brand">Brand DNA Engine</div>
     <div class="login-tagline">Document Styling &amp; Brand Consistency</div>
-    <div class="login-badge">🔐 SHA-256 · v4.0 Hybrid</div>
+    <div class="login-badge">🔐 SHA-256 Protected Access</div>
     <div class="fg">
       <label>Password di accesso</label>
       <input type="password" id="pwd" placeholder="••••••••••••" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()">
     </div>
     <div class="api-sep">
       <div class="fg">
-        <label>Google Gemini API Key <span style="color:var(--text-muted)">(opzionale)</span></label>
-        <input type="password" id="akey" placeholder="AIza... — lascia vuoto per modalità zero-costo" autocomplete="off" onkeydown="if(event.key==='Enter')doLogin()">
-        <p class="api-note">Solo per Analisi Visiva e Brand da Master. Non necessaria per uso normale.</p>
+        <label>Google Gemini API Key</label>
+        <input type="password" id="akey" placeholder="AIza..." autocomplete="off" onkeydown="if(event.key==='Enter')doLogin()" value="">
+        <p class="api-note">Usata solo localmente nel browser — mai inviata a server terzi.</p>
       </div>
     </div>
     <button class="login-btn" onclick="doLogin()">Entra nel Sistema →</button>
-    <div class="api-optional">✦ Modalità Zero-Costo disponibile senza API Key</div>
     <div class="login-err" id="lerr"></div>
   </div>
 </div>
 
-<!-- APP -->
+<!-- ══ APP ══ -->
 <div id="app">
+
   <header class="app-header">
     <div class="hbrand">
       <div class="hmark">B</div>
@@ -204,7 +429,7 @@
       </div>
     </div>
     <div class="hactions">
-      <div class="mode-badge" id="mode-badge">● ZERO-COST MODE</div>
+      <div class="dna-pill" id="dna-pill"><div class="dna-dot"></div><span>DNA Non Acquisito</span></div>
       <div class="sess-time" id="sess-time"></div>
       <button class="logout-btn" onclick="doLogout()">⎋ Esci</button>
     </div>
@@ -212,66 +437,117 @@
 
   <main class="app-main">
 
-    <!-- STEP 1 -->
+    <!-- ── STEP 1 ── -->
     <div class="panel">
       <div class="panel-head">
         <div class="pnum">1</div>
         <div>
-          <div class="ptitle">Documento da Elaborare</div>
-          <div class="pdesc">Incolla o carica il tuo .md · .txt · .docx · .pdf</div>
+          <div class="ptitle">Master Template</div>
+          <div class="pdesc">Il documento che definisce il tuo brand visivo</div>
         </div>
       </div>
       <div class="panel-body">
-        <div class="info-box zero">
-          <span style="font-size:16px">✦</span>
+        <div id="master-sintesi-notice" style="display:flex;align-items:flex-start;gap:12px;padding:14px 16px;background:rgba(255,102,0,0.07);border:1px solid rgba(255,102,0,0.35);border-radius:4px;margin-bottom:12px;">
+          <span style="font-size:18px;line-height:1;margin-top:1px">🟠</span>
           <div>
-            <div style="color:#4aba78;font-weight:600;margin-bottom:3px">Modalità Zero-Costo attiva</div>
-            Parser Markdown nativo — titoli, liste, tabelle, grassetto, corsivo convertiti automaticamente senza API.<br>
-            <span style="color:var(--text-muted)">Ottimizzato per documenti .md generati da AI.</span>
+            <div style="font-family:var(--mono);font-size:11px;font-weight:600;color:#FF6600;letter-spacing:.5px;margin-bottom:4px">SintesiDigitale Brand Kit — precaricato</div>
+            <div style="font-family:var(--mono);font-size:10px;color:var(--text-dim);line-height:1.6">
+              Layout, colori (#FF6600 / #000000), tipografia (Montserrat + Inter),
+              regole header/footer e stile tabelle sono già configurati.<br>
+              Il documento Master Template non è necessario.<br>
+              <span style="color:var(--text-muted)">Seleziona "Brand da Master" per caricare un template personalizzato.</span>
+            </div>
           </div>
         </div>
-        <div class="upload-row">
-          <label for="target-file" class="upload-btn" style="cursor:pointer;">📎 Carica File</label>
-          <span class="upload-hint">.txt · .md · .docx · .pdf</span>
-          <input type="file" id="target-file" accept=".txt,.md,.docx,.pdf" style="display:none" onchange="handleFileInput(event)">
+
+        <div id="master-upload-area" style="display:none;">
+          <div class="upload-row">
+            <label for="master-file" class="upload-btn" style="cursor:pointer;">📎 Carica File</label>
+            <span class="upload-hint">oppure trascina · .txt · .md · .docx</span>
+            <input type="file" id="master-file" accept=".txt,.md,.pdf,.docx" style="display:none" onchange="handleFileInput(event,'master-doc','master-count')">
+          </div>
+          <div class="drop-zone" id="master-drop"
+            ondragover="event.preventDefault();this.classList.add('drag-over')"
+            ondragleave="this.classList.remove('drag-over')"
+            ondrop="handleDrop(event,'master-doc','master-count');this.classList.remove('drag-over')">
+            <textarea id="master-doc" placeholder="Incolla qui il tuo documento master..." oninput="updateCount('master-doc','master-count')"></textarea>
+            <div class="drop-hint-bar">⬇ Drag &amp; drop .txt · .md · .docx · .pdf</div>
+          </div>
+          <div class="char-count" id="master-count">0 caratteri</div>
         </div>
-        <div class="drop-zone" id="target-drop">
-          <textarea id="target-doc" placeholder="Incolla qui il documento .md o testo strutturato...
 
-# Titolo principale
-## Sezione
-- Voce lista
-- Altra voce
-
-| Colonna A | Colonna B |
-|-----------|-----------|
-| Dato 1    | Dato 2    |
-
-Testo normale con **grassetto** e *corsivo*." oninput="updateCount()"></textarea>
-          <div class="drop-hint-bar">⬇ Drag &amp; drop · .txt · .md · .docx · .pdf</div>
+        <div class="visual-section">
+          <div class="visual-label">🎨 Analisi Visiva Brand (opzionale)</div>
+          <div class="upload-row">
+            <button class="upload-btn" onclick="document.getElementById('visual-file').click()">🖼 Screenshot / Immagine</button>
+            <span class="upload-hint">estrae colori, font e stile grafico</span>
+            <input type="file" id="visual-file" accept="image/*" onchange="handleVisualFile(event)">
+          </div>
+          <div id="visual-preview">
+            <img id="visual-img" style="max-width:100%;max-height:140px;border-radius:4px;border:1px solid var(--border);margin-bottom:8px;">
+            <div class="loading-wrap" id="visual-loading"><div class="spinner"></div><span class="loading-text">Analisi visiva in corso...</span></div>
+            <div id="visual-results"></div>
+          </div>
         </div>
-        <div class="char-count" id="target-count">0 caratteri</div>
+
+        <div class="loading-wrap" id="master-loading"><div class="spinner"></div><span class="loading-text">Analisi Brand DNA in corso...</span></div>
+        <div class="btn-row">
+          <button class="btn btn-gold" onclick="analyzeDNA()">◈ Analizza Brand DNA</button>
+          <button class="btn btn-outline" onclick="clearPanel('master-doc','master-count')">Svuota</button>
+        </div>
       </div>
     </div>
 
-    <!-- STEP 2 -->
+    <!-- ── STEP 2 ── -->
     <div class="panel">
       <div class="panel-head">
         <div class="pnum">2</div>
         <div>
-          <div class="ptitle">Opzioni Brand</div>
-          <div class="pdesc">SintesiDigitale precaricato · funzioni AI opzionali</div>
+          <div class="ptitle">Documento da Elaborare</div>
+          <div class="pdesc">Applica il Brand DNA — formattazione speculare al master</div>
         </div>
       </div>
       <div class="panel-body">
+        <div class="upload-row">
+          <label for="target-file" class="upload-btn" style="cursor:pointer;">📎 Carica File</label>
+          <span class="upload-hint">oppure trascina · .txt · .md · .docx</span>
+          <input type="file" id="target-file" accept=".txt,.md,.pdf,.docx" style="display:none" onchange="handleFileInput(event,'target-doc','target-count')">
+        </div>
+        <div class="drop-zone" id="target-drop"
+          ondragover="event.preventDefault();this.classList.add('drag-over')"
+          ondragleave="this.classList.remove('drag-over')"
+          ondrop="handleDrop(event,'target-doc','target-count');this.classList.remove('drag-over')">
+          <textarea id="target-doc" placeholder="Incolla qui il documento da elaborare..." oninput="updateCount('target-doc','target-count')"></textarea>
+          <div class="drop-hint-bar">⬇ Drag &amp; drop .txt · .md · .docx · .pdf</div>
+        </div>
+        <div class="char-count" id="target-count">0 caratteri</div>
 
-        <!-- Brand precaricato -->
-        <div class="info-box sintesi" style="margin-bottom:14px">
-          <span style="font-size:18px;line-height:1;margin-top:1px">🟠</span>
-          <div>
-            <div style="color:#FF6600;font-weight:600;margin-bottom:3px">SintesiDigitale Brand Kit — attivo</div>
-            #FF6600 · #000000 · Montserrat + Inter · Header/Footer automatici<br>
-            <span style="color:var(--text-muted)">Nessuna configurazione necessaria.</span>
+        <!-- Brand Selector -->
+        <div style="margin-bottom:12px;">
+          <div style="font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--gold-dim);font-family:var(--mono);margin-bottom:8px;">◈ Brand da Applicare</div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;" id="brand-selector">
+            <div class="brand-opt active" id="brand-sintesi" onclick="selectBrand('sintesi')">
+              <div class="brand-opt-dot" style="background:#FF6600"></div>
+              <div><div class="brand-opt-name">🟠 SintesiDigitale</div><div class="brand-opt-desc">Brand Kit precaricato</div></div>
+            </div>
+            <div class="brand-opt" id="brand-master" onclick="selectBrand('master')">
+              <div class="brand-opt-dot" style="background:var(--gold)"></div>
+              <div><div class="brand-opt-name">🎨 Brand da Master</div><div class="brand-opt-desc">DNA estratto dal template</div></div>
+            </div>
+            <div class="brand-opt" id="brand-custom" onclick="selectBrand('custom')">
+              <div class="brand-opt-dot" style="background:var(--text-dim)"></div>
+              <div><div class="brand-opt-name">➕ Brand Personalizzato</div><div class="brand-opt-desc">Configura manualmente</div></div>
+            </div>
+          </div>
+          <div id="custom-brand-inputs" style="display:none;margin-top:10px;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);padding:12px;">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+              <div><label style="font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--text-dim);font-family:var(--mono);display:block;margin-bottom:5px">Nome Brand</label><input type="text" id="cb-name" placeholder="Es. Acme Srl" style="width:100%;padding:7px 10px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-size:12px;font-family:var(--mono)"></div>
+              <div><label style="font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--text-dim);font-family:var(--mono);display:block;margin-bottom:5px">Colore Primario</label><div style="display:flex;gap:6px;align-items:center"><input type="color" id="cb-primary" value="#FF6600" style="width:36px;height:30px;border:none;background:none;cursor:pointer" oninput="document.getElementById('cb-primary-hex').value=this.value"><input type="text" id="cb-primary-hex" placeholder="#FF6600" style="flex:1;padding:7px 10px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-size:12px;font-family:var(--mono)"></div></div>
+              <div><label style="font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--text-dim);font-family:var(--mono);display:block;margin-bottom:5px">Colore Secondario</label><div style="display:flex;gap:6px;align-items:center"><input type="color" id="cb-secondary" value="#000000" style="width:36px;height:30px;border:none;background:none;cursor:pointer" oninput="document.getElementById('cb-secondary-hex').value=this.value"><input type="text" id="cb-secondary-hex" placeholder="#000000" style="flex:1;padding:7px 10px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-size:12px;font-family:var(--mono)"></div></div>
+              <div><label style="font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--text-dim);font-family:var(--mono);display:block;margin-bottom:5px">Font Titoli</label><select id="cb-font-head" style="width:100%;padding:7px 10px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-size:12px;font-family:var(--mono)"><option value="Montserrat">Montserrat</option><option value="Orbitron">Orbitron</option><option value="Playfair Display">Playfair Display</option><option value="Poppins">Poppins</option><option value="Raleway">Raleway</option></select></div>
+              <div><label style="font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--text-dim);font-family:var(--mono);display:block;margin-bottom:5px">Font Corpo</label><select id="cb-font-body" style="width:100%;padding:7px 10px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-size:12px;font-family:var(--mono)"><option value="Inter">Inter</option><option value="Roboto">Roboto</option><option value="DM Sans">DM Sans</option><option value="Open Sans">Open Sans</option></select></div>
+              <div><label style="font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--text-dim);font-family:var(--mono);display:block;margin-bottom:5px">Tagline</label><input type="text" id="cb-tagline" placeholder="Es. Premium Digital Solutions" style="width:100%;padding:7px 10px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-size:12px;font-family:var(--mono)"></div>
+            </div>
           </div>
         </div>
 
@@ -289,65 +565,49 @@ Testo normale con **grassetto** e *corsivo*." oninput="updateCount()"></textarea
             <option value="n">1</option>
             <option value="pag-n">Pag. N</option>
             <option value="n-di-tot">N / TOT</option>
+            <option value="pagina-n-di-tot">Pagina N di TOT</option>
           </select>
+          <span style="font-size:10px;color:var(--text-muted);font-family:var(--mono)">Da</span>
+          <input type="number" class="pstart" id="page-start" value="1" min="1" disabled>
         </div>
 
-        <!-- Titolo documento -->
-        <div style="margin-bottom:14px;">
-          <label style="display:block;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-dim);font-family:var(--mono);margin-bottom:6px;">◈ Titolo Documento (opzionale)</label>
-          <input type="text" id="doc-title" placeholder="Es. Vademecum Operativo Q2 2026" style="width:100%;padding:8px 12px;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-size:12px;font-family:var(--mono);">
+        <div class="loading-wrap" id="target-loading"><div class="spinner"></div><span class="loading-text">Elaborazione Brand DNA in corso...</span></div>
+        <div class="btn-row">
+          <button class="btn btn-gold" id="apply-btn" onclick="applyDNA()" disabled>✦ Applica Brand Kit</button>
+          <button class="btn btn-outline" onclick="clearPanel('target-doc','target-count')">Svuota</button>
         </div>
-
-        <!-- Pulsante principale ZERO COST -->
-        <div class="loading-wrap" id="target-loading"><div class="spinner"></div><span class="loading-text" id="loading-msg">Elaborazione in corso...</span></div>
-        <div class="btn-row" style="margin-bottom:14px;">
-          <button class="btn btn-gold" id="apply-btn" onclick="applyBrandLocal()">✦ Applica Brand Kit</button>
-          <span class="cost-badge">€0 · zero API</span>
-          <button class="btn btn-outline" onclick="clearDoc()">Svuota</button>
-        </div>
-
-        <!-- Sezione AI opzionale -->
-        <div style="border-top:1px solid var(--border);padding-top:14px;margin-top:4px;">
-          <div style="font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--text-muted);font-family:var(--mono);margin-bottom:10px;">◈ Funzioni AI Opzionali <span id="api-status-lbl" style="color:var(--red)">— API Key non inserita</span></div>
-
-          <!-- Analisi visiva -->
-          <div class="visual-section" style="border:none;margin:0;padding:0;">
-            <div class="upload-row">
-              <button class="btn btn-api" id="visual-btn" onclick="document.getElementById('visual-file').click()" disabled>🖼 Analisi Visiva Brand</button>
-              <span class="cost-badge api-cost">~€0.001 · Gemini</span>
-              <input type="file" id="visual-file" accept="image/png,image/jpeg,image/webp" onchange="handleVisualFile(event)">
-            </div>
-            <div id="visual-preview" style="display:none;margin-top:8px;">
-              <img id="visual-img" style="max-width:100%;max-height:120px;border-radius:4px;border:1px solid var(--border);">
-              <div class="loading-wrap" id="visual-loading" style="margin-top:8px;margin-bottom:0;"><div class="spinner"></div><span class="loading-text">Analisi visiva Gemini...</span></div>
-              <div id="visual-results" style="margin-top:8px;font-size:10px;color:var(--text-dim);font-family:var(--mono);"></div>
-            </div>
-          </div>
-
-          <!-- Applica con AI -->
-          <div style="margin-top:10px;">
-            <div class="btn-row">
-              <button class="btn btn-api" id="apply-ai-btn" onclick="applyBrandAI()" disabled>✦ Applica Brand con AI</button>
-              <span class="cost-badge api-cost">~€0.01 · Gemini</span>
-            </div>
-            <div style="font-size:9px;color:var(--text-muted);font-family:var(--mono);margin-top:5px;">Per documenti non strutturati o con formattazione complessa</div>
-          </div>
-        </div>
-
       </div>
     </div>
 
-    <!-- DIVIDER -->
+    <!-- ── DNA ESTRATTO ── -->
+    <div class="dna-panel" id="dna-panel">
+      <div class="dna-panel-head">
+        <span class="dna-panel-title">◈ Brand DNA Testuale Estratto</span>
+        <span style="font-size:10px;color:var(--text-muted);font-family:var(--mono)">Profilo stilistico acquisito</span>
+      </div>
+      <div class="dna-grid" id="dna-grid"></div>
+      <div class="dna-rules">
+        <div class="dna-rules-title">Regole stilistiche identificate</div>
+        <ul class="dna-rules-list" id="rules-list"></ul>
+      </div>
+    </div>
+
+    <!-- ── VISUAL DNA ── -->
+    <div class="visual-dna-panel" id="visual-dna-panel">
+      <div class="vdna-head"><span class="vdna-title">🎨 Brand DNA Visivo Estratto</span></div>
+      <div class="vdna-body" id="vdna-body"></div>
+    </div>
+
     <div class="divider">◆</div>
 
-    <!-- OUTPUT -->
+    <!-- ── OUTPUT ── -->
     <div class="output-panel">
       <div class="output-head">
         <div class="output-title-wrap">
           <div class="pnum">3</div>
           <div>
             <div class="ptitle">Output — Documento Elaborato</div>
-            <div class="pdesc" id="output-desc">Pronto per stampa/PDF · Brand SintesiDigitale</div>
+            <div class="pdesc">Formattazione speculare al Master Template · pronto per stampa/PDF</div>
           </div>
         </div>
       </div>
@@ -364,12 +624,12 @@ Testo normale con **grassetto** e *corsivo*." oninput="updateCount()"></textarea
           <button class="btn btn-outline" onclick="saveToHistory()">◈ Salva in Storia</button>
         </div>
         <div class="print-tip" id="print-tip">
-          💡 <strong>Tip stampa pulita:</strong> header e footer del browser vengono soppressi — solo numero pagina in basso a destra.
+          ✓ <strong>Output pulito:</strong> data/ora, titolo e URL del browser vengono eliminati automaticamente. Il numero pagina (se attivo) è nel contenuto del documento.
         </div>
       </div>
     </div>
 
-    <!-- HISTORY -->
+    <!-- ── HISTORY ── -->
     <div class="history-section">
       <div class="history-head">
         <span class="history-title">◈ Documenti Elaborati</span>
@@ -381,48 +641,135 @@ Testo normale con **grassetto** e *corsivo*." oninput="updateCount()"></textarea
     </div>
 
   </main>
-  <footer class="app-footer">Brand DNA Engine · Luciano Bettoli · v4.0 Hybrid · Zero-Cost Mode · SHA-256 Auth</footer>
+
+  <footer class="app-footer">
+    Brand DNA Engine · Luciano Bettoli · Google Gemini · SHA-256 Auth · v3.3
+  </footer>
 </div>
 
 <div id="toast"></div>
 
 <script>
-// ══════════════════════════════════════════════
-// CONFIG
-// ══════════════════════════════════════════════
+let selectedBrand = 'sintesi';
+
+const SINTESI_BRAND = {
+  name: 'SintesiDigitale',
+  tagline: 'Premium Digital Solutions',
+  primary: '#FF6600',
+  secondary: '#000000',
+  white: '#FFFFFF',
+  fontHead: 'Montserrat',
+  fontBody: 'Inter',
+  rules: [
+    'PRIMO FOGLIO: Grande intestazione con nome SINTESIDIGITALE in arancione (#FF6600) bold maiuscolo, sottotitolo "Premium Digital Solutions" in corsivo nero su sfondo grigio chiaro (#f4f4f4)',
+    'BODY: sfondo bianco (#FFFFFF), testo quasi nero (#1a1a1a), titoli H1/H2/H3 in arancione (#FF6600)',
+    'Tipografia titoli: Montserrat Bold, corpo: Inter',
+    'Tabelle: header sfondo nero testo bianco, righe alternate #f9f9f9',
+    'Design flat: no ombre, no gradienti, no effetti decorativi',
+    'NESSUNA emoji decorativa — solo icone funzionali indispensabili',
+    'Documento formale e professionale — tono tecnico-operativo',
+    'Accenti, link, bordi: sempre #FF6600'
+  ]
+};
+
+function selectBrand(brand) {
+  selectedBrand = brand;
+  document.querySelectorAll('.brand-opt').forEach(el => el.classList.remove('active'));
+  document.getElementById('brand-' + brand).classList.add('active');
+  document.getElementById('custom-brand-inputs').style.display = brand === 'custom' ? 'block' : 'none';
+  const uploadArea    = document.getElementById('master-upload-area');
+  const sintesiNotice = document.getElementById('master-sintesi-notice');
+  const applyBtn      = document.getElementById('apply-btn');
+  if (brand === 'sintesi') {
+    uploadArea.style.display    = 'none';
+    sintesiNotice.style.display = 'flex';
+    applyBtn.disabled = false;
+    toast('🟠 Brand SintesiDigitale attivo');
+  } else {
+    uploadArea.style.display    = 'block';
+    sintesiNotice.style.display = 'none';
+    if (brand === 'master') {
+      applyBtn.disabled = !brandDNA;
+      if (!brandDNA) toast('⚠ Analizza prima il Master Template');
+      else toast('🎨 Brand da Master attivo');
+    } else {
+      applyBtn.disabled = false;
+      toast('➕ Configura il brand personalizzato');
+    }
+  }
+}
+
+function getBrandContext() {
+  if (selectedBrand === 'sintesi') {
+    return `
+BRAND KIT ATTIVO: SintesiDigitale
+- Nome brand: ${SINTESI_BRAND.name}
+- Tagline: ${SINTESI_BRAND.tagline}
+- Colore primario: ${SINTESI_BRAND.primary}
+- Colore secondario: ${SINTESI_BRAND.secondary}
+- Font titoli: ${SINTESI_BRAND.fontHead} Bold
+- Font corpo: ${SINTESI_BRAND.fontBody}
+- Regole brand:
+${SINTESI_BRAND.rules.map((r,i) => `  ${i+1}. ${r}`).join('\n')}
+`;
+  } else if (selectedBrand === 'master' && brandDNA) {
+    return `
+BRAND DA MASTER TEMPLATE:
+- Brand: ${brandDNA.brand_name||''}
+- Tono: ${brandDNA.tone}
+- Struttura: ${brandDNA.structure}
+- Tabelle: ${brandDNA.tables}
+- Emoji/Icone: ${brandDNA.emoji}
+- Intestazioni: ${brandDNA.headers}
+- Colori: ${brandDNA.colors_mentioned||''}
+- Regole: ${(brandDNA.rules||[]).join('; ')}
+${visualDNA ? `VISUAL DNA: Colori: ${JSON.stringify(visualDNA.colors)}, Header: ${visualDNA.header_style}, Footer: ${visualDNA.footer_style}` : ''}
+`;
+  } else if (selectedBrand === 'custom') {
+    const name      = document.getElementById('cb-name').value || 'Brand';
+    const primary   = document.getElementById('cb-primary-hex').value || document.getElementById('cb-primary').value;
+    const secondary = document.getElementById('cb-secondary-hex').value || document.getElementById('cb-secondary').value;
+    const fontHead  = document.getElementById('cb-font-head').value;
+    const fontBody  = document.getElementById('cb-font-body').value;
+    const tagline   = document.getElementById('cb-tagline').value;
+    return `BRAND PERSONALIZZATO: Nome: ${name}, Tagline: ${tagline}, Primario: ${primary}, Secondario: ${secondary}, Font titoli: ${fontHead}, Font corpo: ${fontBody}`;
+  }
+  return '';
+}
+
+// ══ CONFIG ══
 const PWD_HASH = 'fcd476b39d0442520601f01fe534a16267371685e4235855da7e8aeafbae5eda';
+
 let apiKey = '';
+let brandDNA = null;
+let visualDNA = null;
+let sessionHistory = [];
 let outputHTML = '';
 let outputText = '';
-let sessionHistory = [];
 let pagesEnabled = false;
-let visualDNA = null;
 
-// ══════════════════════════════════════════════
-// AUTH
-// ══════════════════════════════════════════════
+// ══ AUTH ══
 async function sha256(s) {
   const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(s));
   return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
 }
 
 async function doLogin() {
-  const pwd = document.getElementById('pwd').value;
-  const key = document.getElementById('akey').value.trim();
+  const pwd  = document.getElementById('pwd').value;
+  const key  = document.getElementById('akey').value.trim();
   const lerr = document.getElementById('lerr');
-  if (!pwd) { lerr.textContent = 'Inserisci la password.'; return; }
+  if (!pwd || !key) { lerr.textContent = 'Inserisci password e API key.'; return; }
+  if (!key.startsWith('AIza')) { lerr.textContent = 'API Key non valida.'; return; }
   const hash = await sha256(pwd);
   if (hash !== PWD_HASH) { lerr.textContent = '✕ Password errata.'; return; }
-  if (key && !key.startsWith('AIza')) { lerr.textContent = 'API Key non valida (deve iniziare con AIza).'; return; }
   apiKey = key;
   document.getElementById('login-screen').classList.add('hidden');
   document.getElementById('app').classList.add('visible');
-  updateAPIStatus();
   startTimer();
 }
 
 function doLogout() {
-  apiKey=''; outputHTML=''; outputText='';
+  apiKey=''; brandDNA=null; visualDNA=null; outputHTML=''; outputText='';
   document.getElementById('login-screen').classList.remove('hidden');
   document.getElementById('app').classList.remove('visible');
   document.getElementById('pwd').value='';
@@ -430,391 +777,25 @@ function doLogout() {
   document.getElementById('lerr').textContent='';
 }
 
-function updateAPIStatus() {
-  const hasAPI = !!apiKey;
-  const badge = document.getElementById('mode-badge');
-  const lbl = document.getElementById('api-status-lbl');
-  badge.textContent = hasAPI ? '● HYBRID MODE' : '● ZERO-COST MODE';
-  badge.className = hasAPI ? 'mode-badge api' : 'mode-badge';
-  lbl.textContent = hasAPI ? '— API Key attiva' : '— API Key non inserita';
-  lbl.style.color = hasAPI ? 'var(--green)' : 'var(--red)';
-  document.getElementById('visual-btn').disabled = !hasAPI;
-  document.getElementById('apply-ai-btn').disabled = !hasAPI;
-}
-
 function startTimer() {
   const start = Date.now();
   const el = document.getElementById('sess-time');
   setInterval(() => {
-    const d = Date.now()-start, m = Math.floor(d/60000), s = Math.floor((d%60000)/1000);
-    el.textContent = `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+    const d = Date.now()-start;
+    const m = Math.floor(d/60000);
+    const s = Math.floor((d%60000)/1000);
+    el.textContent = `Login ${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
   }, 1000);
 }
 
-// ══════════════════════════════════════════════
-// MARKDOWN PARSER — zero dipendenze
-// ══════════════════════════════════════════════
-function parseMarkdown(md) {
-  const lines = md.split('\n');
-  let html = [], inUL=false, inOL=false, inTable=false, inCode=false, codeLang='';
-
-  function closeUL(){ if(inUL){html.push('</ul>');inUL=false;} }
-  function closeOL(){ if(inOL){html.push('</ol>');inOL=false;} }
-  function closeTable(){ if(inTable){html.push('</tbody></table>');inTable=false;} }
-  function closeLists(){ closeUL(); closeOL(); }
-
-  function inline(t) {
-    t = t.replace(/\*\*\*(.+?)\*\*\*/g,'<strong><em>$1</em></strong>');
-    t = t.replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>');
-    t = t.replace(/__(.+?)__/g,'<strong>$1</strong>');
-    t = t.replace(/\*(.+?)\*/g,'<em>$1</em>');
-    t = t.replace(/_([^_]+?)_/g,'<em>$1</em>');
-    t = t.replace(/`([^`]+?)`/g,'<code>$1</code>');
-    t = t.replace(/\[(.+?)\]\((.+?)\)/g,'<a href="$2" style="color:#FF6600">$1</a>');
-    return t;
-  }
-
-  for (let i=0; i<lines.length; i++) {
-    const line = lines[i];
-
-    // Code block fence
-    if (line.startsWith('```')) {
-      closeLists(); closeTable();
-      if (!inCode) {
-        codeLang = line.slice(3).trim();
-        html.push(`<pre><code class="lang-${codeLang}">`);
-        inCode = true;
-      } else {
-        html.push('</code></pre>');
-        inCode = false;
-      }
-      continue;
-    }
-    if (inCode) {
-      html.push(line.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'));
-      continue;
-    }
-
-    // Headings
-    const hm = line.match(/^(#{1,6})\s+(.+)/);
-    if (hm) {
-      closeLists(); closeTable();
-      const lv = hm[1].length;
-      html.push(`<h${lv}>${inline(hm[2])}</h${lv}>`);
-      continue;
-    }
-
-    // HR
-    if (/^[-*_]{3,}\s*$/.test(line)) {
-      closeLists(); closeTable();
-      html.push('<hr>');
-      continue;
-    }
-
-    // Table detection
-    if (line.includes('|')) {
-      const next = lines[i+1] || '';
-      if (!inTable && /^[\s|:-]+$/.test(next)) {
-        closeLists();
-        const cols = line.trim().replace(/^\||\|$/g,'').split('|').map(c=>c.trim());
-        html.push('<table><thead><tr>');
-        cols.forEach(c => html.push(`<th>${inline(c)}</th>`));
-        html.push('</tr></thead><tbody>');
-        inTable = true;
-        i++; // skip separator row
-        continue;
-      } else if (inTable) {
-        const cols = line.trim().replace(/^\||\|$/g,'').split('|').map(c=>c.trim());
-        html.push('<tr>');
-        cols.forEach(c => html.push(`<td>${inline(c)}</td>`));
-        html.push('</tr>');
-        continue;
-      }
-    } else {
-      closeTable();
-    }
-
-    // Unordered list
-    const ulm = line.match(/^(\s*)[-*+]\s+(.+)/);
-    if (ulm) {
-      closeTable();
-      if (!inUL) { closeOL(); html.push('<ul>'); inUL=true; }
-      html.push(`<li>${inline(ulm[2])}</li>`);
-      continue;
-    }
-
-    // Ordered list
-    const olm = line.match(/^(\s*)\d+\.\s+(.+)/);
-    if (olm) {
-      closeTable();
-      if (!inOL) { closeUL(); html.push('<ol>'); inOL=true; }
-      html.push(`<li>${inline(olm[2])}</li>`);
-      continue;
-    }
-
-    // Blockquote
-    const bqm = line.match(/^>\s+(.+)/);
-    if (bqm) {
-      closeLists(); closeTable();
-      html.push(`<blockquote>${inline(bqm[1])}</blockquote>`);
-      continue;
-    }
-
-    // Empty line
-    if (line.trim() === '') {
-      closeLists(); closeTable();
-      continue;
-    }
-
-    // Paragraph
-    closeLists(); closeTable();
-    html.push(`<p>${inline(line)}</p>`);
-  }
-
-  closeLists(); closeTable();
-  if (inCode) html.push('</code></pre>');
-  return html.join('\n');
+// ══ DRAG & DROP ══
+async function handleDrop(ev, taId, countId) {
+  ev.preventDefault(); ev.stopPropagation();
+  const file = ev.dataTransfer?.files?.[0];
+  if (file) await readFile(file, taId, countId);
 }
 
-// ══════════════════════════════════════════════
-// SINTESIDIGITALE TEMPLATE — zero API
-// ══════════════════════════════════════════════
-const PAGE_CLEAN_CSS = `<style id="pco">
-@page {
-  @top-left{content:none!important} @top-center{content:none!important} @top-right{content:none!important}
-  @bottom-left{content:none!important} @bottom-center{content:none!important}
-  @bottom-right{content:counter(page)" / "counter(pages)!important;font-size:9px;font-family:Inter,sans-serif;color:#666}
-}
-</style>`;
-
-function buildSintesiHTML(bodyContent, docTitle, pageCfg) {
-  const today = new Date().toLocaleDateString('it-IT',{day:'2-digit',month:'long',year:'numeric'});
-  const titleDisplay = docTitle || 'Documento SintesiDigitale';
-
-  let pageNumberCSS = '';
-  if (pageCfg.enabled) {
-    const posMap = {
-      'bottom-right':'bottom:12mm;right:15mm',
-      'bottom-center':'bottom:12mm;left:50%;transform:translateX(-50%)',
-      'bottom-left':'bottom:12mm;left:15mm'
-    };
-    const pos = posMap[pageCfg.pos] || posMap['bottom-right'];
-    const fmt = pageCfg.fmt === 'pag-n' ? '"Pag. " counter(page)' :
-                 pageCfg.fmt === 'n-di-tot' ? 'counter(page)" / "counter(pages)' :
-                 'counter(page)';
-    pageNumberCSS = `
-      .page-num-el { display:block; position:fixed; ${pos}; font-size:9px; font-family:Inter,sans-serif; color:#666; }
-      @media print { .page-num-el { position:fixed; ${pos}; } }`;
-  }
-
-  return `<!DOCTYPE html>
-<html lang="it">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>${titleDisplay}</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Montserrat:wght@400;700;900&display=swap" rel="stylesheet">
-<style>
-@page {
-  size: A4 portrait;
-  margin: 20mm 15mm 25mm 15mm;
-  @top-left{content:none} @top-center{content:none} @top-right{content:none}
-  @bottom-left{content:none} @bottom-center{content:none}
-  @bottom-right{content:counter(page)" / "counter(pages);font-size:9px;font-family:Inter,sans-serif;color:#666}
-}
-*{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'Inter',sans-serif;font-size:11px;background:#fff;color:#1a1a1a;max-width:794px;margin:0 auto;-webkit-print-color-adjust:exact;print-color-adjust:exact}
-/* COVER */
-.cover{background:#f4f4f4;padding:40px 30px 30px;margin-bottom:0;-webkit-print-color-adjust:exact;print-color-adjust:exact}
-.cover-brand{font-family:'Montserrat',sans-serif;font-size:36px;font-weight:900;color:#FF6600;letter-spacing:2px;text-transform:uppercase}
-.cover-divider{border:none;border-bottom:3px solid #FF6600;margin:10px 0 12px}
-.cover-tagline{font-family:'Inter',sans-serif;font-size:13px;font-style:italic;color:#333}
-.cover-title{font-family:'Montserrat',sans-serif;font-size:20px;font-weight:700;color:#1a1a1a;margin-top:20px}
-.cover-date{font-size:10px;color:#888;margin-top:6px;font-family:'Inter',sans-serif}
-/* CONTENT */
-.content{padding:28px 20px 20px}
-h1{font-family:'Montserrat',sans-serif;font-size:18px;font-weight:700;color:#FF6600;margin:24px 0 10px;-webkit-print-color-adjust:exact}
-h2{font-family:'Montserrat',sans-serif;font-size:15px;font-weight:700;color:#FF6600;margin:20px 0 8px;border-bottom:1px solid #FF6600;padding-bottom:4px;-webkit-print-color-adjust:exact}
-h3{font-family:'Montserrat',sans-serif;font-size:13px;font-weight:700;color:#FF6600;margin:16px 0 6px;-webkit-print-color-adjust:exact}
-h4,h5,h6{font-family:'Montserrat',sans-serif;font-size:12px;font-weight:700;color:#333;margin:12px 0 5px}
-p{margin-bottom:8px;line-height:1.7}
-ul,ol{margin:8px 0 10px 20px}
-li{margin-bottom:3px;line-height:1.6}
-strong{font-weight:600;color:#1a1a1a}
-em{font-style:italic}
-code{font-family:'Courier New',monospace;font-size:10px;background:#f5f5f5;padding:1px 5px;border-radius:3px;border:1px solid #e0e0e0}
-pre{background:#1a1a1a;color:#f0f0f0;padding:14px 16px;border-radius:4px;overflow-x:auto;margin:10px 0;border-left:3px solid #FF6600}
-pre code{background:none;border:none;padding:0;color:inherit;font-size:10px}
-blockquote{border-left:3px solid #FF6600;padding:8px 14px;margin:10px 0;background:#fff8f5;color:#555;font-style:italic;-webkit-print-color-adjust:exact}
-hr{border:none;border-top:2px solid #FF6600;margin:20px 0;-webkit-print-color-adjust:exact}
-a{color:#FF6600;text-decoration:none}
-/* TABLES */
-table{width:100%;border-collapse:collapse;margin:12px 0;font-size:11px}
-thead tr{background:#000;color:#fff;-webkit-print-color-adjust:exact;print-color-adjust:exact}
-thead th{padding:8px 10px;text-align:left;font-family:'Montserrat',sans-serif;font-weight:700;font-size:10px;letter-spacing:.5px}
-tbody tr:nth-child(even){background:#f9f9f9;-webkit-print-color-adjust:exact}
-tbody td{padding:6px 10px;border-bottom:1px solid #e8e8e8}
-/* FOOTER */
-.page-footer{background:#000;color:#aaa;padding:14px 20px;margin-top:40px;border-top:3px solid #FF6600;text-align:center;-webkit-print-color-adjust:exact;print-color-adjust:exact}
-.page-footer-brand{font-family:'Montserrat',sans-serif;font-size:11px;font-weight:700;color:#FF6600;letter-spacing:1px}
-.page-footer-sub{font-size:9px;color:#666;margin-top:4px}
-${pageNumberCSS}
-/* PRINT */
-@media print {
-  body{font-size:10px!important;background:#fff!important}
-  h1,h2,h3{color:#FF6600!important;-webkit-print-color-adjust:exact}
-  .cover{background:#f4f4f4!important;-webkit-print-color-adjust:exact}
-  .page-footer{background:#000!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
-  thead tr{background:#000!important;-webkit-print-color-adjust:exact}
-  pre{background:#1a1a1a!important;-webkit-print-color-adjust:exact}
-  blockquote{background:#fff8f5!important;-webkit-print-color-adjust:exact}
-  a{color:#FF6600!important}
-}
-</style>
-</head>
-<body>
-<div class="cover">
-  <div class="cover-brand">SINTESIDIGITALE</div>
-  <hr class="cover-divider">
-  <div class="cover-tagline">Premium Digital Solutions</div>
-  <div class="cover-title">${titleDisplay}</div>
-  <div class="cover-date">${today}</div>
-</div>
-<div class="content">
-${bodyContent}
-</div>
-<div class="page-footer">
-  <div class="page-footer-brand">SINTESIDIGITALE</div>
-  <div class="page-footer-sub">Premium Digital Solutions · ${today}</div>
-</div>
-</body>
-</html>`;
-}
-
-// ══════════════════════════════════════════════
-// APPLY BRAND — ZERO COST (JS puro)
-// ══════════════════════════════════════════════
-function applyBrandLocal() {
-  const text = document.getElementById('target-doc').value.trim();
-  if (!text) { toast('⚠ Inserisci un documento'); return; }
-
-  const docTitle = document.getElementById('doc-title').value.trim();
-  const pageCfg = getPageCfg();
-
-  // Parse markdown → HTML
-  const bodyHTML = parseMarkdown(text);
-  const fullHTML = buildSintesiHTML(bodyHTML, docTitle, pageCfg);
-
-  outputHTML = fullHTML;
-  outputText = text;
-  document.getElementById('output-desc').textContent = 'Brand SintesiDigitale · Zero-Cost Mode · €0';
-  renderOutput(fullHTML);
-  toast('✓ Documento elaborato — €0 · zero API');
-}
-
-// ══════════════════════════════════════════════
-// APPLY BRAND — AI (Gemini, opzionale)
-// ══════════════════════════════════════════════
-async function applyBrandAI() {
-  if (!apiKey) { toast('⚠ Inserisci la API Key Gemini al login'); return; }
-  const text = document.getElementById('target-doc').value.trim();
-  if (!text) { toast('⚠ Inserisci un documento'); return; }
-
-  const tl = document.getElementById('target-loading');
-  const lm = document.getElementById('loading-msg');
-  lm.textContent = 'Gemini in elaborazione...';
-  tl.classList.add('visible');
-
-  const docTitle = document.getElementById('doc-title').value.trim();
-  const pageCfg = getPageCfg();
-
-  const sys = `Sei un esperto di document design. Converti il testo in HTML semantico professionale SintesiDigitale.
-Restituisci SOLO il contenuto interno (NO DOCTYPE/html/head/body/style) — solo il markup del contenuto.
-Usa classi: .cover per la cover, .content per il body, .page-footer per il footer.
-Regole: preserva tutto il contenuto, converti titoli in h1/h2/h3, liste in ul/ol, tabelle in table/thead/tbody.
-Nessuna emoji decorativa. Tono formale e professionale.`;
-
-  try {
-    const bodyRaw = await callGemini(sys, `Converti in HTML:\n\n${text}`, null, null, 1, 12288);
-    const bodyContent = bodyRaw.replace(/^```(?:html)?\s*/im,'').replace(/\s*```$/im,'').trim();
-    const fullHTML = buildSintesiHTML(bodyContent, docTitle, pageCfg);
-    outputHTML = fullHTML;
-    outputText = text;
-    document.getElementById('output-desc').textContent = 'Brand SintesiDigitale · AI Mode · ~€0.01';
-    renderOutput(fullHTML);
-    toast('✓ Documento elaborato con AI Gemini');
-  } catch(e) { toast('Errore Gemini: '+e.message); console.error(e); }
-  finally { tl.classList.remove('visible'); }
-}
-
-// ══════════════════════════════════════════════
-// GEMINI API (solo per funzioni opzionali)
-// ══════════════════════════════════════════════
-async function callGemini(system, userMsg, imageData=null, imageMime=null, retries=1, maxTokens=8192) {
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
-  const parts = [];
-  if (imageData) parts.push({ inline_data: { mime_type: imageMime, data: imageData } });
-  parts.push({ text: userMsg });
-  const body = {
-    system_instruction: { parts: [{ text: system }] },
-    contents: [{ role: 'user', parts }],
-    generationConfig: { maxOutputTokens: maxTokens, temperature: 0.3 }
-  };
-  for (let attempt=1; attempt<=retries; attempt++) {
-    const resp = await fetch(url, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body) });
-    if (resp.ok) {
-      const data = await resp.json();
-      return data.candidates[0].content.parts[0].text;
-    }
-    const e = await resp.json();
-    throw new Error(e.error?.message || 'Gemini error');
-  }
-}
-
-// ══════════════════════════════════════════════
-// VISUAL ANALYSIS (Gemini, opzionale)
-// ══════════════════════════════════════════════
-async function handleVisualFile(ev) {
-  if (!apiKey) { toast('⚠ API Key non inserita'); return; }
-  const file = ev.target.files[0];
-  if (!file) return;
-  ev.target.value='';
-  if (file.size > 2*1024*1024) { toast('⚠ Immagine troppo grande — max 2MB'); return; }
-  const reader = new FileReader();
-  reader.onload = async e => {
-    const dataUrl = e.target.result;
-    const b64 = dataUrl.split(',')[1];
-    const mime = file.type || 'image/png';
-    document.getElementById('visual-img').src = dataUrl;
-    document.getElementById('visual-preview').style.display = 'block';
-    const vl = document.getElementById('visual-loading');
-    vl.classList.add('visible');
-    document.getElementById('visual-results').innerHTML = '';
-    try {
-      const sys = `Analizza l'immagine brand e restituisci SOLO JSON valido:
-{"colors":{"primary":"#hex","secondary":"#hex","background":"#hex","text":"#hex"},
-"typography":{"headings":"descrizione","body":"descrizione"},
-"style":"stile grafico","mood":"atmosfera","notes":"osservazioni chiave"}`;
-      const raw = await callGemini(sys, 'Analizza questo brand visivamente:', b64, mime, 1, 2048);
-      visualDNA = JSON.parse(raw.replace(/```json|```/g,'').trim());
-      document.getElementById('visual-results').innerHTML =
-        `<div style="background:var(--bg);border:1px solid var(--border);border-radius:4px;padding:10px;font-size:10px;color:var(--text-dim)">
-          <strong style="color:var(--gold)">Palette estratta:</strong> ${Object.entries(visualDNA.colors||{}).map(([k,v])=>`${k}: <span style="color:${v}">${v}</span>`).join(' · ')}<br>
-          <strong style="color:var(--gold)">Stile:</strong> ${visualDNA.style||'—'}<br>
-          <strong style="color:var(--gold)">Note:</strong> ${visualDNA.notes||'—'}
-        </div>`;
-      toast('✓ Analisi visiva completata');
-    } catch(e) { toast('Errore analisi visiva: '+e.message); }
-    finally { vl.classList.remove('visible'); }
-  };
-  reader.readAsDataURL(file);
-}
-
-// ══════════════════════════════════════════════
-// FILE HANDLING
-// ══════════════════════════════════════════════
-function setupDrop(zoneId, taId) {
+function setupDrop(zoneId, taId, countId) {
   const zone = document.getElementById(zoneId);
   if (!zone) return;
   zone.addEventListener('dragover', ev => { ev.preventDefault(); zone.classList.add('drag-over'); });
@@ -822,165 +803,488 @@ function setupDrop(zoneId, taId) {
   zone.addEventListener('drop', async ev => {
     ev.preventDefault(); zone.classList.remove('drag-over');
     const file = ev.dataTransfer?.files?.[0];
-    if (file) await readFile(file);
+    if (file) await readFile(file, taId, countId);
   });
 }
 
-async function readFile(file) {
+async function readFile(file, taId, countId) {
   const name = file.name.toLowerCase();
-  const ta = document.getElementById('target-doc');
+  const ta   = document.getElementById(taId);
   if (name.endsWith('.txt') || name.endsWith('.md') || name.endsWith('.csv')) {
     ta.value = await file.text();
-    updateCount();
+    updateCount(taId, countId);
     toast(`✓ ${file.name}`);
   } else if (name.endsWith('.docx')) {
     toast('Lettura DOCX...');
     try {
-      const ab = await file.arrayBuffer();
+      const ab     = await file.arrayBuffer();
       const result = await mammoth.extractRawText({ arrayBuffer: ab });
       ta.value = result.value.trim();
-      updateCount();
+      updateCount(taId, countId);
       toast(`✓ DOCX: ${file.name}`);
-    } catch(e) { toast('⚠ Errore DOCX'); }
+    } catch(e) { toast('⚠ Errore DOCX — incolla il testo manualmente'); }
   } else if (name.endsWith('.pdf')) {
-    // PDF.js via CDN — estrazione testo senza API
-    toast('📄 Estrazione PDF in corso...');
+    toast('📄 Estrazione testo PDF...');
     try {
-      if (!window.pdfjsLib) {
-        await loadScript('https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js');
-        window.pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-      }
-      const ab = await file.arrayBuffer();
-      const pdf = await pdfjsLib.getDocument({ data: ab }).promise;
-      let text = '';
-      for (let p=1; p<=pdf.numPages; p++) {
-        const page = await pdf.getPage(p);
-        const content = await page.getTextContent();
-        text += content.items.map(i=>i.str).join(' ') + '\n\n';
-      }
-      ta.value = text.trim();
-      updateCount();
-      toast(`✓ PDF estratto: ${pdf.numPages} pagine · €0`);
-    } catch(e) {
-      toast('⚠ PDF.js non disponibile — usa l\'estrazione AI (richiede API Key)');
-      // fallback AI se disponibile
-      if (apiKey) await extractPDFwithAI(file);
-    }
-  } else {
-    toast('⚠ Formato non supportato');
-  }
+      const ab     = await file.arrayBuffer();
+      const base64 = btoa(String.fromCharCode(...new Uint8Array(ab)));
+      const url    = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
+      const resp   = await fetch(url, {
+        method: 'POST', headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({
+          contents: [{ role:'user', parts:[
+            { inline_data:{ mime_type:'application/pdf', data:base64 } },
+            { text:'Estrai tutto il testo da questo PDF mantenendo la struttura originale. Restituisci SOLO il testo estratto.' }
+          ]}],
+          generationConfig: { maxOutputTokens:32768, temperature:0 }
+        })
+      });
+      if (!resp.ok) throw new Error('Errore API');
+      const data = await resp.json();
+      ta.value = data.candidates[0].content.parts[0].text.trim();
+      updateCount(taId, countId);
+      toast(`✓ PDF: ${file.name}`);
+    } catch(e) { toast('⚠ Errore PDF — incolla il testo manualmente'); }
+  } else { toast('⚠ Formato non supportato'); }
 }
 
-async function extractPDFwithAI(file) {
-  toast('📄 Estrazione PDF via Gemini...');
-  try {
-    const ab = await file.arrayBuffer();
-    const base64 = btoa(String.fromCharCode(...new Uint8Array(ab)));
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
-    const resp = await fetch(url, {
-      method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({
-        contents:[{role:'user',parts:[
-          {inline_data:{mime_type:'application/pdf',data:base64}},
-          {text:'Estrai tutto il testo mantenendo la struttura. Solo testo, nessun commento.'}
-        ]}],
-        generationConfig:{maxOutputTokens:8192,temperature:0}
-      })
-    });
-    if (!resp.ok) throw new Error('API error');
-    const data = await resp.json();
-    document.getElementById('target-doc').value = data.candidates[0].content.parts[0].text.trim();
-    updateCount();
-    toast('✓ PDF estratto via Gemini');
-  } catch(e) { toast('⚠ Errore estrazione PDF'); }
-}
-
-function loadScript(src) {
-  return new Promise((res,rej) => {
-    const s = document.createElement('script');
-    s.src = src; s.onload = res; s.onerror = rej;
-    document.head.appendChild(s);
-  });
-}
-
-function handleFileInput(ev) {
+function handleFileInput(ev, taId, countId) {
   const file = ev.target.files[0];
-  if (file) readFile(file);
+  if (file) readFile(file, taId, countId);
   ev.target.value='';
 }
 
-function updateCount() {
-  const len = document.getElementById('target-doc').value.length;
-  document.getElementById('target-count').textContent = len.toLocaleString('it') + ' caratteri';
+function updateCount(taId, countId) {
+  document.getElementById(countId).textContent = document.getElementById(taId).value.length.toLocaleString('it') + ' caratteri';
+}
+function clearPanel(taId, countId) {
+  document.getElementById(taId).value='';
+  document.getElementById(countId).textContent='0 caratteri';
+}
+function toast(msg, dur=3000) {
+  const el = document.getElementById('toast');
+  el.textContent=msg; el.classList.add('show');
+  setTimeout(()=>el.classList.remove('show'), dur);
 }
 
-function clearDoc() {
-  document.getElementById('target-doc').value='';
-  document.getElementById('target-count').textContent='0 caratteri';
-}
-
-// ══════════════════════════════════════════════
-// PAGE NUMBERS
-// ══════════════════════════════════════════════
 function togglePages() {
   pagesEnabled = !pagesEnabled;
   document.getElementById('page-toggle').classList.toggle('on', pagesEnabled);
   document.getElementById('page-lbl').textContent = pagesEnabled ? 'On' : 'Off';
-  ['page-pos','page-fmt'].forEach(id => document.getElementById(id).disabled = !pagesEnabled);
+  ['page-pos','page-fmt','page-start'].forEach(id => document.getElementById(id).disabled = !pagesEnabled);
 }
+
 function getPageCfg() {
   return {
     enabled: pagesEnabled,
-    pos: document.getElementById('page-pos').value,
-    fmt: document.getElementById('page-fmt').value
+    pos:   document.getElementById('page-pos').value,
+    fmt:   document.getElementById('page-fmt').value,
+    start: parseInt(document.getElementById('page-start').value)||1
   };
 }
 
-// ══════════════════════════════════════════════
-// RENDER OUTPUT
-// ══════════════════════════════════════════════
+// ══ GEMINI ══
+async function callGemini(system, userMsg, imageData=null, imageMime=null, retries=3) {
+  const url  = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
+  const parts = [];
+  if (imageData) parts.push({ inline_data:{ mime_type:imageMime, data:imageData } });
+  parts.push({ text: userMsg });
+  const body = {
+    system_instruction: { parts:[{ text:system }] },
+    contents: [{ role:'user', parts }],
+    generationConfig: { maxOutputTokens:65536, temperature:0.4 }
+  };
+  for (let attempt=1; attempt<=retries; attempt++) {
+    const resp = await fetch(url, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(body) });
+    if (resp.ok) {
+      const data = await resp.json();
+      return data.candidates[0].content.parts[0].text;
+    }
+    const e   = await resp.json();
+    const msg = e.error?.message || 'Gemini error';
+    if (resp.status===503 && attempt<retries) {
+      toast(`⏳ Gemini sovraccarico — riprovo (${attempt}/${retries})...`);
+      await new Promise(r => setTimeout(r, 4000*attempt));
+      continue;
+    }
+    throw new Error(msg);
+  }
+}
+
+// ══ ANALYZE DNA ══
+async function analyzeDNA() {
+  const master = document.getElementById('master-doc').value.trim();
+  if (!master) { toast('Inserisci il documento master'); return; }
+  const ml = document.getElementById('master-loading');
+  ml.classList.add('visible');
+  const sys = `Sei un esperto di brand identity. Analizza il documento e restituisci SOLO JSON valido senza markdown:
+{"tone":"","structure":"","density":"","lists":"","opening":"","closing":"","vocabulary":"","formality":"","tables":"","emoji":"","headers":"","brand_name":"","colors_mentioned":"","rules":["r1","r2","r3","r4","r5","r6","r7","r8"]}`;
+  try {
+    const raw  = await callGemini(sys, 'Analizza:\n\n'+master);
+    brandDNA   = JSON.parse(raw.replace(/```json|```/g,'').trim());
+    renderDNA(brandDNA);
+    setDNAStatus(true);
+    document.getElementById('apply-btn').disabled = false;
+    toast('✓ Brand DNA acquisito');
+  } catch(e) { toast('Errore: '+e.message); }
+  finally { ml.classList.remove('visible'); }
+}
+
+function renderDNA(dna) {
+  const fields = [['Tono','tone'],['Struttura','structure'],['Densità','density'],['Tabelle','tables'],['Apertura','opening'],['Chiusura','closing'],['Emoji/Icone','emoji'],['Intestazioni','headers']];
+  document.getElementById('dna-grid').innerHTML = fields.map(([l,k])=>
+    `<div class="dna-cell"><div class="dna-cell-lbl">${l}</div><div class="dna-cell-val">${dna[k]||'—'}</div></div>`).join('');
+  document.getElementById('rules-list').innerHTML = (dna.rules||[]).map((r,i)=>
+    `<li><span class="rnum">${i+1}</span><span>${r}</span></li>`).join('');
+  document.getElementById('dna-panel').classList.add('visible');
+}
+
+function setDNAStatus(active) {
+  const el = document.getElementById('dna-pill');
+  el.classList.toggle('active', active);
+  el.querySelector('span').textContent = active ? 'Brand DNA Attivo' : 'DNA Non Acquisito';
+}
+
+// ══ VISUAL ANALYSIS ══
+let visualBase64=null, visualMime=null;
+
+async function handleVisualFile(ev) {
+  const file = ev.target.files[0]; if (!file) return; ev.target.value='';
+  const reader = new FileReader();
+  reader.onload = async e => {
+    const dataUrl = e.target.result;
+    visualBase64  = dataUrl.split(',')[1];
+    visualMime    = file.type || 'image/png';
+    document.getElementById('visual-img').src = dataUrl;
+    document.getElementById('visual-preview').style.display = 'block';
+    const vl = document.getElementById('visual-loading'); vl.classList.add('visible');
+    document.getElementById('visual-results').innerHTML = '';
+    try {
+      const sys = `Analizza l'immagine e restituisci SOLO JSON: {"colors":{"primary":"","secondary":"","accent":"","background":"","text":"","header_bg":"","border":""},"typography":{"headings":"","body":"","size":""},"layout":"","style":"","mood":"","header_style":"","footer_style":"","table_style":"","recommendations":["","",""]}`;
+      const raw  = await callGemini(sys, 'Analizza visivamente:', visualBase64, visualMime);
+      visualDNA  = JSON.parse(raw.replace(/```json|```/g,'').trim());
+      renderVisualDNA(visualDNA);
+      toast('✓ Analisi visiva completata');
+    } catch(e) { toast('Errore analisi visiva: '+e.message); }
+    finally { vl.classList.remove('visible'); }
+  };
+  reader.readAsDataURL(file);
+}
+
+function renderVisualDNA(v) {
+  const colors   = v.colors || {};
+  const swatches = Object.entries(colors).map(([name,val]) => {
+    const hex = val.match(/#[0-9a-fA-F]{3,6}/)?.[0] || '#888';
+    return `<div class="swatch-row"><div class="swatch" style="background:${hex}"></div><div class="swatch-info">${name}: <span>${val}</span></div></div>`;
+  }).join('');
+  document.getElementById('vdna-body').innerHTML = `
+    <div><div class="vdna-section-title">Palette Colori</div><div class="color-swatches">${swatches}</div></div>
+    <div>
+      <div class="vdna-section-title">Tipografia &amp; Layout</div>
+      <div class="vdna-card"><div class="vdna-card-lbl">Titoli</div><div class="vdna-card-val">${v.typography?.headings||'—'}</div></div>
+      <div class="vdna-card"><div class="vdna-card-lbl">Corpo</div><div class="vdna-card-val">${v.typography?.body||'—'}</div></div>
+      <div class="vdna-card"><div class="vdna-card-lbl">Layout</div><div class="vdna-card-val">${v.layout||'—'}</div></div>
+      <div class="vdna-card"><div class="vdna-card-lbl">Header</div><div class="vdna-card-val">${v.header_style||'—'}</div></div>
+    </div>
+    <div>
+      <div class="vdna-section-title">Stile &amp; Mood</div>
+      <div class="vdna-card"><div class="vdna-card-lbl">Stile</div><div class="vdna-card-val">${v.style||'—'}</div></div>
+      <div class="vdna-card"><div class="vdna-card-lbl">Mood</div><div class="vdna-card-val">${v.mood||'—'}</div></div>
+      <div class="vdna-card"><div class="vdna-card-lbl">Tabelle</div><div class="vdna-card-val">${v.table_style||'—'}</div></div>
+      <div class="vdna-section-title" style="margin-top:10px">Raccomandazioni</div>
+      ${(v.recommendations||[]).map((r,i)=>`<div style="display:flex;gap:8px;margin-bottom:6px;align-items:flex-start"><div style="background:var(--gold);color:#0f0e0b;font-size:9px;font-weight:700;width:16px;height:16px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-family:var(--mono)">${i+1}</div><div style="font-size:11px;color:var(--text);line-height:1.5">${r}</div></div>`).join('')}
+    </div>`;
+  document.getElementById('visual-dna-panel').classList.add('visible');
+}
+
+// ══ CLEAN HTML ══
+function cleanGeminiHTML(raw) {
+  let html = raw.trim();
+  html = html.replace(/^```(?:html)?\s*\r?\n?/im, '');
+  html = html.replace(/\r?\n?```\s*$/im, '');
+  html = html.trim();
+  if (!html.startsWith('<!DOCTYPE') && !html.startsWith('<html')) {
+    const docStart = html.indexOf('<!DOCTYPE');
+    const htmlStart = html.indexOf('<html');
+    const start = docStart !== -1 ? docStart : (htmlStart !== -1 ? htmlStart : 0);
+    html = html.slice(start);
+  }
+  const closeTag = html.lastIndexOf('</html>');
+  if (closeTag !== -1) html = html.slice(0, closeTag + 7);
+  return html;
+}
+
+// ══════════════════════════════════════════════════════════════════
+// FIX DEFINITIVO — ELIMINAZIONE HEADER/FOOTER BROWSER (v3.3)
+// ══════════════════════════════════════════════════════════════════
+//
+// PROBLEMA: Chrome/Edge/Firefox iniettano automaticamente in stampa:
+//   - Data/ora (es. "01/06/26, 19:15")         → margin-top area
+//   - Titolo pagina (es. "Documento XYZ")       → margin-top area
+//   - URL (es. "about:blank")                   → margin-bottom area
+//   - Numero pagina (es. "1/2")                 → margin-bottom area
+//
+// CAUSA: Il browser usa lo spazio dei @page margins per iniettare
+//        questi elementi. Non è possibile sovrascriverli con CSS
+//        margin-boxes (@top-left { content:none }) in modo affidabile
+//        su Chrome (viene ignorato per i propri header/footer nativi).
+//
+// SOLUZIONE DEFINITIVA: @page { margin: 0 !important }
+//   → Azzera fisicamente lo spazio disponibile per il browser
+//   → Senza spazio, il browser non può renderizzare i suoi elementi
+//   → Funziona su Chrome ✓  Edge ✓  Firefox ✓  Safari ✓
+//
+// COMPENSAZIONE MARGINI: body { padding: 14mm 18mm }
+//   → Ripristina i margini del documento via CSS padding sul body
+//   → Il contenuto non tocca i bordi carta
+//   → I background colorati (.cover, .page-footer) rispettano il padding
+//
+// TITLE SVUOTATO: <title>\u200B</title>
+//   → Il browser usa document.title come testo header
+//   → Svuotarlo a zero-width space lo rende invisibile
+//   → Applicato sia in printOutput() che in downloadHTML()
+//
+// ══════════════════════════════════════════════════════════════════
+const PAGE_CLEAN_CSS = `<style id="page-clean-override">
+/*
+ * BRAND DNA ENGINE v3.3 — PRINT CLEAN
+ * @page margin:0 = nessuno spazio per header/footer browser
+ * body padding   = margini compensativi del contenuto
+ */
+@media print {
+  @page {
+    margin: 0 !important;
+    size: A4 portrait !important;
+  }
+  body {
+    padding: 14mm 18mm 14mm 18mm !important;
+    margin: 0 !important;
+    max-width: 100% !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+  /* Annulla eventuali margini aggiuntivi su .cover e .page-footer
+     per evitare doppio padding border-to-edge */
+  .cover {
+    margin-left: -18mm !important;
+    margin-right: -18mm !important;
+    padding-left: 18mm !important;
+    padding-right: 18mm !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+  .page-footer {
+    margin-left: -18mm !important;
+    margin-right: -18mm !important;
+    padding-left: 18mm !important;
+    padding-right: 18mm !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+}
+</style>`;
+
+// Prepara l'HTML per la stampa: svuota il title + inietta PAGE_CLEAN_CSS
+function preparePrintHTML(html) {
+  // 1. Svuota il <title> — il browser usa il titolo come testo dell'header nativo
+  let out = html.replace(/<title>[^<]*<\/title>/gi, '<title>\u200B</title>');
+  // 2. Inietta il blocco CSS pulito prima di </head>
+  out = out.includes('</head>')
+    ? out.replace('</head>', PAGE_CLEAN_CSS + '\n</head>')
+    : PAGE_CLEAN_CSS + out;
+  return out;
+}
+
+// ══ ISTRUZIONI STAMPA PER GEMINI ══
+// Blocco CSS che viene inserito nel prompt Gemini per guidare
+// la generazione del documento con i margini corretti.
+const GEMINI_PRINT_CSS_RULES = `
+REGOLE CSS STAMPA — OBBLIGATORIE (v3.3 clean print):
+- @page { size: A4 portrait; margin: 0; }  ← margin:0 per eliminare header/footer browser
+- @media print { body { padding: 14mm 18mm; margin: 0; max-width: 100%; box-sizing: border-box; -webkit-print-color-adjust: exact; print-color-adjust: exact; } }
+- NON usare @page margin-boxes (@top-left, @bottom-right ecc.) — sono ignorati da Chrome
+- NON inserire header/footer ripetuti su ogni pagina nel HTML: usa SOLO cover (prima pagina) e footer-finale (ultima pagina)
+- Il tag <title> deve essere vuoto o contenere uno spazio: <title> </title>
+`;
+
+// ══ APPLY DNA ══
+async function applyDNA() {
+  const target = document.getElementById('target-doc').value.trim();
+  if (!target) { toast('Inserisci il documento da elaborare'); return; }
+  if (selectedBrand==='master' && !brandDNA) { toast('⚠ Analizza prima il Master Template'); return; }
+  if (selectedBrand==='custom' && !document.getElementById('cb-name').value) { toast('⚠ Inserisci il nome del brand personalizzato'); return; }
+
+  if (target.length > 8000) { await applyDNAChunked(target); return; }
+
+  const tl = document.getElementById('target-loading');
+  tl.classList.add('visible');
+
+  const pageCfg = getPageCfg();
+  const pageInstructions = pageCfg.enabled
+    ? `- Numerazione pagine HTML: aggiungi un div fisso in fondo con counter CSS, formato "${pageCfg.fmt}", posizione "${pageCfg.pos}", da ${pageCfg.start}. USA position:fixed; bottom:10mm; right:14mm; font-size:9px; color:#666; font-family:Inter; per schermo, e @media print { stessa posizione }. NON usare @page margin-boxes.`
+    : '- Nessuna numerazione pagine.';
+
+  const brandContext = getBrandContext();
+
+  const sys = `Sei un esperto di brand consistency e document design. Riscrivi il documento in HTML rispettando ESATTAMENTE il Brand Kit.
+
+REGOLE FONDAMENTALI:
+1. Preserva TUTTO il contenuto — nessun dato, fatto o numero deve andare perso
+2. Output: HTML completo autocontenuto, pronto per stampa/PDF
+3. Stile visivo esatto al master: cover, body, footer
+
+${brandContext}
+
+STRUTTURA HTML:
+- Importa Google Fonts: Montserrat (400,700,900) e Inter (400,500,600)
+- Carta A4 portrait: max-width 794px, margin 0 auto
+
+${GEMINI_PRINT_CSS_RULES}
+
+FONT SIZE:
+- body: 11px | h1: 18px | h2: 15px | h3: 13px | p,li,td: 11px | small: 10px
+
+PRIMO FOGLIO (.cover):
+- background: #f4f4f4, padding: 40px 30px
+- "SINTESIDIGITALE": Montserrat 900, 36px, #FF6600, letter-spacing 2px
+- Linea: border-bottom 3px solid #FF6600
+- Tagline: Inter italic, 14px, #333
+
+BODY:
+- background: #FFFFFF, color: #1a1a1a
+- H1/H2/H3: color #FF6600, Montserrat Bold
+- Tabelle: thead #000 bianco, tbody righe alternate #f9f9f9, 11px
+
+FOOTER DOCUMENTO (.page-footer — UNO SOLO in fondo):
+- background: #000, border-top: 3px solid #FF6600, padding: 12px 20px
+- Testo centrato: "SINTESIDIGITALE — Premium Digital Solutions", #aaaaaa, 10px
+
+ICONE: VIETATE emoji decorative. Solo icone funzionali essenziali.
+TONO: Formale, professionale, tecnico-operativo.
+
+OUTPUT PURO:
+- Inizia ESATTAMENTE con <!DOCTYPE html>
+- ZERO testo prima o dopo il codice HTML
+- ZERO markdown fences
+
+${pageInstructions}`;
+
+  try {
+    const rawHTML = await callGemini(sys, `Documento da elaborare:\n\n${target}`);
+    const html    = cleanGeminiHTML(rawHTML);
+    outputHTML = html;
+    outputText = target;
+    renderOutput(html);
+    toast(`✓ Elaborato — Brand ${selectedBrand==='sintesi'?'SintesiDigitale':selectedBrand==='master'?'Master':'Custom'}`);
+  } catch(e) { toast('Errore: '+e.message); console.error(e); }
+  finally { tl.classList.remove('visible'); }
+}
+
+async function applyDNAChunked(target) {
+  const tl = document.getElementById('target-loading');
+  tl.classList.add('visible');
+  const brandContext = getBrandContext();
+  const pageCfg      = getPageCfg();
+  const pageInstructions = pageCfg.enabled
+    ? `Aggiungi numerazione: div fixed bottom:10mm right:14mm, formato "${pageCfg.fmt}", da ${pageCfg.start}.`
+    : 'Nessuna numerazione pagine.';
+
+  try {
+    toast('Step 1/2 — Generazione template brand...');
+    const cssSystem = `Genera SOLO il blocco CSS completo per documento HTML SintesiDigitale.
+${brandContext}
+Restituisci SOLO CSS (senza <style>, senza HTML, senza markdown fences).
+${GEMINI_PRINT_CSS_RULES}
+Includi: body, h1/h2/h3, table, .cover, .page-footer, .content, @media print.`;
+
+    const cssRaw = await callGemini(cssSystem, 'Genera CSS completo SintesiDigitale.');
+    const css    = cssRaw.replace(/^```(?:css)?\s*\r?\n?/im,'').replace(/\r?\n?```\s*$/im,'').trim();
+
+    toast('Step 2/2 — Elaborazione contenuto...');
+    const contentSystem = `Converti il testo in HTML semantico. NON includere DOCTYPE/html/head/style/body.
+Usa: .cover (prima pagina), .page-footer (footer finale), .content (contenuto).
+${brandContext}
+${pageInstructions}
+Regole: preserva tutto il contenuto, usa h1/h2/h3, ul/ol, table. Tono formale. Zero emoji decorative.`;
+
+    const bodyRaw     = await callGemini(contentSystem, `Converti:\n\n${target}`);
+    const bodyContent = bodyRaw.replace(/^```(?:html)?\s*\r?\n?/im,'').replace(/\r?\n?```\s*$/im,'').trim();
+    const today       = new Date().toLocaleDateString('it-IT',{day:'2-digit',month:'long',year:'numeric'});
+
+    const html = `<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title> </title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Montserrat:wght@400;700;900&display=swap');
+${css}
+</style>
+</head>
+<body>
+${bodyContent}
+</body>
+</html>`;
+
+    outputHTML = html;
+    outputText = target;
+    renderOutput(html);
+    toast(`✓ Elaborato — Brand ${selectedBrand==='sintesi'?'SintesiDigitale':selectedBrand==='master'?'Master':'Custom'}`);
+  } catch(e) { toast('Errore: '+e.message); console.error(e); }
+  finally { tl.classList.remove('visible'); }
+}
+
 function renderOutput(html) {
   const rendered = document.getElementById('output-rendered');
-  const iframe = document.getElementById('output-iframe');
+  const iframe   = document.getElementById('output-iframe');
   rendered.style.display = 'none';
-  iframe.style.display = 'block';
-  iframe.style.height = '600px';
-  const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
-  const url = URL.createObjectURL(blob);
-  iframe.src = url;
-  iframe.onload = () => {
-    try {
-      const h = iframe.contentDocument?.body?.scrollHeight || 600;
-      iframe.style.height = Math.max(h+40, 400)+'px';
-    } catch(e) {}
-  };
+  iframe.style.display   = 'block';
+  iframe.style.height    = '600px';
+  try {
+    const blob = new Blob([html], { type:'text/html;charset=utf-8' });
+    const url  = URL.createObjectURL(blob);
+    iframe.src = url;
+    iframe.onload = () => {
+      try {
+        const h = iframe.contentDocument?.body?.scrollHeight || 600;
+        iframe.style.height = Math.max(h+40, 400)+'px';
+      } catch(e) { iframe.style.height='600px'; }
+    };
+  } catch(e) { console.error('renderOutput:', e); }
   document.getElementById('output-actions').style.display = 'flex';
   document.getElementById('print-tip').classList.add('visible');
 }
 
-// ══════════════════════════════════════════════
-// OUTPUT ACTIONS
-// ══════════════════════════════════════════════
+// ══ OUTPUT ACTIONS ══
+
+// FIX 1+2 (v3.3): printOutput con eliminazione definitiva header/footer browser
+// - preparePrintHTML() svuota il <title> (fonte del testo header browser)
+// - preparePrintHTML() inietta @page { margin:0 } + body { padding:14mm 18mm }
+// - La finestra si apre su about:blank (nessun URL visibile nel footer)
 function printOutput() {
-  const win = window.open('','_blank','width=960,height=800');
-  if (!win) { toast('⚠ Popup bloccato'); return; }
-  const html = outputHTML.includes('</head>') ? outputHTML.replace('</head>', PAGE_CLEAN_CSS+'\n</head>') : PAGE_CLEAN_CSS+outputHTML;
+  const win = window.open('', '_blank', 'width=960,height=800');
+  if (!win) { toast('⚠ Popup bloccato — abilita i popup per questo sito'); return; }
+  const printReady = preparePrintHTML(outputHTML);
   win.document.open();
-  win.document.write(html);
+  win.document.write(printReady);
   win.document.close();
-  setTimeout(()=>{ win.print(); }, 900);
-  toast('✓ Finestra stampa aperta');
+  setTimeout(() => { win.print(); }, 900);
+  toast('✓ Stampa aperta — output pulito senza header/footer browser');
 }
 
+// downloadHTML: il file scaricato include già il fix pulito
 function downloadHTML() {
-  const date = new Date().toISOString().slice(0,10);
-  const html = outputHTML.includes('</head>') ? outputHTML.replace('</head>', PAGE_CLEAN_CSS+'\n</head>') : PAGE_CLEAN_CSS+outputHTML;
-  const blob = new Blob([html], { type:'text/html;charset=utf-8' });
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = `sintesidigitale-${date}.html`;
+  const date       = new Date().toISOString().slice(0,10);
+  const cleanHTML  = preparePrintHTML(outputHTML);
+  const blob = new Blob([cleanHTML], { type:'text/html;charset=utf-8' });
+  const a    = document.createElement('a');
+  a.href     = URL.createObjectURL(blob);
+  a.download = `brand-dna-output-${date}.html`;
   a.click(); URL.revokeObjectURL(a.href);
-  toast('✓ File HTML scaricato');
+  toast('✓ File HTML scaricato (print-clean incluso)');
 }
 
 function copyOutput() {
@@ -989,7 +1293,7 @@ function copyOutput() {
 
 function saveToHistory() {
   const preview = outputText.slice(0,70).replace(/\n/g,' ')+'...';
-  const now = new Date().toLocaleString('it-IT',{hour:'2-digit',minute:'2-digit',day:'2-digit',month:'2-digit'});
+  const now     = new Date().toLocaleString('it-IT',{hour:'2-digit',minute:'2-digit',day:'2-digit',month:'2-digit'});
   sessionHistory.unshift({ html:outputHTML, text:outputText, preview, date:now });
   renderHistory();
   toast('✓ Salvato in storia');
@@ -998,16 +1302,15 @@ function saveToHistory() {
 function renderHistory() {
   const list = document.getElementById('history-list');
   if (!sessionHistory.length) { list.innerHTML='<div class="history-empty">Nessun documento elaborato in questa sessione</div>'; return; }
-  list.innerHTML = sessionHistory.map((item,i)=>
-    `<div class="history-item" onclick="loadHistory(${i})">
+  list.innerHTML = sessionHistory.map((item,i)=>`
+    <div class="history-item" onclick="loadHistory(${i})">
       <span class="history-lbl">${item.preview}</span>
       <span class="history-date">${item.date}</span>
     </div>`).join('');
 }
 
 function loadHistory(i) {
-  const item = sessionHistory[i];
-  if (!item) return;
+  const item = sessionHistory[i]; if (!item) return;
   outputHTML=item.html; outputText=item.text;
   renderOutput(item.html);
   toast('✓ Caricato dalla storia');
@@ -1015,21 +1318,15 @@ function loadHistory(i) {
 
 function clearHistory() { sessionHistory=[]; renderHistory(); toast('Storia svuotata'); }
 
-// ══════════════════════════════════════════════
-// UTILS
-// ══════════════════════════════════════════════
-function toast(msg, dur=3000) {
-  const el = document.getElementById('toast');
-  el.textContent=msg; el.classList.add('show');
-  setTimeout(()=>el.classList.remove('show'), dur);
-}
-
-// ══════════════════════════════════════════════
-// INIT
-// ══════════════════════════════════════════════
+// ══ INIT ══
 window.addEventListener('DOMContentLoaded', () => {
-  setupDrop('target-drop','target-doc');
-  document.getElementById('target-doc').addEventListener('input', updateCount);
+  setupDrop('master-drop','master-doc','master-count');
+  setupDrop('target-drop','target-doc','target-count');
+  if (selectedBrand==='sintesi') {
+    document.getElementById('master-upload-area').style.display    = 'none';
+    document.getElementById('master-sintesi-notice').style.display = 'flex';
+    document.getElementById('apply-btn').disabled = false;
+  }
 });
 </script>
 </body>
