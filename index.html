@@ -137,6 +137,15 @@
   .dna-pill.active { border-color: var(--green); color: #4aba78; }
   .dna-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--text-muted); transition: all .3s; }
   .dna-pill.active .dna-dot { background: #4aba78; box-shadow: 0 0 8px #4aba78; }
+  .cost-pill {
+    display: flex; align-items: center; gap: 5px;
+    padding: 4px 12px; border: 1px solid var(--border);
+    border-radius: 20px; font-size: 10px; font-family: var(--mono);
+    color: var(--text-muted); transition: all .4s; cursor: default; white-space: nowrap;
+  }
+  .cost-pill.active { border-color: var(--gold-dim); color: var(--gold-dim); }
+  .cost-pill.warn   { border-color: #c87a20; color: #c87a20; }
+  .cost-sep { opacity:.35; }
   .sess-time { font-size: 10px; color: var(--text-muted); font-family: var(--mono); }
   .logout-btn {
     padding: 5px 14px; background: transparent;
@@ -333,6 +342,7 @@
   .empty-icon { font-size: 28px; opacity:.3; }
   .empty-txt { font-size:10px; letter-spacing:2px; text-transform:uppercase; font-family:var(--mono); }
 
+  /* Output iframe */
   #output-iframe {
     width:100%; min-height:600px; border:none; display:none;
     border-radius: 4px;
@@ -401,6 +411,7 @@
     <div class="login-brand">Brand DNA Engine</div>
     <div class="login-tagline">Document Styling &amp; Brand Consistency</div>
     <div class="login-badge">🔐 SHA-256 Protected Access</div>
+
     <div class="fg">
       <label>Password di accesso</label>
       <input type="password" id="pwd" placeholder="••••••••••••" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()">
@@ -430,6 +441,7 @@
     </div>
     <div class="hactions">
       <div class="dna-pill" id="dna-pill"><div class="dna-dot"></div><span>DNA Non Acquisito</span></div>
+      <div class="cost-pill" id="cost-pill" title="Token e costo API sessione"><span style="font-size:9px;letter-spacing:1px">API</span><span id="cost-val" style="font-weight:600">$0.0000</span><span class="cost-sep">|</span><span id="cost-tok">0 tok</span></div>
       <div class="sess-time" id="sess-time"></div>
       <button class="logout-btn" onclick="doLogout()">⎋ Esci</button>
     </div>
@@ -437,7 +449,7 @@
 
   <main class="app-main">
 
-    <!-- ── STEP 1 ── -->
+    <!-- ── STEP 1: MASTER TEMPLATE ── -->
     <div class="panel">
       <div class="panel-head">
         <div class="pnum">1</div>
@@ -447,10 +459,19 @@
         </div>
       </div>
       <div class="panel-body">
-        <div id="master-sintesi-notice" style="display:flex;align-items:flex-start;gap:12px;padding:14px 16px;background:rgba(255,102,0,0.07);border:1px solid rgba(255,102,0,0.35);border-radius:4px;margin-bottom:12px;">
+
+        <div id="master-sintesi-notice" style="
+          display:flex; align-items:flex-start; gap:12px;
+          padding:14px 16px;
+          background:rgba(255,102,0,0.07);
+          border:1px solid rgba(255,102,0,0.35);
+          border-radius:4px;
+          margin-bottom:12px;">
           <span style="font-size:18px;line-height:1;margin-top:1px">🟠</span>
           <div>
-            <div style="font-family:var(--mono);font-size:11px;font-weight:600;color:#FF6600;letter-spacing:.5px;margin-bottom:4px">SintesiDigitale Brand Kit — precaricato</div>
+            <div style="font-family:var(--mono);font-size:11px;font-weight:600;color:#FF6600;letter-spacing:.5px;margin-bottom:4px">
+              SintesiDigitale Brand Kit — precaricato
+            </div>
             <div style="font-family:var(--mono);font-size:10px;color:var(--text-dim);line-height:1.6">
               Layout, colori (#FF6600 / #000000), tipografia (Montserrat + Inter),
               regole header/footer e stile tabelle sono già configurati.<br>
@@ -470,12 +491,13 @@
             ondragover="event.preventDefault();this.classList.add('drag-over')"
             ondragleave="this.classList.remove('drag-over')"
             ondrop="handleDrop(event,'master-doc','master-count');this.classList.remove('drag-over')">
-            <textarea id="master-doc" placeholder="Incolla qui il tuo documento master..." oninput="updateCount('master-doc','master-count')"></textarea>
+            <textarea id="master-doc" placeholder="Incolla qui il tuo documento master — lettera, report, proposta commerciale, vademecum...&#10;&#10;Puoi anche trascinare un file .txt .md .docx qui sopra." oninput="updateCount('master-doc','master-count')"></textarea>
             <div class="drop-hint-bar">⬇ Drag &amp; drop .txt · .md · .docx · .pdf</div>
           </div>
           <div class="char-count" id="master-count">0 caratteri</div>
         </div>
 
+        <!-- Analisi visiva -->
         <div class="visual-section">
           <div class="visual-label">🎨 Analisi Visiva Brand (opzionale)</div>
           <div class="upload-row">
@@ -498,7 +520,7 @@
       </div>
     </div>
 
-    <!-- ── STEP 2 ── -->
+    <!-- ── STEP 2: DOCUMENTO DA ELABORARE ── -->
     <div class="panel">
       <div class="panel-head">
         <div class="pnum">2</div>
@@ -517,7 +539,7 @@
           ondragover="event.preventDefault();this.classList.add('drag-over')"
           ondragleave="this.classList.remove('drag-over')"
           ondrop="handleDrop(event,'target-doc','target-count');this.classList.remove('drag-over')">
-          <textarea id="target-doc" placeholder="Incolla qui il documento da elaborare..." oninput="updateCount('target-doc','target-count')"></textarea>
+          <textarea id="target-doc" placeholder="Incolla qui il documento da elaborare...&#10;&#10;Puoi anche trascinare un file .txt .md .docx qui sopra." oninput="updateCount('target-doc','target-count')"></textarea>
           <div class="drop-hint-bar">⬇ Drag &amp; drop .txt · .md · .docx · .pdf</div>
         </div>
         <div class="char-count" id="target-count">0 caratteri</div>
@@ -557,9 +579,11 @@
           <div class="toggle" id="page-toggle" onclick="togglePages()"></div>
           <span class="toggle-lbl" id="page-lbl">Off</span>
           <select class="pselect" id="page-pos" disabled>
-            <option value="bottom-right">Destra Basso</option>
             <option value="bottom-center">Centro Basso</option>
+            <option value="bottom-right">Destra Basso</option>
             <option value="bottom-left">Sinistra Basso</option>
+            <option value="top-center">Centro Alto</option>
+            <option value="top-right">Destra Alto</option>
           </select>
           <select class="pselect" id="page-fmt" disabled>
             <option value="n">1</option>
@@ -598,6 +622,7 @@
       <div class="vdna-body" id="vdna-body"></div>
     </div>
 
+    <!-- ── DIVIDER ── -->
     <div class="divider">◆</div>
 
     <!-- ── OUTPUT ── -->
@@ -623,8 +648,9 @@
           <button class="btn btn-outline" onclick="copyOutput()">⎘ Copia Testo</button>
           <button class="btn btn-outline" onclick="saveToHistory()">◈ Salva in Storia</button>
         </div>
+        <!-- TIP STAMPA -->
         <div class="print-tip" id="print-tip">
-          ✓ <strong>Output pulito:</strong> data/ora, titolo e URL del browser vengono eliminati automaticamente. Il numero pagina (se attivo) è nel contenuto del documento.
+          💡 <strong>Tip stampa pulita:</strong> header e footer del browser vengono soppressi automaticamente — solo il numero pagina rimane in basso a destra.
         </div>
       </div>
     </div>
@@ -643,7 +669,7 @@
   </main>
 
   <footer class="app-footer">
-    Brand DNA Engine · Luciano Bettoli · Google Gemini · SHA-256 Auth · v3.3
+    Brand DNA Engine · Luciano Bettoli · Google Gemini · SHA-256 Auth · v3.4
   </footer>
 </div>
 
@@ -652,6 +678,7 @@
 <script>
 let selectedBrand = 'sintesi';
 
+// ══ BRAND SINTESIDIGITALE KIT ══
 const SINTESI_BRAND = {
   name: 'SintesiDigitale',
   tagline: 'Premium Digital Solutions',
@@ -660,15 +687,20 @@ const SINTESI_BRAND = {
   white: '#FFFFFF',
   fontHead: 'Montserrat',
   fontBody: 'Inter',
+  logo: 'SINTESIDIGITALE',
   rules: [
-    'PRIMO FOGLIO: Grande intestazione con nome SINTESIDIGITALE in arancione (#FF6600) bold maiuscolo, sottotitolo "Premium Digital Solutions" in corsivo nero su sfondo grigio chiaro (#f4f4f4)',
-    'BODY: sfondo bianco (#FFFFFF), testo quasi nero (#1a1a1a), titoli H1/H2/H3 in arancione (#FF6600)',
+    'PRIMO FOGLIO: Grande intestazione con nome SINTESIDIGITALE in arancione (#FF6600) bold maiuscolo, sottotitolo "Premium Digital Solutions" in corsivo nero su sfondo grigio chiaro (#f0f0f0)',
+    'HEADER GLOBALE (tutte le pagine): sfondo nero (#000000), testo "— Vademecum Operativo SINTESIDIGITALE | Control Panel" con SINTESIDIGITALE in arancione, separatore arancione in basso',
+    'FOOTER GLOBALE (tutte le pagine): sfondo nero (#000000), separatore arancione in alto, testo centrato "Sintesidigitale — Premium Digital Solutions | Pagina N" in grigio chiaro',
+    'SCHERMO: sfondo body bianco (#FFFFFF), testo quasi nero (#1a1a1a), titoli H1/H2/H3 in arancione (#FF6600)',
+    'STAMPA @media print: sfondo bianco (#FFFFFF), testo nero (#000000), titoli H1/H2/H3 in arancione (#FF6600)',
+    'NESSUNA icona informale o decorativa (no razzo, no graffetta, no emoji decorative) — solo icone funzionali indispensabili',
     'Tipografia titoli: Montserrat Bold, corpo: Inter',
-    'Tabelle: header sfondo nero testo bianco, righe alternate #f9f9f9',
+    'Tabelle: header sfondo nero testo bianco, righe alternate #1a1a1a (schermo) / #f5f5f5 (stampa)',
+    'Indice/TOC: voci in arancione (#FF6600)',
+    'Accenti, link, bordi: sempre #FF6600',
     'Design flat: no ombre, no gradienti, no effetti decorativi',
-    'NESSUNA emoji decorativa — solo icone funzionali indispensabili',
-    'Documento formale e professionale — tono tecnico-operativo',
-    'Accenti, link, bordi: sempre #FF6600'
+    'Documento formale e professionale — tono tecnico-operativo'
   ]
 };
 
@@ -677,14 +709,16 @@ function selectBrand(brand) {
   document.querySelectorAll('.brand-opt').forEach(el => el.classList.remove('active'));
   document.getElementById('brand-' + brand).classList.add('active');
   document.getElementById('custom-brand-inputs').style.display = brand === 'custom' ? 'block' : 'none';
+
   const uploadArea    = document.getElementById('master-upload-area');
   const sintesiNotice = document.getElementById('master-sintesi-notice');
   const applyBtn      = document.getElementById('apply-btn');
+
   if (brand === 'sintesi') {
     uploadArea.style.display    = 'none';
     sintesiNotice.style.display = 'flex';
     applyBtn.disabled = false;
-    toast('🟠 Brand SintesiDigitale attivo');
+    toast('🟠 Brand SintesiDigitale attivo — template non necessario');
   } else {
     uploadArea.style.display    = 'block';
     sintesiNotice.style.display = 'none';
@@ -705,10 +739,12 @@ function getBrandContext() {
 BRAND KIT ATTIVO: SintesiDigitale
 - Nome brand: ${SINTESI_BRAND.name}
 - Tagline: ${SINTESI_BRAND.tagline}
-- Colore primario: ${SINTESI_BRAND.primary}
-- Colore secondario: ${SINTESI_BRAND.secondary}
-- Font titoli: ${SINTESI_BRAND.fontHead} Bold
-- Font corpo: ${SINTESI_BRAND.fontBody}
+- Colore primario (Sintesi Action): ${SINTESI_BRAND.primary}
+- Colore secondario (Deep Neural): ${SINTESI_BRAND.secondary}
+- Colore sfondo puro (Data Pure): ${SINTESI_BRAND.white}
+- Font titoli: ${SINTESI_BRAND.fontHead} Bold (alternativa: Orbitron per look tech)
+- Font corpo: ${SINTESI_BRAND.fontBody} (alternativa: Roboto)
+- Logo simbolo: griglia esagonale ⬡ in arancione ${SINTESI_BRAND.primary}
 - Regole brand:
 ${SINTESI_BRAND.rules.map((r,i) => `  ${i+1}. ${r}`).join('\n')}
 `;
@@ -723,22 +759,66 @@ BRAND DA MASTER TEMPLATE:
 - Intestazioni: ${brandDNA.headers}
 - Colori: ${brandDNA.colors_mentioned||''}
 - Regole: ${(brandDNA.rules||[]).join('; ')}
-${visualDNA ? `VISUAL DNA: Colori: ${JSON.stringify(visualDNA.colors)}, Header: ${visualDNA.header_style}, Footer: ${visualDNA.footer_style}` : ''}
+${visualDNA ? `
+VISUAL DNA:
+- Colori: ${JSON.stringify(visualDNA.colors)}
+- Header: ${visualDNA.header_style}
+- Footer: ${visualDNA.footer_style}
+- Tabelle: ${visualDNA.table_style}
+` : ''}
 `;
   } else if (selectedBrand === 'custom') {
-    const name      = document.getElementById('cb-name').value || 'Brand';
-    const primary   = document.getElementById('cb-primary-hex').value || document.getElementById('cb-primary').value;
+    const name = document.getElementById('cb-name').value || 'Brand';
+    const primary = document.getElementById('cb-primary-hex').value || document.getElementById('cb-primary').value;
     const secondary = document.getElementById('cb-secondary-hex').value || document.getElementById('cb-secondary').value;
-    const fontHead  = document.getElementById('cb-font-head').value;
-    const fontBody  = document.getElementById('cb-font-body').value;
-    const tagline   = document.getElementById('cb-tagline').value;
-    return `BRAND PERSONALIZZATO: Nome: ${name}, Tagline: ${tagline}, Primario: ${primary}, Secondario: ${secondary}, Font titoli: ${fontHead}, Font corpo: ${fontBody}`;
+    const fontHead = document.getElementById('cb-font-head').value;
+    const fontBody = document.getElementById('cb-font-body').value;
+    const tagline = document.getElementById('cb-tagline').value;
+    return `
+BRAND PERSONALIZZATO:
+- Nome brand: ${name}
+- Tagline: ${tagline}
+- Colore primario: ${primary}
+- Colore secondario: ${secondary}
+- Font titoli: ${fontHead}
+- Font corpo: ${fontBody}
+`;
   }
   return '';
 }
 
+// == COST TRACKER ==
+const PRICE_IN_PER_M  = 0.075;  // USD/1M tok input  - Gemini 2.5 Flash
+const PRICE_OUT_PER_M = 0.300;  // USD/1M tok output - Gemini 2.5 Flash
+let sessTokensIn = 0, sessTokensOut = 0, sessCallCount = 0;
+
+function trackCost(tokIn, tokOut) {
+  sessTokensIn += tokIn; sessTokensOut += tokOut; sessCallCount += 1;
+  const costIn  = (sessTokensIn  / 1000000) * PRICE_IN_PER_M;
+  const costOut = (sessTokensOut / 1000000) * PRICE_OUT_PER_M;
+  const total   = costIn + costOut;
+  const totTok  = sessTokensIn + sessTokensOut;
+  const pill  = document.getElementById('cost-pill');
+  const valEl = document.getElementById('cost-val');
+  const tokEl = document.getElementById('cost-tok');
+  if (!pill || !valEl || !tokEl) return;
+  valEl.textContent = '$' + total.toFixed(4);
+  tokEl.textContent = totTok.toLocaleString('it') + ' tok';
+  pill.classList.toggle('active', total > 0 && total < 0.05);
+  pill.classList.toggle('warn',   total >= 0.05);
+}
+function resetCostTracker() {
+  sessTokensIn = sessTokensOut = sessCallCount = 0;
+  const pill  = document.getElementById('cost-pill');
+  const valEl = document.getElementById('cost-val');
+  const tokEl = document.getElementById('cost-tok');
+  if (valEl) valEl.textContent = '$0.0000';
+  if (tokEl) tokEl.textContent = '0 tok';
+  if (pill)  { pill.classList.remove('active'); pill.classList.remove('warn'); }
+}
+
 // ══ CONFIG ══
-const PWD_HASH = 'fcd476b39d0442520601f01fe534a16267371685e4235855da7e8aeafbae5eda';
+const PWD_HASH = 'fcd476b39d0442520601f01fe534a16267371685e4235855da7e8aeafbae5eda'; // brandDNA2026
 
 let apiKey = '';
 let brandDNA = null;
@@ -755,8 +835,8 @@ async function sha256(s) {
 }
 
 async function doLogin() {
-  const pwd  = document.getElementById('pwd').value;
-  const key  = document.getElementById('akey').value.trim();
+  const pwd = document.getElementById('pwd').value;
+  const key = document.getElementById('akey').value.trim();
   const lerr = document.getElementById('lerr');
   if (!pwd || !key) { lerr.textContent = 'Inserisci password e API key.'; return; }
   if (!key.startsWith('AIza')) { lerr.textContent = 'API Key non valida.'; return; }
@@ -770,6 +850,7 @@ async function doLogin() {
 
 function doLogout() {
   apiKey=''; brandDNA=null; visualDNA=null; outputHTML=''; outputText='';
+  resetCostTracker();
   document.getElementById('login-screen').classList.remove('hidden');
   document.getElementById('app').classList.remove('visible');
   document.getElementById('pwd').value='';
@@ -790,7 +871,8 @@ function startTimer() {
 
 // ══ DRAG & DROP ══
 async function handleDrop(ev, taId, countId) {
-  ev.preventDefault(); ev.stopPropagation();
+  ev.preventDefault();
+  ev.stopPropagation();
   const file = ev.dataTransfer?.files?.[0];
   if (file) await readFile(file, taId, countId);
 }
@@ -809,7 +891,7 @@ function setupDrop(zoneId, taId, countId) {
 
 async function readFile(file, taId, countId) {
   const name = file.name.toLowerCase();
-  const ta   = document.getElementById(taId);
+  const ta = document.getElementById(taId);
   if (name.endsWith('.txt') || name.endsWith('.md') || name.endsWith('.csv')) {
     ta.value = await file.text();
     updateCount(taId, countId);
@@ -817,35 +899,45 @@ async function readFile(file, taId, countId) {
   } else if (name.endsWith('.docx')) {
     toast('Lettura DOCX...');
     try {
-      const ab     = await file.arrayBuffer();
+      const ab = await file.arrayBuffer();
       const result = await mammoth.extractRawText({ arrayBuffer: ab });
       ta.value = result.value.trim();
       updateCount(taId, countId);
-      toast(`✓ DOCX: ${file.name}`);
+      toast(`✓ DOCX caricato: ${file.name}`);
     } catch(e) { toast('⚠ Errore DOCX — incolla il testo manualmente'); }
   } else if (name.endsWith('.pdf')) {
-    toast('📄 Estrazione testo PDF...');
+    toast('📄 PDF rilevato — estrazione testo in corso...');
     try {
-      const ab     = await file.arrayBuffer();
+      const ab = await file.arrayBuffer();
       const base64 = btoa(String.fromCharCode(...new Uint8Array(ab)));
-      const url    = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
-      const resp   = await fetch(url, {
-        method: 'POST', headers: {'Content-Type':'application/json'},
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
+      const resp = await fetch(url, {
+        method: 'POST',
+        headers: {'Content-Type':'application/json'},
         body: JSON.stringify({
-          contents: [{ role:'user', parts:[
-            { inline_data:{ mime_type:'application/pdf', data:base64 } },
-            { text:'Estrai tutto il testo da questo PDF mantenendo la struttura originale. Restituisci SOLO il testo estratto.' }
-          ]}],
-          generationConfig: { maxOutputTokens:32768, temperature:0 }
+          contents: [{
+            role: 'user',
+            parts: [
+              { inline_data: { mime_type: 'application/pdf', data: base64 } },
+              { text: 'Estrai tutto il testo da questo PDF mantenendo la struttura originale (titoli, paragrafi, liste, tabelle). Restituisci SOLO il testo estratto, nessun commento.' }
+            ]
+          }],
+          generationConfig: { maxOutputTokens: 32768, temperature: 0 }
         })
       });
       if (!resp.ok) throw new Error('Errore API');
       const data = await resp.json();
-      ta.value = data.candidates[0].content.parts[0].text.trim();
+      const text = data.candidates[0].content.parts[0].text;
+      ta.value = text.trim();
       updateCount(taId, countId);
-      toast(`✓ PDF: ${file.name}`);
-    } catch(e) { toast('⚠ Errore PDF — incolla il testo manualmente'); }
-  } else { toast('⚠ Formato non supportato'); }
+      toast(`✓ PDF caricato: ${file.name}`);
+    } catch(e) {
+      toast('⚠ Errore PDF — incolla il testo manualmente');
+      console.error(e);
+    }
+  } else {
+    toast('⚠ Formato non supportato');
+  }
 }
 
 function handleFileInput(ev, taId, countId) {
@@ -854,6 +946,7 @@ function handleFileInput(ev, taId, countId) {
   ev.target.value='';
 }
 
+// ══ UTILS ══
 function updateCount(taId, countId) {
   document.getElementById(countId).textContent = document.getElementById(taId).value.length.toLocaleString('it') + ' caratteri';
 }
@@ -867,6 +960,7 @@ function toast(msg, dur=3000) {
   setTimeout(()=>el.classList.remove('show'), dur);
 }
 
+// ══ PAGE NUMBERS ══
 function togglePages() {
   pagesEnabled = !pagesEnabled;
   document.getElementById('page-toggle').classList.toggle('on', pagesEnabled);
@@ -877,34 +971,42 @@ function togglePages() {
 function getPageCfg() {
   return {
     enabled: pagesEnabled,
-    pos:   document.getElementById('page-pos').value,
-    fmt:   document.getElementById('page-fmt').value,
+    pos: document.getElementById('page-pos').value,
+    fmt: document.getElementById('page-fmt').value,
     start: parseInt(document.getElementById('page-start').value)||1
   };
 }
 
-// ══ GEMINI ══
+// ══ GEMINI API ══
 async function callGemini(system, userMsg, imageData=null, imageMime=null, retries=3) {
-  const url  = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
+  const model = 'gemini-2.5-flash';
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+
   const parts = [];
-  if (imageData) parts.push({ inline_data:{ mime_type:imageMime, data:imageData } });
+  if (imageData) parts.push({ inline_data: { mime_type: imageMime, data: imageData } });
   parts.push({ text: userMsg });
+
   const body = {
-    system_instruction: { parts:[{ text:system }] },
-    contents: [{ role:'user', parts }],
-    generationConfig: { maxOutputTokens:65536, temperature:0.4 }
+    system_instruction: { parts: [{ text: system }] },
+    contents: [{ role: 'user', parts }],
+    generationConfig: { maxOutputTokens: 65536, temperature: 0.4 }
   };
-  for (let attempt=1; attempt<=retries; attempt++) {
-    const resp = await fetch(url, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(body) });
+
+  for (let attempt = 1; attempt <= retries; attempt++) {
+    const resp = await fetch(url, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body) });
     if (resp.ok) {
       const data = await resp.json();
+      if (data.usageMetadata) {
+        trackCost(data.usageMetadata.promptTokenCount || 0,
+                  data.usageMetadata.candidatesTokenCount || 0);
+      }
       return data.candidates[0].content.parts[0].text;
     }
-    const e   = await resp.json();
+    const e = await resp.json();
     const msg = e.error?.message || 'Gemini error';
-    if (resp.status===503 && attempt<retries) {
+    if (resp.status === 503 && attempt < retries) {
       toast(`⏳ Gemini sovraccarico — riprovo (${attempt}/${retries})...`);
-      await new Promise(r => setTimeout(r, 4000*attempt));
+      await new Promise(r => setTimeout(r, 4000 * attempt));
       continue;
     }
     throw new Error(msg);
@@ -917,25 +1019,48 @@ async function analyzeDNA() {
   if (!master) { toast('Inserisci il documento master'); return; }
   const ml = document.getElementById('master-loading');
   ml.classList.add('visible');
-  const sys = `Sei un esperto di brand identity. Analizza il documento e restituisci SOLO JSON valido senza markdown:
-{"tone":"","structure":"","density":"","lists":"","opening":"","closing":"","vocabulary":"","formality":"","tables":"","emoji":"","headers":"","brand_name":"","colors_mentioned":"","rules":["r1","r2","r3","r4","r5","r6","r7","r8"]}`;
+
+  const sys = `Sei un esperto di brand identity e comunicazione professionale italiana.
+Analizza il documento e restituisci SOLO JSON valido senza markdown o backtick:
+{
+  "tone":"tono comunicativo",
+  "structure":"struttura e organizzazione",
+  "density":"densità informativa",
+  "lists":"uso delle liste",
+  "opening":"stile apertura documenti",
+  "closing":"stile chiusura documenti",
+  "vocabulary":"vocabolario e termini tipici",
+  "formality":"livello formalità",
+  "tables":"uso delle tabelle",
+  "emoji":"uso di emoji e icone",
+  "headers":"stile intestazioni e titoli",
+  "brand_name":"nome brand/azienda identificato",
+  "colors_mentioned":"colori o elementi visivi menzionati nel testo",
+  "rules":["regola stilistica 1","regola2","regola3","regola4","regola5","regola6","regola7","regola8"]
+}`;
+
   try {
-    const raw  = await callGemini(sys, 'Analizza:\n\n'+master);
-    brandDNA   = JSON.parse(raw.replace(/```json|```/g,'').trim());
+    const raw = await callGemini(sys, 'Analizza questo documento master:\n\n' + master);
+    brandDNA = JSON.parse(raw.replace(/```json|```/g,'').trim());
     renderDNA(brandDNA);
     setDNAStatus(true);
     document.getElementById('apply-btn').disabled = false;
     toast('✓ Brand DNA acquisito');
-  } catch(e) { toast('Errore: '+e.message); }
+  } catch(e) { toast('Errore: '+e.message); console.error(e); }
   finally { ml.classList.remove('visible'); }
 }
 
 function renderDNA(dna) {
-  const fields = [['Tono','tone'],['Struttura','structure'],['Densità','density'],['Tabelle','tables'],['Apertura','opening'],['Chiusura','closing'],['Emoji/Icone','emoji'],['Intestazioni','headers']];
+  const fields = [
+    ['Tono','tone'],['Struttura','structure'],['Densità','density'],['Tabelle','tables'],
+    ['Apertura','opening'],['Chiusura','closing'],['Emoji/Icone','emoji'],['Intestazioni','headers']
+  ];
   document.getElementById('dna-grid').innerHTML = fields.map(([l,k])=>
-    `<div class="dna-cell"><div class="dna-cell-lbl">${l}</div><div class="dna-cell-val">${dna[k]||'—'}</div></div>`).join('');
+    `<div class="dna-cell"><div class="dna-cell-lbl">${l}</div><div class="dna-cell-val">${dna[k]||'—'}</div></div>`
+  ).join('');
   document.getElementById('rules-list').innerHTML = (dna.rules||[]).map((r,i)=>
-    `<li><span class="rnum">${i+1}</span><span>${r}</span></li>`).join('');
+    `<li><span class="rnum">${i+1}</span><span>${r}</span></li>`
+  ).join('');
   document.getElementById('dna-panel').classList.add('visible');
 }
 
@@ -946,23 +1071,38 @@ function setDNAStatus(active) {
 }
 
 // ══ VISUAL ANALYSIS ══
-let visualBase64=null, visualMime=null;
+let visualBase64 = null;
+let visualMime = null;
 
 async function handleVisualFile(ev) {
-  const file = ev.target.files[0]; if (!file) return; ev.target.value='';
+  const file = ev.target.files[0];
+  if (!file) return;
+  ev.target.value='';
   const reader = new FileReader();
   reader.onload = async e => {
     const dataUrl = e.target.result;
-    visualBase64  = dataUrl.split(',')[1];
-    visualMime    = file.type || 'image/png';
+    visualBase64 = dataUrl.split(',')[1];
+    visualMime = file.type || 'image/png';
     document.getElementById('visual-img').src = dataUrl;
     document.getElementById('visual-preview').style.display = 'block';
-    const vl = document.getElementById('visual-loading'); vl.classList.add('visible');
+    const vl = document.getElementById('visual-loading');
+    vl.classList.add('visible');
     document.getElementById('visual-results').innerHTML = '';
     try {
-      const sys = `Analizza l'immagine e restituisci SOLO JSON: {"colors":{"primary":"","secondary":"","accent":"","background":"","text":"","header_bg":"","border":""},"typography":{"headings":"","body":"","size":""},"layout":"","style":"","mood":"","header_style":"","footer_style":"","table_style":"","recommendations":["","",""]}`;
-      const raw  = await callGemini(sys, 'Analizza visivamente:', visualBase64, visualMime);
-      visualDNA  = JSON.parse(raw.replace(/```json|```/g,'').trim());
+      const sys = `Sei un esperto di brand identity visiva. Analizza l'immagine e restituisci SOLO JSON valido senza markdown:
+{
+  "colors":{"primary":"#hex nome","secondary":"#hex nome","accent":"#hex nome","background":"#hex nome","text":"#hex nome","header_bg":"#hex nome","border":"#hex nome"},
+  "typography":{"headings":"descrizione font titoli","body":"descrizione font testo","size":"dimensioni tipiche"},
+  "layout":"descrizione layout e spaziatura",
+  "style":"stile grafico generale",
+  "mood":"atmosfera brand",
+  "header_style":"descrizione visiva dell'header",
+  "footer_style":"descrizione visiva del footer",
+  "table_style":"descrizione stile tabelle",
+  "recommendations":["consiglio1","consiglio2","consiglio3"]
+}`;
+      const raw = await callGemini(sys, 'Analizza questo documento visivamente:', visualBase64, visualMime);
+      visualDNA = JSON.parse(raw.replace(/```json|```/g,'').trim());
       renderVisualDNA(visualDNA);
       toast('✓ Analisi visiva completata');
     } catch(e) { toast('Errore analisi visiva: '+e.message); }
@@ -972,32 +1112,40 @@ async function handleVisualFile(ev) {
 }
 
 function renderVisualDNA(v) {
-  const colors   = v.colors || {};
+  const colors = v.colors || {};
   const swatches = Object.entries(colors).map(([name,val]) => {
     const hex = val.match(/#[0-9a-fA-F]{3,6}/)?.[0] || '#888';
-    return `<div class="swatch-row"><div class="swatch" style="background:${hex}"></div><div class="swatch-info">${name}: <span>${val}</span></div></div>`;
+    return `<div class="swatch-row">
+      <div class="swatch" style="background:${hex}"></div>
+      <div class="swatch-info">${name}: <span>${val}</span></div>
+    </div>`;
   }).join('');
+
   document.getElementById('vdna-body').innerHTML = `
-    <div><div class="vdna-section-title">Palette Colori</div><div class="color-swatches">${swatches}</div></div>
+    <div>
+      <div class="vdna-section-title">Palette Colori</div>
+      <div class="color-swatches">${swatches}</div>
+    </div>
     <div>
       <div class="vdna-section-title">Tipografia &amp; Layout</div>
       <div class="vdna-card"><div class="vdna-card-lbl">Titoli</div><div class="vdna-card-val">${v.typography?.headings||'—'}</div></div>
-      <div class="vdna-card"><div class="vdna-card-lbl">Corpo</div><div class="vdna-card-val">${v.typography?.body||'—'}</div></div>
+      <div class="vdna-card"><div class="vdna-card-lbl">Corpo Testo</div><div class="vdna-card-val">${v.typography?.body||'—'}</div></div>
       <div class="vdna-card"><div class="vdna-card-lbl">Layout</div><div class="vdna-card-val">${v.layout||'—'}</div></div>
-      <div class="vdna-card"><div class="vdna-card-lbl">Header</div><div class="vdna-card-val">${v.header_style||'—'}</div></div>
+      <div class="vdna-card"><div class="vdna-card-lbl">Stile Header</div><div class="vdna-card-val">${v.header_style||'—'}</div></div>
     </div>
     <div>
       <div class="vdna-section-title">Stile &amp; Mood</div>
-      <div class="vdna-card"><div class="vdna-card-lbl">Stile</div><div class="vdna-card-val">${v.style||'—'}</div></div>
+      <div class="vdna-card"><div class="vdna-card-lbl">Stile Grafico</div><div class="vdna-card-val">${v.style||'—'}</div></div>
       <div class="vdna-card"><div class="vdna-card-lbl">Mood</div><div class="vdna-card-val">${v.mood||'—'}</div></div>
       <div class="vdna-card"><div class="vdna-card-lbl">Tabelle</div><div class="vdna-card-val">${v.table_style||'—'}</div></div>
       <div class="vdna-section-title" style="margin-top:10px">Raccomandazioni</div>
-      ${(v.recommendations||[]).map((r,i)=>`<div style="display:flex;gap:8px;margin-bottom:6px;align-items:flex-start"><div style="background:var(--gold);color:#0f0e0b;font-size:9px;font-weight:700;width:16px;height:16px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-family:var(--mono)">${i+1}</div><div style="font-size:11px;color:var(--text);line-height:1.5">${r}</div></div>`).join('')}
-    </div>`;
+      ${(v.recommendations||[]).map((r,i)=>`<div style="display:flex;gap:8px;margin-bottom:6px;align-items:flex-start;"><div style="background:var(--gold);color:#0f0e0b;font-size:9px;font-weight:700;width:16px;height:16px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-family:var(--mono)">${i+1}</div><div style="font-size:11px;color:var(--text);line-height:1.5">${r}</div></div>`).join('')}
+    </div>
+  `;
   document.getElementById('visual-dna-panel').classList.add('visible');
 }
 
-// ══ CLEAN HTML ══
+// ══ CLEAN HTML OUTPUT ══
 function cleanGeminiHTML(raw) {
   let html = raw.trim();
   html = html.replace(/^```(?:html)?\s*\r?\n?/im, '');
@@ -1014,274 +1162,51 @@ function cleanGeminiHTML(raw) {
   return html;
 }
 
-// ══════════════════════════════════════════════════════════════════
-// FIX DEFINITIVO — ELIMINAZIONE HEADER/FOOTER BROWSER (v3.3)
-// ══════════════════════════════════════════════════════════════════
-//
-// PROBLEMA: Chrome/Edge/Firefox iniettano automaticamente in stampa:
-//   - Data/ora (es. "01/06/26, 19:15")         → margin-top area
-//   - Titolo pagina (es. "Documento XYZ")       → margin-top area
-//   - URL (es. "about:blank")                   → margin-bottom area
-//   - Numero pagina (es. "1/2")                 → margin-bottom area
-//
-// CAUSA: Il browser usa lo spazio dei @page margins per iniettare
-//        questi elementi. Non è possibile sovrascriverli con CSS
-//        margin-boxes (@top-left { content:none }) in modo affidabile
-//        su Chrome (viene ignorato per i propri header/footer nativi).
-//
-// SOLUZIONE DEFINITIVA: @page { margin: 0 !important }
-//   → Azzera fisicamente lo spazio disponibile per il browser
-//   → Senza spazio, il browser non può renderizzare i suoi elementi
-//   → Funziona su Chrome ✓  Edge ✓  Firefox ✓  Safari ✓
-//
-// COMPENSAZIONE MARGINI: body { padding: 14mm 18mm }
-//   → Ripristina i margini del documento via CSS padding sul body
-//   → Il contenuto non tocca i bordi carta
-//   → I background colorati (.cover, .page-footer) rispettano il padding
-//
-// TITLE SVUOTATO: <title>\u200B</title>
-//   → Il browser usa document.title come testo header
-//   → Svuotarlo a zero-width space lo rende invisibile
-//   → Applicato sia in printOutput() che in downloadHTML()
-//
-// ══════════════════════════════════════════════════════════════════
+// ══ CSS @PAGE — sopprime header/footer browser, mantiene solo numero pagina ══
+// FIX STAMPA v3.4 — @page margin:0 elimina header/footer browser
+// body padding:14mm 18mm compensa i margini del contenuto.
 const PAGE_CLEAN_CSS = `<style id="page-clean-override">
-/*
- * BRAND DNA ENGINE v3.3 — PRINT CLEAN
- * @page margin:0 = nessuno spazio per header/footer browser
- * body padding   = margini compensativi del contenuto
- */
 @media print {
-  @page {
-    margin: 0 !important;
-    size: A4 portrait !important;
-  }
+  @page { margin: 0 !important; size: A4 portrait !important; }
   body {
     padding: 14mm 18mm 14mm 18mm !important;
-    margin: 0 !important;
-    max-width: 100% !important;
-    width: 100% !important;
+    margin: 0 !important; max-width: 100% !important; width: 100% !important;
     box-sizing: border-box !important;
-    -webkit-print-color-adjust: exact !important;
-    print-color-adjust: exact !important;
+    -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important;
   }
-  /* Annulla eventuali margini aggiuntivi su .cover e .page-footer
-     per evitare doppio padding border-to-edge */
   .cover {
-    margin-left: -18mm !important;
-    margin-right: -18mm !important;
-    padding-left: 18mm !important;
-    padding-right: 18mm !important;
-    -webkit-print-color-adjust: exact !important;
-    print-color-adjust: exact !important;
+    margin-left: -18mm !important; margin-right: -18mm !important;
+    padding-left: 18mm !important; padding-right: 18mm !important;
+    -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important;
   }
   .page-footer {
-    margin-left: -18mm !important;
-    margin-right: -18mm !important;
-    padding-left: 18mm !important;
-    padding-right: 18mm !important;
-    -webkit-print-color-adjust: exact !important;
-    print-color-adjust: exact !important;
+    margin-left: -18mm !important; margin-right: -18mm !important;
+    padding-left: 18mm !important; padding-right: 18mm !important;
+    -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important;
   }
 }
 </style>`;
 
-// Prepara l'HTML per la stampa: svuota il title + inietta PAGE_CLEAN_CSS
 function preparePrintHTML(html) {
-  // 1. Svuota il <title> — il browser usa il titolo come testo dell'header nativo
   let out = html.replace(/<title>[^<]*<\/title>/gi, '<title>\u200B</title>');
-  // 2. Inietta il blocco CSS pulito prima di </head>
-  out = out.includes('</head>')
-    ? out.replace('</head>', PAGE_CLEAN_CSS + '\n</head>')
-    : PAGE_CLEAN_CSS + out;
-  return out;
+  return out.includes('</head>') ? out.replace('</head>', PAGE_CLEAN_CSS + '\n</head>') : PAGE_CLEAN_CSS + out;
 }
 
-// ══ ISTRUZIONI STAMPA PER GEMINI ══
-// Blocco CSS che viene inserito nel prompt Gemini per guidare
-// la generazione del documento con i margini corretti.
-const GEMINI_PRINT_CSS_RULES = `
-REGOLE CSS STAMPA — OBBLIGATORIE (v3.3 clean print):
-- @page { size: A4 portrait; margin: 0; }  ← margin:0 per eliminare header/footer browser
-- @media print { body { padding: 14mm 18mm; margin: 0; max-width: 100%; box-sizing: border-box; -webkit-print-color-adjust: exact; print-color-adjust: exact; } }
-- NON usare @page margin-boxes (@top-left, @bottom-right ecc.) — sono ignorati da Chrome
-- NON inserire header/footer ripetuti su ogni pagina nel HTML: usa SOLO cover (prima pagina) e footer-finale (ultima pagina)
-- Il tag <title> deve essere vuoto o contenere uno spazio: <title> </title>
-`;
-
-// ══ APPLY DNA ══
-async function applyDNA() {
-  const target = document.getElementById('target-doc').value.trim();
-  if (!target) { toast('Inserisci il documento da elaborare'); return; }
-  if (selectedBrand==='master' && !brandDNA) { toast('⚠ Analizza prima il Master Template'); return; }
-  if (selectedBrand==='custom' && !document.getElementById('cb-name').value) { toast('⚠ Inserisci il nome del brand personalizzato'); return; }
-
-  if (target.length > 8000) { await applyDNAChunked(target); return; }
-
-  const tl = document.getElementById('target-loading');
-  tl.classList.add('visible');
-
-  const pageCfg = getPageCfg();
-  const pageInstructions = pageCfg.enabled
-    ? `- Numerazione pagine HTML: aggiungi un div fisso in fondo con counter CSS, formato "${pageCfg.fmt}", posizione "${pageCfg.pos}", da ${pageCfg.start}. USA position:fixed; bottom:10mm; right:14mm; font-size:9px; color:#666; font-family:Inter; per schermo, e @media print { stessa posizione }. NON usare @page margin-boxes.`
-    : '- Nessuna numerazione pagine.';
-
-  const brandContext = getBrandContext();
-
-  const sys = `Sei un esperto di brand consistency e document design. Riscrivi il documento in HTML rispettando ESATTAMENTE il Brand Kit.
-
-REGOLE FONDAMENTALI:
-1. Preserva TUTTO il contenuto — nessun dato, fatto o numero deve andare perso
-2. Output: HTML completo autocontenuto, pronto per stampa/PDF
-3. Stile visivo esatto al master: cover, body, footer
-
-${brandContext}
-
-STRUTTURA HTML:
-- Importa Google Fonts: Montserrat (400,700,900) e Inter (400,500,600)
-- Carta A4 portrait: max-width 794px, margin 0 auto
-
-${GEMINI_PRINT_CSS_RULES}
-
-FONT SIZE:
-- body: 11px | h1: 18px | h2: 15px | h3: 13px | p,li,td: 11px | small: 10px
-
-PRIMO FOGLIO (.cover):
-- background: #f4f4f4, padding: 40px 30px
-- "SINTESIDIGITALE": Montserrat 900, 36px, #FF6600, letter-spacing 2px
-- Linea: border-bottom 3px solid #FF6600
-- Tagline: Inter italic, 14px, #333
-
-BODY:
-- background: #FFFFFF, color: #1a1a1a
-- H1/H2/H3: color #FF6600, Montserrat Bold
-- Tabelle: thead #000 bianco, tbody righe alternate #f9f9f9, 11px
-
-FOOTER DOCUMENTO (.page-footer — UNO SOLO in fondo):
-- background: #000, border-top: 3px solid #FF6600, padding: 12px 20px
-- Testo centrato: "SINTESIDIGITALE — Premium Digital Solutions", #aaaaaa, 10px
-
-ICONE: VIETATE emoji decorative. Solo icone funzionali essenziali.
-TONO: Formale, professionale, tecnico-operativo.
-
-OUTPUT PURO:
-- Inizia ESATTAMENTE con <!DOCTYPE html>
-- ZERO testo prima o dopo il codice HTML
-- ZERO markdown fences
-
-${pageInstructions}`;
-
-  try {
-    const rawHTML = await callGemini(sys, `Documento da elaborare:\n\n${target}`);
-    const html    = cleanGeminiHTML(rawHTML);
-    outputHTML = html;
-    outputText = target;
-    renderOutput(html);
-    toast(`✓ Elaborato — Brand ${selectedBrand==='sintesi'?'SintesiDigitale':selectedBrand==='master'?'Master':'Custom'}`);
-  } catch(e) { toast('Errore: '+e.message); console.error(e); }
-  finally { tl.classList.remove('visible'); }
-}
-
-async function applyDNAChunked(target) {
-  const tl = document.getElementById('target-loading');
-  tl.classList.add('visible');
-  const brandContext = getBrandContext();
-  const pageCfg      = getPageCfg();
-  const pageInstructions = pageCfg.enabled
-    ? `Aggiungi numerazione: div fixed bottom:10mm right:14mm, formato "${pageCfg.fmt}", da ${pageCfg.start}.`
-    : 'Nessuna numerazione pagine.';
-
-  try {
-    toast('Step 1/2 — Generazione template brand...');
-    const cssSystem = `Genera SOLO il blocco CSS completo per documento HTML SintesiDigitale.
-${brandContext}
-Restituisci SOLO CSS (senza <style>, senza HTML, senza markdown fences).
-${GEMINI_PRINT_CSS_RULES}
-Includi: body, h1/h2/h3, table, .cover, .page-footer, .content, @media print.`;
-
-    const cssRaw = await callGemini(cssSystem, 'Genera CSS completo SintesiDigitale.');
-    const css    = cssRaw.replace(/^```(?:css)?\s*\r?\n?/im,'').replace(/\r?\n?```\s*$/im,'').trim();
-
-    toast('Step 2/2 — Elaborazione contenuto...');
-    const contentSystem = `Converti il testo in HTML semantico. NON includere DOCTYPE/html/head/style/body.
-Usa: .cover (prima pagina), .page-footer (footer finale), .content (contenuto).
-${brandContext}
-${pageInstructions}
-Regole: preserva tutto il contenuto, usa h1/h2/h3, ul/ol, table. Tono formale. Zero emoji decorative.`;
-
-    const bodyRaw     = await callGemini(contentSystem, `Converti:\n\n${target}`);
-    const bodyContent = bodyRaw.replace(/^```(?:html)?\s*\r?\n?/im,'').replace(/\r?\n?```\s*$/im,'').trim();
-    const today       = new Date().toLocaleDateString('it-IT',{day:'2-digit',month:'long',year:'numeric'});
-
-    const html = `<!DOCTYPE html>
-<html lang="it">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title> </title>
-<style>
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Montserrat:wght@400;700;900&display=swap');
-${css}
-</style>
-</head>
-<body>
-${bodyContent}
-</body>
-</html>`;
-
-    outputHTML = html;
-    outputText = target;
-    renderOutput(html);
-    toast(`✓ Elaborato — Brand ${selectedBrand==='sintesi'?'SintesiDigitale':selectedBrand==='master'?'Master':'Custom'}`);
-  } catch(e) { toast('Errore: '+e.message); console.error(e); }
-  finally { tl.classList.remove('visible'); }
-}
-
-function renderOutput(html) {
-  const rendered = document.getElementById('output-rendered');
-  const iframe   = document.getElementById('output-iframe');
-  rendered.style.display = 'none';
-  iframe.style.display   = 'block';
-  iframe.style.height    = '600px';
-  try {
-    const blob = new Blob([html], { type:'text/html;charset=utf-8' });
-    const url  = URL.createObjectURL(blob);
-    iframe.src = url;
-    iframe.onload = () => {
-      try {
-        const h = iframe.contentDocument?.body?.scrollHeight || 600;
-        iframe.style.height = Math.max(h+40, 400)+'px';
-      } catch(e) { iframe.style.height='600px'; }
-    };
-  } catch(e) { console.error('renderOutput:', e); }
-  document.getElementById('output-actions').style.display = 'flex';
-  document.getElementById('print-tip').classList.add('visible');
-}
-
-// ══ OUTPUT ACTIONS ══
-
-// FIX 1+2 (v3.3): printOutput con eliminazione definitiva header/footer browser
-// - preparePrintHTML() svuota il <title> (fonte del testo header browser)
-// - preparePrintHTML() inietta @page { margin:0 } + body { padding:14mm 18mm }
-// - La finestra si apre su about:blank (nessun URL visibile nel footer)
 function printOutput() {
   const win = window.open('', '_blank', 'width=960,height=800');
-  if (!win) { toast('⚠ Popup bloccato — abilita i popup per questo sito'); return; }
-  const printReady = preparePrintHTML(outputHTML);
+  if (!win) { toast('⚠ Popup bloccato — abilita i popup'); return; }
   win.document.open();
-  win.document.write(printReady);
+  win.document.write(preparePrintHTML(outputHTML));
   win.document.close();
   setTimeout(() => { win.print(); }, 900);
-  toast('✓ Stampa aperta — output pulito senza header/footer browser');
+  toast('✓ Stampa aperta — output pulito, nessun header/footer browser');
 }
 
-// downloadHTML: il file scaricato include già il fix pulito
 function downloadHTML() {
-  const date       = new Date().toISOString().slice(0,10);
-  const cleanHTML  = preparePrintHTML(outputHTML);
-  const blob = new Blob([cleanHTML], { type:'text/html;charset=utf-8' });
-  const a    = document.createElement('a');
-  a.href     = URL.createObjectURL(blob);
+  const date = new Date().toISOString().slice(0,10);
+  const blob = new Blob([preparePrintHTML(outputHTML)], { type: 'text/html;charset=utf-8' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
   a.download = `brand-dna-output-${date}.html`;
   a.click(); URL.revokeObjectURL(a.href);
   toast('✓ File HTML scaricato (print-clean incluso)');
@@ -1293,15 +1218,15 @@ function copyOutput() {
 
 function saveToHistory() {
   const preview = outputText.slice(0,70).replace(/\n/g,' ')+'...';
-  const now     = new Date().toLocaleString('it-IT',{hour:'2-digit',minute:'2-digit',day:'2-digit',month:'2-digit'});
-  sessionHistory.unshift({ html:outputHTML, text:outputText, preview, date:now });
+  const now = new Date().toLocaleString('it-IT',{hour:'2-digit',minute:'2-digit',day:'2-digit',month:'2-digit'});
+  sessionHistory.unshift({ html: outputHTML, text: outputText, preview, date: now });
   renderHistory();
   toast('✓ Salvato in storia');
 }
 
 function renderHistory() {
   const list = document.getElementById('history-list');
-  if (!sessionHistory.length) { list.innerHTML='<div class="history-empty">Nessun documento elaborato in questa sessione</div>'; return; }
+  if (!sessionHistory.length) { list.innerHTML = '<div class="history-empty">Nessun documento elaborato in questa sessione</div>'; return; }
   list.innerHTML = sessionHistory.map((item,i)=>`
     <div class="history-item" onclick="loadHistory(${i})">
       <span class="history-lbl">${item.preview}</span>
@@ -1310,10 +1235,11 @@ function renderHistory() {
 }
 
 function loadHistory(i) {
-  const item = sessionHistory[i]; if (!item) return;
-  outputHTML=item.html; outputText=item.text;
+  const item = sessionHistory[i];
+  if (!item) return;
+  outputHTML = item.html; outputText = item.text;
   renderOutput(item.html);
-  toast('✓ Caricato dalla storia');
+  toast('✓ Documento caricato dalla storia');
 }
 
 function clearHistory() { sessionHistory=[]; renderHistory(); toast('Storia svuotata'); }
@@ -1322,7 +1248,7 @@ function clearHistory() { sessionHistory=[]; renderHistory(); toast('Storia svuo
 window.addEventListener('DOMContentLoaded', () => {
   setupDrop('master-drop','master-doc','master-count');
   setupDrop('target-drop','target-doc','target-count');
-  if (selectedBrand==='sintesi') {
+  if (selectedBrand === 'sintesi') {
     document.getElementById('master-upload-area').style.display    = 'none';
     document.getElementById('master-sintesi-notice').style.display = 'flex';
     document.getElementById('apply-btn').disabled = false;
