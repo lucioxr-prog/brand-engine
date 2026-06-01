@@ -138,15 +138,15 @@
   .dna-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--text-muted); transition: all .3s; }
   .dna-pill.active .dna-dot { background: #4aba78; box-shadow: 0 0 8px #4aba78; }
   .cost-pill {
-    display: flex; align-items: center; gap: 5px;
-    padding: 4px 12px; border: 1px solid var(--border);
-    border-radius: 20px; font-size: 10px; font-family: var(--mono);
-    color: var(--text-muted); transition: all .4s; cursor: default; white-space: nowrap;
+    display:flex; align-items:center; gap:6px;
+    padding:4px 14px; border:1px solid var(--border); border-radius:20px;
+    font-size:10px; font-family:var(--mono); color:var(--text-muted);
+    transition:all .4s; cursor:default; white-space:nowrap;
   }
-  .cost-pill.active { border-color: var(--gold-dim); color: var(--gold-dim); }
-  .cost-pill.warn   { border-color: #c87a20; color: #c87a20; }
-  .cost-sep { opacity:.35; }
-  .sess-time { font-size: 10px; color: var(--text-muted); font-family: var(--mono); }
+  .cost-pill.active { border-color:var(--gold-dim); color:var(--gold-dim); }
+  .cost-pill.warn   { border-color:#c07820; color:#c07820; }
+  .cost-pill-sep    { opacity:.3; }
+  .sess-time { font-size:10px; color:var(--text-muted); font-family:var(--mono); }
   .logout-btn {
     padding: 5px 14px; background: transparent;
     border: 1px solid var(--border); border-radius: var(--radius);
@@ -441,7 +441,12 @@
     </div>
     <div class="hactions">
       <div class="dna-pill" id="dna-pill"><div class="dna-dot"></div><span>DNA Non Acquisito</span></div>
-      <div class="cost-pill" id="cost-pill" title="Token e costo API sessione"><span style="font-size:9px;letter-spacing:1px">API</span><span id="cost-val" style="font-weight:600">$0.0000</span><span class="cost-sep">|</span><span id="cost-tok">0 tok</span></div>
+      <div class="cost-pill" id="cost-pill" title="Token consumati e costo Gemini stimato questa sessione">
+        <span style="letter-spacing:.5px;font-size:9px">API</span>
+        <span id="cost-val" style="font-weight:700">$0.0000</span>
+        <span class="cost-pill-sep">|</span>
+        <span id="cost-tok">0 tok</span>
+      </div>
       <div class="sess-time" id="sess-time"></div>
       <button class="logout-btn" onclick="doLogout()">⎋ Esci</button>
     </div>
@@ -787,26 +792,30 @@ BRAND PERSONALIZZATO:
   return '';
 }
 
-// == COST TRACKER ==
-const PRICE_IN_PER_M  = 0.075;  // USD/1M tok input  - Gemini 2.5 Flash
-const PRICE_OUT_PER_M = 0.300;  // USD/1M tok output - Gemini 2.5 Flash
+// ── COST TRACKER ──
+// Gemini 2.5 Flash pricing (giugno 2026)
+const PRICE_IN_PER_M  = 0.075; // USD / 1M token input
+const PRICE_OUT_PER_M = 0.300; // USD / 1M token output
 let sessTokensIn = 0, sessTokensOut = 0, sessCallCount = 0;
 
 function trackCost(tokIn, tokOut) {
-  sessTokensIn += tokIn; sessTokensOut += tokOut; sessCallCount += 1;
-  const costIn  = (sessTokensIn  / 1000000) * PRICE_IN_PER_M;
-  const costOut = (sessTokensOut / 1000000) * PRICE_OUT_PER_M;
-  const total   = costIn + costOut;
-  const totTok  = sessTokensIn + sessTokensOut;
-  const pill  = document.getElementById('cost-pill');
-  const valEl = document.getElementById('cost-val');
-  const tokEl = document.getElementById('cost-tok');
-  if (!pill || !valEl || !tokEl) return;
+  sessTokensIn  += (tokIn  || 0);
+  sessTokensOut += (tokOut || 0);
+  sessCallCount += 1;
+  const costIn   = (sessTokensIn  / 1000000) * PRICE_IN_PER_M;
+  const costOut  = (sessTokensOut / 1000000) * PRICE_OUT_PER_M;
+  const total    = costIn + costOut;
+  const totTok   = sessTokensIn + sessTokensOut;
+  const pill     = document.getElementById('cost-pill');
+  const valEl    = document.getElementById('cost-val');
+  const tokEl    = document.getElementById('cost-tok');
+  if (!pill) return;
   valEl.textContent = '$' + total.toFixed(4);
   tokEl.textContent = totTok.toLocaleString('it') + ' tok';
   pill.classList.toggle('active', total > 0 && total < 0.05);
   pill.classList.toggle('warn',   total >= 0.05);
 }
+
 function resetCostTracker() {
   sessTokensIn = sessTokensOut = sessCallCount = 0;
   const pill  = document.getElementById('cost-pill');
@@ -814,7 +823,7 @@ function resetCostTracker() {
   const tokEl = document.getElementById('cost-tok');
   if (valEl) valEl.textContent = '$0.0000';
   if (tokEl) tokEl.textContent = '0 tok';
-  if (pill)  { pill.classList.remove('active'); pill.classList.remove('warn'); }
+  if (pill)  { pill.classList.remove('active','warn'); }
 }
 
 // ══ CONFIG ══
@@ -997,8 +1006,10 @@ async function callGemini(system, userMsg, imageData=null, imageMime=null, retri
     if (resp.ok) {
       const data = await resp.json();
       if (data.usageMetadata) {
-        trackCost(data.usageMetadata.promptTokenCount || 0,
-                  data.usageMetadata.candidatesTokenCount || 0);
+        trackCost(
+          data.usageMetadata.promptTokenCount     || 0,
+          data.usageMetadata.candidatesTokenCount || 0
+        );
       }
       return data.candidates[0].content.parts[0].text;
     }
@@ -1163,8 +1174,10 @@ function cleanGeminiHTML(raw) {
 }
 
 // ══ CSS @PAGE — sopprime header/footer browser, mantiene solo numero pagina ══
+// MODIFICA v3.2: Questo blocco viene iniettato in printOutput() per garantire
+// output pulito indipendentemente da ciò che Gemini genera.
 // FIX STAMPA v3.4 — @page margin:0 elimina header/footer browser
-// body padding:14mm 18mm compensa i margini del contenuto.
+// Funziona su Chrome, Edge, Firefox, Safari.
 const PAGE_CLEAN_CSS = `<style id="page-clean-override">
 @media print {
   @page { margin: 0 !important; size: A4 portrait !important; }
@@ -1172,39 +1185,277 @@ const PAGE_CLEAN_CSS = `<style id="page-clean-override">
     padding: 14mm 18mm 14mm 18mm !important;
     margin: 0 !important; max-width: 100% !important; width: 100% !important;
     box-sizing: border-box !important;
-    -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
   }
   .cover {
     margin-left: -18mm !important; margin-right: -18mm !important;
     padding-left: 18mm !important; padding-right: 18mm !important;
-    -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
   }
   .page-footer {
     margin-left: -18mm !important; margin-right: -18mm !important;
     padding-left: 18mm !important; padding-right: 18mm !important;
-    -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
   }
 }
-</style>`;
+</style>`
 
+// ══ APPLY DNA ══
+async function applyDNA() {
+  const target = document.getElementById('target-doc').value.trim();
+  if (!target) { toast('Inserisci il documento da elaborare'); return; }
+  if (selectedBrand === 'master' && !brandDNA) { toast('⚠ Analizza prima il Master Template'); return; }
+  if (selectedBrand === 'custom' && !document.getElementById('cb-name').value) { toast('⚠ Inserisci il nome del brand personalizzato'); return; }
+
+  if (target.length > 8000) {
+    await applyDNAChunked(target);
+    return;
+  }
+
+  const tl = document.getElementById('target-loading');
+  tl.classList.add('visible');
+
+  const pageCfg = getPageCfg();
+  const pageInstructions = pageCfg.enabled ?
+    `- Aggiungi numerazione pagine nel HTML: formato "${pageCfg.fmt}", posizione "${pageCfg.pos}", partendo da ${pageCfg.start}` :
+    '- Non aggiungere numerazione pagine nel HTML (viene gestita automaticamente dal sistema di stampa)';
+
+  const brandContext = getBrandContext();
+
+  const sys = `Sei un esperto di brand consistency e document design. Il tuo compito è riscrivere un documento in HTML che rispetti ESATTAMENTE il Brand Kit fornito.
+
+REGOLE FONDAMENTALI:
+1. Preserva TUTTO il contenuto informativo originale — nessun dato, fatto o numero deve andare perso
+2. L'output DEVE essere HTML completo e autocontenuto, pronto per la stampa/PDF
+3. Replica ESATTAMENTE la struttura visiva del master: header, body, footer
+4. Usa CSS inline per garantire la stampa corretta
+5. Il documento deve sembrare uscito dalla stessa stampante del master
+
+${brandContext}
+
+ISTRUZIONI HTML OBBLIGATORIE — SEGUI ESATTAMENTE:
+
+STRUTTURA PAGINA:
+- Importa Google Fonts: @import url Montserrat (400,700,900) e Inter (400,500;600)
+- Usa -webkit-print-color-adjust: exact e print-color-adjust: exact nel CSS
+- Orientamento SEMPRE verticale (portrait): @page { size: A4 portrait; margin: 20mm 15mm 25mm 15mm; }
+- Carta A4 verticale: max-width: 794px, margin: 0 auto, padding: 0 20px
+- CSS OBBLIGATORIO: @media print { @page { margin: 20mm 15mm 25mm 15mm; } }
+
+SOPPRESSIONE HEADER/FOOTER BROWSER — OBBLIGATORIO:
+Nel blocco @page includi SEMPRE queste regole per sopprimere data, titolo e URL del browser:
+@page {
+  @top-left   { content: none; }
+  @top-center { content: none; }
+  @top-right  { content: none; }
+  @bottom-left { content: none; }
+  @bottom-center { content: none; }
+  @bottom-right { content: counter(page) " / " counter(pages); font-size: 9px; font-family: Inter, sans-serif; color: #666; }
+}
+
+FONT SIZE — TUTTO PIÙ PICCOLO:
+- body: font-size: 11px
+- h1: font-size: 18px
+- h2: font-size: 15px
+- h3: font-size: 13px
+- p, li, td: font-size: 11px
+- small: font-size: 10px
+
+PRIMO FOGLIO (solo prima pagina, class .cover):
+- Sfondo grigio chiarissimo (#f4f4f4), padding: 40px 30px 30px 30px
+- Nome brand "SINTESIDIGITALE" in Montserrat 900, font-size: 36px, color: #FF6600, letter-spacing: 2px
+- Linea sottile arancione (border-bottom: 3px solid #FF6600) sotto il nome, margin: 8px 0 12px 0
+- Sottotitolo tagline in Inter italic, font-size: 14px, color: #333
+- NON mettere sfondo nero sul cover — solo grigio chiaro
+
+HEADER GLOBALE:
+- NON inserire NESSUNA banda nera con testo nel documento
+- NON inserire .page-header con sfondo nero nel body del documento
+- L'unico header permesso è quello della cover (primo foglio)
+- Usa SOLO una linea decorativa arancione (border: 2px solid #FF6600) come separatore tra sezioni se necessario
+
+BODY:
+- background: #FFFFFF
+- color: #1a1a1a
+- H1, H2, H3: color #FF6600, font-family: Montserrat Bold
+- Indice/TOC: voci in #FF6600
+- Tabelle: header sfondo #000000 testo bianco, righe alternate #f9f9f9, font-size: 11px
+- Contenuto in div.content con padding: 20px
+
+FOOTER GLOBALE (class .page-footer):
+- Inserisci UN SOLO footer alla fine del documento (non su ogni pagina)
+- Sfondo nero (#000000), padding: 12px 20px
+- Linea arancione in alto: border-top: 3px solid #FF6600
+- Testo centrato: "SINTESIDIGITALE — Premium Digital Solutions" in color: #aaaaaa, font-size: 10px
+- Sotto: anno copyright in color: #666, font-size: 9px
+- NON inserire URL, NON inserire numeri pagina nel footer HTML
+
+STAMPA @media print:
+- @page { size: A4 portrait; margin: 15mm; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+- body { background: #FFFFFF !important; color: #000000 !important; font-size: 10px !important; -webkit-print-color-adjust: exact; }
+- h1,h2,h3 { color: #FF6600 !important; -webkit-print-color-adjust: exact; }
+- .cover { background: #f4f4f4 !important; -webkit-print-color-adjust: exact; }
+- .page-footer { background: #000000 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+
+ICONE E TONO:
+- VIETATO: emoji decorative, razzo, graffetta, occhio e simili
+- PERMESSO: solo per avvisi critici, per stati completati
+- Tono formale, professionale, tecnico-operativo
+- Font monospace SOLO per codice/URL, non per testo normale
+
+IMPORTANTE — OUTPUT PURO:
+- Restituisci SOLO il codice HTML, iniziando ESATTAMENTE con <!DOCTYPE html>
+- NON aggiungere nessun testo prima o dopo il codice HTML
+- NON usare markdown code fences (niente backtick, niente \`\`\`html)
+
+${pageInstructions}`;
+
+  try {
+    const rawHTML = await callGemini(sys, `Documento da elaborare:\n\n${target}`);
+    const html = cleanGeminiHTML(rawHTML);
+    outputHTML = html;
+    outputText = target;
+    renderOutput(html);
+    const brandName = selectedBrand==='sintesi' ? 'SintesiDigitale' : selectedBrand==='master' ? 'Master' : 'Custom';
+    toast(`✓ Documento elaborato — Brand ${brandName}`);
+  } catch(e) { toast('Errore: '+e.message); console.error(e); }
+  finally { tl.classList.remove('visible'); }
+}
+
+async function applyDNAChunked(target) {
+  const tl = document.getElementById('target-loading');
+  tl.classList.add('visible');
+
+  const brandContext = getBrandContext();
+  const pageCfg = getPageCfg();
+  const pageInstructions = pageCfg.enabled ?
+    `- Aggiungi numerazione pagine nel HTML: formato "${pageCfg.fmt}", posizione "${pageCfg.pos}", partendo da ${pageCfg.start}` :
+    '- Non aggiungere numerazione pagine nel HTML (viene gestita automaticamente dal sistema di stampa)';
+
+  try {
+    toast('Step 1/2 — Generazione template brand...');
+    const cssSystem = `Sei un esperto di document design. Genera SOLO il blocco CSS completo per un documento HTML branded SintesiDigitale.
+${brandContext}
+Restituisci SOLO il codice CSS (senza tag <style>, senza HTML, senza markdown fences), completo e pronto per essere inserito in un tag <style>.
+REGOLE CSS OBBLIGATORIE:
+- @page { size: A4 portrait; margin: 20mm 15mm 25mm 15mm; }
+- SOPPRESSIONE HEADER/FOOTER BROWSER — includi SEMPRE nel @page queste regole:
+  @page { @top-left { content: none; } @top-center { content: none; } @top-right { content: none; } @bottom-left { content: none; } @bottom-center { content: none; } @bottom-right { content: counter(page) " / " counter(pages); font-size: 9px; font-family: Inter, sans-serif; color: #666; } }
+- body { font-size: 11px; background: #fff; color: #1a1a1a; font-family: Inter; max-width: 794px; margin: 0 auto; }
+- h1 { font-size: 18px; color: #FF6600; } h2 { font-size: 15px; color: #FF6600; } h3 { font-size: 13px; color: #FF6600; }
+- .cover { background: #f4f4f4; padding: 40px 30px; }
+- .page-footer { background: #000; color: #aaa; padding: 12px 20px; border-top: 3px solid #FF6600; text-align: center; font-size: 10px; margin-top: 40px; }
+- @media print { @page { size: A4 portrait; margin: 15mm; } body { font-size: 10px !important; } .cover, .page-footer { -webkit-print-color-adjust: exact; print-color-adjust: exact; } }
+- .content { padding: 20px; }
+- table { width: 100%; border-collapse: collapse; font-size: 11px; }
+- thead tr { background: #000; color: #fff; }
+- tbody tr:nth-child(even) { background: #f9f9f9; }
+- td, th { padding: 6px 10px; border: 1px solid #ddd; }
+Includi: body, h1/h2/h3, tabelle, .cover, .page-footer, .content, @page margin boxes, @media print.`;
+
+    const cssRaw = await callGemini(cssSystem, 'Genera il CSS completo per il documento branded SintesiDigitale.');
+    const css = cssRaw.replace(/^```(?:css)?\s*\r?\n?/im,'').replace(/\r?\n?```\s*$/im,'').trim();
+
+    toast('Step 2/2 — Elaborazione contenuto...');
+    const contentSystem = `Sei un esperto di document design. Converti il testo fornito in HTML semantico professionale.
+NON includere DOCTYPE, html, head, style o body tags — solo il contenuto interno.
+NON usare markdown code fences.
+Usa classi: .cover per cover prima pagina, .page-footer per footer, .content per contenuto.
+${brandContext}
+REGOLE:
+- Preserva TUTTO il contenuto originale
+- Converti titoli in <h1><h2><h3>
+- Converti liste in <ul><li> o <ol><li>
+- Converti tabelle in <table><thead><tbody>
+- NESSUNA emoji decorativa, solo funzionali
+- Tono formale e professionale
+- Cover prima pagina con nome brand e titolo documento
+- Footer in fondo al documento`;
+
+    const bodyRaw = await callGemini(contentSystem, `Converti in HTML questo documento:\n\n${target}`);
+    const bodyContent = bodyRaw.replace(/^```(?:html)?\s*\r?\n?/im,'').replace(/\r?\n?```\s*$/im,'').trim();
+
+    const today = new Date().toLocaleDateString('it-IT', {day:'2-digit', month:'long', year:'numeric'});
+    const html = `<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Documento SintesiDigitale — ${today}</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Montserrat:wght@400;700;900&display=swap');
+${css}
+</style>
+</head>
+<body>
+${bodyContent}
+</body>
+</html>`;
+
+    outputHTML = html;
+    outputText = target;
+    renderOutput(html);
+    const brandName = selectedBrand==='sintesi' ? 'SintesiDigitale' : selectedBrand==='master' ? 'Master' : 'Custom';
+    toast(`✓ Documento elaborato — Brand ${brandName}`);
+
+  } catch(e) { toast('Errore: '+e.message); console.error(e); }
+  finally { tl.classList.remove('visible'); }
+}
+
+function renderOutput(html) {
+  const rendered = document.getElementById('output-rendered');
+  const iframe = document.getElementById('output-iframe');
+
+  rendered.style.display = 'none';
+  iframe.style.display = 'block';
+  iframe.style.height = '600px';
+
+  try {
+    const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    iframe.src = url;
+    iframe.onload = () => {
+      try {
+        const h = iframe.contentDocument?.body?.scrollHeight || 600;
+        iframe.style.height = Math.max(h + 40, 400) + 'px';
+      } catch(e) { iframe.style.height = '600px'; }
+    };
+  } catch(e) {
+    console.error('renderOutput error:', e);
+  }
+
+  document.getElementById('output-actions').style.display = 'flex';
+  document.getElementById('print-tip').classList.add('visible');
+}
+
+// ══ OUTPUT ACTIONS ══
+
+// MODIFICA v3.2: printOutput inietta PAGE_CLEAN_CSS per sopprimere
+// data/ora, titolo e URL del browser — mantiene solo il numero pagina in basso a destra
+// preparePrintHTML — svuota <title> e inietta PAGE_CLEAN_CSS
 function preparePrintHTML(html) {
   let out = html.replace(/<title>[^<]*<\/title>/gi, '<title>\u200B</title>');
-  return out.includes('</head>') ? out.replace('</head>', PAGE_CLEAN_CSS + '\n</head>') : PAGE_CLEAN_CSS + out;
+  return out.includes('</head>')
+    ? out.replace('</head>', PAGE_CLEAN_CSS + '\n</head>')
+    : PAGE_CLEAN_CSS + out;
 }
 
 function printOutput() {
   const win = window.open('', '_blank', 'width=960,height=800');
-  if (!win) { toast('⚠ Popup bloccato — abilita i popup'); return; }
+  if (!win) { toast('⚠ Popup bloccato — abilita i popup per questo sito'); return; }
   win.document.open();
   win.document.write(preparePrintHTML(outputHTML));
   win.document.close();
   setTimeout(() => { win.print(); }, 900);
-  toast('✓ Stampa aperta — output pulito, nessun header/footer browser');
+  toast('✓ Stampa aperta — nessun header/footer browser');
 }
 
 function downloadHTML() {
   const date = new Date().toISOString().slice(0,10);
-  const blob = new Blob([preparePrintHTML(outputHTML)], { type: 'text/html;charset=utf-8' });
+  const blob = new Blob([preparePrintHTML(outputHTML)], { type:'text/html;charset=utf-8' });
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
   a.download = `brand-dna-output-${date}.html`;
