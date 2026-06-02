@@ -381,6 +381,35 @@
   /* ══ FOOTER ══ */
   .app-footer { border-top:1px solid var(--border); padding:12px 28px; text-align:center; font-size:9px; letter-spacing:2px; text-transform:uppercase; color:var(--text-muted); font-family:var(--mono); }
 
+  /* ══ BADGE FREE / API ══ */
+  .badge-free {
+    display:inline-block; padding:1px 7px;
+    background:rgba(45,138,80,.15); border:1px solid rgba(45,138,80,.45);
+    border-radius:3px; font-size:8px; font-weight:700; letter-spacing:.5px;
+    color:#2d8a50; font-family:var(--mono); vertical-align:middle; text-transform:uppercase;
+  }
+  .badge-api {
+    display:inline-block; padding:1px 7px;
+    background:rgba(201,168,76,.15); border:1px solid rgba(201,168,76,.45);
+    border-radius:3px; font-size:8px; font-weight:700; letter-spacing:.5px;
+    color:var(--gold-dim); font-family:var(--mono); vertical-align:middle; text-transform:uppercase;
+  }
+  .badge-api-min {
+    display:inline-block; padding:1px 7px;
+    background:rgba(201,168,76,.08); border:1px dashed rgba(201,168,76,.35);
+    border-radius:3px; font-size:8px; font-weight:600; letter-spacing:.5px;
+    color:var(--gold-dim); font-family:var(--mono); vertical-align:middle; text-transform:uppercase;
+  }
+  /* ══ COST INFO BOX ══ */
+  .cost-info-box {
+    display:flex; align-items:flex-start; gap:10px;
+    padding:8px 12px; margin-top:8px;
+    background:var(--bg); border:1px solid var(--border); border-radius:var(--radius);
+    font-size:10px; font-family:var(--mono); color:var(--text-dim); line-height:1.6;
+  }
+  .cost-info-icon { font-size:14px; flex-shrink:0; margin-top:1px; }
+  .cost-info-text b { color:var(--text); }
+
   /* ══ BRAND SELECTOR ══ */
   .brand-opt {
     display: flex; align-items: center; gap: 10px;
@@ -519,7 +548,7 @@
 
         <div class="loading-wrap" id="master-loading"><div class="spinner"></div><span class="loading-text">Analisi Brand DNA in corso...</span></div>
         <div class="btn-row">
-          <button class="btn btn-gold" onclick="analyzeDNA()">◈ Analizza Brand DNA</button>
+          <button class="btn btn-gold" onclick="analyzeDNA()">◈ Analizza Brand DNA <span class="badge-api">API</span></button>
           <button class="btn btn-outline" onclick="clearPanel('master-doc','master-count')">Svuota</button>
         </div>
       </div>
@@ -566,6 +595,15 @@
               <div><div class="brand-opt-name">➕ Brand Personalizzato</div><div class="brand-opt-desc">Configura manualmente</div></div>
             </div>
           </div>
+          <!-- Cost info box — aggiornato da selectBrand() -->
+          <div class="cost-info-box" id="cost-info-box">
+            <span class="cost-info-icon">🟠</span>
+            <span class="cost-info-text" id="cost-info-text">
+              <b>SintesiDigitale</b> — CSS hardcoded · prompt Gemini minimo ·
+              <span class="badge-api-min">API min.</span> ~€0.001/doc<br>
+              <span style="color:var(--text-muted)">Stampa · Scarica · Copia · Salva in storia → <span class="badge-free">FREE</span></span>
+            </span>
+          </div>
           <div id="custom-brand-inputs" style="display:none;margin-top:10px;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);padding:12px;">
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
               <div><label style="font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--text-dim);font-family:var(--mono);display:block;margin-bottom:5px">Nome Brand</label><input type="text" id="cb-name" placeholder="Es. Acme Srl" style="width:100%;padding:7px 10px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-size:12px;font-family:var(--mono)"></div>
@@ -602,7 +640,7 @@
 
         <div class="loading-wrap" id="target-loading"><div class="spinner"></div><span class="loading-text">Elaborazione Brand DNA in corso...</span></div>
         <div class="btn-row">
-          <button class="btn btn-gold" id="apply-btn" onclick="applyDNA()" disabled>✦ Applica Brand Kit</button>
+          <button class="btn btn-gold" id="apply-btn" onclick="applyDNA()" disabled>✦ Applica Brand Kit <span id="apply-badge" class="badge-api-min" title="CSS hardcoded · prompt Gemini minimo · ~€0.001/doc">API min.</span></button>
           <button class="btn btn-outline" onclick="clearPanel('target-doc','target-count')">Svuota</button>
         </div>
       </div>
@@ -648,10 +686,10 @@
         </div>
         <iframe id="output-iframe"></iframe>
         <div class="output-actions" id="output-actions" style="display:none">
-          <button class="btn btn-gold" onclick="printOutput()">🖨 Stampa / Salva PDF</button>
-          <button class="btn btn-outline" onclick="downloadHTML()">↓ Scarica .html</button>
-          <button class="btn btn-outline" onclick="copyOutput()">⎘ Copia Testo</button>
-          <button class="btn btn-outline" onclick="saveToHistory()">◈ Salva in Storia</button>
+          <button class="btn btn-gold" onclick="printOutput()">🖨 Stampa / Salva PDF <span class="badge-free">FREE</span></button>
+          <button class="btn btn-outline" onclick="downloadHTML()">↓ Scarica .html <span class="badge-free">FREE</span></button>
+          <button class="btn btn-outline" onclick="copyOutput()">⎘ Copia Testo <span class="badge-free">FREE</span></button>
+          <button class="btn btn-outline" onclick="saveToHistory()">◈ Salva in Storia <span class="badge-free">FREE</span></button>
         </div>
         <!-- TIP STAMPA -->
         <div class="print-tip" id="print-tip">
@@ -674,7 +712,7 @@
   </main>
 
   <footer class="app-footer">
-    Brand DNA Engine · Luciano Bettoli · Google Gemini · SHA-256 Auth · v3.4
+    Brand DNA Engine · Luciano Bettoli · Google Gemini · SHA-256 Auth · v3.5
   </footer>
 </div>
 
@@ -709,11 +747,118 @@ const SINTESI_BRAND = {
   ]
 };
 
+// ══ BADGE UPDATER ══
+function updateApplyBadge(brand) {
+  const badge   = document.getElementById('apply-badge');
+  const infoTxt = document.getElementById('cost-info-text');
+  const infoBox = document.getElementById('cost-info-box');
+  if (!badge) return;
+  if (brand === 'sintesi') {
+    badge.textContent = 'API min.';
+    badge.className   = 'badge-api-min';
+    badge.title       = 'CSS hardcoded · prompt Gemini minimo · ~€0.001/doc';
+    if (infoTxt) infoTxt.innerHTML = '<b>SintesiDigitale</b> — CSS hardcoded · prompt Gemini minimo · <span class="badge-api-min">API min.</span> ~€0.001/doc<br><span style="color:var(--text-muted)">Stampa · Scarica · Copia · Salva → <span class="badge-free">FREE</span></span>';
+  } else if (brand === 'master') {
+    badge.textContent = 'API';
+    badge.className   = 'badge-api';
+    badge.title       = 'Analisi DNA + generazione CSS · ~€0.01/doc';
+    if (infoTxt) infoTxt.innerHTML = '<b>Brand da Master</b> — prompt Gemini completo (DNA+CSS) · <span class="badge-api">API</span> ~€0.01/doc<br><span style="color:var(--text-muted)">Stampa · Scarica · Copia → <span class="badge-free">FREE</span></span>';
+  } else {
+    badge.textContent = 'API';
+    badge.className   = 'badge-api';
+    badge.title       = 'Generazione CSS personalizzata · ~€0.01/doc';
+    if (infoTxt) infoTxt.innerHTML = '<b>Brand Personalizzato</b> — prompt Gemini completo · <span class="badge-api">API</span> ~€0.01/doc<br><span style="color:var(--text-muted)">Stampa · Scarica · Copia → <span class="badge-free">FREE</span></span>';
+  }
+}
+
+// ══ SINTESIDIGITALE — CSS HARDCODED (nessun token speso per lo stile) ══
+const SINTESI_CSS_TEMPLATE = `@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Montserrat:wght@400;700;900&display=swap');
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',sans-serif;font-size:11px;line-height:1.75;color:#1a1a1a;background:#fff;max-width:794px;margin:0 auto}
+.cover{background:#f4f4f4;padding:52px 40px 44px;border-bottom:3px solid #FF6600}
+.cover-brand{font-family:'Montserrat',sans-serif;font-weight:900;font-size:34px;color:#FF6600;letter-spacing:3px;text-transform:uppercase;line-height:1;margin-bottom:8px}
+.cover-line{height:3px;background:#FF6600;width:260px;margin:10px 0 14px}
+.cover-tagline{font-style:italic;font-size:13px;color:#555;margin-bottom:40px}
+.cover-title{font-family:'Montserrat',sans-serif;font-weight:700;font-size:22px;color:#FF6600;line-height:1.3;margin-bottom:10px}
+.cover-subtitle{font-size:12px;color:#555;line-height:1.5;margin-bottom:6px}
+.cover-date{font-size:10px;color:#888;margin-top:4px}
+.content{padding:30px 40px}
+h1{font-family:'Montserrat',sans-serif;font-weight:700;font-size:17px;color:#FF6600;margin:36px 0 14px;padding-bottom:7px;border-bottom:2px solid #FF6600;page-break-after:avoid;break-after:avoid}
+h2{font-family:'Montserrat',sans-serif;font-weight:700;font-size:14px;color:#FF6600;margin:28px 0 10px;page-break-after:avoid;break-after:avoid}
+h3{font-family:'Montserrat',sans-serif;font-weight:700;font-size:12px;color:#FF6600;margin:20px 0 8px;page-break-after:avoid;break-after:avoid}
+h1+*,h2+*,h3+*{page-break-before:avoid;break-before:avoid}
+p{margin-bottom:10px;orphans:4;widows:4}
+ul,ol{margin:8px 0 14px 26px}
+li{margin-bottom:5px;orphans:3;widows:3}
+strong{font-weight:600}
+table{width:100%;border-collapse:collapse;font-size:11px;margin:18px 0;page-break-inside:avoid;break-inside:avoid}
+thead tr{background:#000;color:#fff;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+thead th{font-family:'Montserrat',sans-serif;font-weight:700;font-size:10px;letter-spacing:.5px;padding:9px 14px;text-align:left}
+tbody tr{background:#fff}
+tbody tr:nth-child(even){background:#f5f5f5;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+td{padding:8px 14px;border-bottom:1px solid #e4e4e4;vertical-align:top}
+blockquote{border-left:3px solid #FF6600;background:#fff8f4;padding:10px 16px;margin:14px 0;page-break-inside:avoid;break-inside:avoid;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+code{font-family:'DM Mono','Courier New',monospace;font-size:10px;background:#f0f0f0;padding:2px 6px;border-radius:2px;color:#222}
+pre{font-family:'DM Mono','Courier New',monospace;font-size:10px;background:#f0f0f0;padding:14px 16px;margin:14px 0;border-radius:3px;page-break-inside:avoid;break-inside:avoid;white-space:pre-wrap;word-wrap:break-word;border-left:3px solid #FF6600}
+.toc{background:#f8f8f8;border:1px solid #e0e0e0;border-left:3px solid #FF6600;padding:18px 24px 14px;margin:24px 0 32px;page-break-inside:avoid;break-inside:avoid}
+.toc h2{font-family:'Montserrat',sans-serif;font-weight:700;font-size:12px;color:#FF6600;margin:0 0 12px;border:none;padding:0}
+.toc ol,.toc ul{margin-left:18px}
+.toc li{margin-bottom:5px;color:#333}
+.page-footer{background:#000;color:#aaa;font-size:10px;font-family:'Montserrat',sans-serif;letter-spacing:.5px;padding:14px 40px;border-top:3px solid #FF6600;text-align:center;margin-top:52px;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+@media print{
+@page{margin:0!important;size:A4 portrait!important}
+body{padding:14mm 18mm!important;margin:0!important;max-width:100%!important;width:100%!important;box-sizing:border-box!important;-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
+.cover{margin:-14mm -18mm 0!important;padding:52px 40px 44px!important;-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
+.page-footer{margin:52px -18mm -14mm!important;padding:14px 40px!important;-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
+h1,h2,h3{color:#FF6600!important;-webkit-print-color-adjust:exact!important}
+thead tr{background:#000!important;color:#fff!important;-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
+tbody tr:nth-child(even){background:#f5f5f5!important;-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
+blockquote{background:#fff8f4!important;-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
+h1,h2,h3{page-break-after:avoid!important;break-after:avoid!important}
+h1+*,h2+*,h3+*{page-break-before:avoid!important;break-before:avoid!important}
+table,blockquote,.toc,pre{page-break-inside:avoid!important;break-inside:avoid!important}
+tr{page-break-inside:avoid!important;break-inside:avoid!important}
+p{orphans:4!important;widows:4!important}
+li{orphans:3!important;widows:3!important}
+}`;
+
+// ══ SINTESIDIGITALE — PROMPT MINIMO (CSS hardcoded, zero token per lo stile) ══
+const SINTESI_MINIMAL_PROMPT = `Sei un convertitore HTML semantico. Converti il testo in HTML strutturato.
+OUTPUT: SOLO contenuto HTML interno — NO DOCTYPE, NO html, NO head, NO style, NO body tag.
+NESSUN markdown fence, nessun testo prima o dopo l'HTML.
+
+STRUTTURA OBBLIGATORIA (rispetta questo ordine):
+1. <div class="cover">
+     <div class="cover-brand">SINTESIDIGITALE</div>
+     <div class="cover-line"></div>
+     <div class="cover-tagline">Premium Digital Solutions</div>
+     <div class="cover-title">[TITOLO PRINCIPALE estratto dal documento]</div>
+     <div class="cover-subtitle">[sottotitolo o stack tecnico se presente]</div>
+     <div class="cover-date">[data o versione se presenti, altrimenti ometti il tag]</div>
+   </div>
+2. Se esiste un indice: <nav class="toc"><h2>Indice</h2><ol><li>...</li></ol></nav>
+3. <div class="content">
+     [tutto il contenuto principale]
+   </div>
+4. <div class="page-footer">SINTESIDIGITALE — Premium Digital Solutions</div>
+
+REGOLE HTML:
+- h1 = sezione principale (es. "1. Setup", "FASE 2"), h2 = sottosezione, h3 = paragrafo minore
+- ul/li per liste puntate, ol/li per liste numerate
+- table > thead > tr > th + tbody > tr > td per tabelle
+- <blockquote> per avvisi critici, REGOLA CRITICA, warning (righe con emoji o testo enfatizzato)
+- <code> per comandi, URL, variabili, valori tecnici inline
+- <pre><code> per blocchi multi-riga di codice/configurazione
+- Preserva TUTTO il contenuto originale — zero omissioni
+- ZERO stili inline, ZERO CSS aggiunto, ZERO emoji decorative
+- Output puro: inizia esattamente con <div class="cover">`;
+
 function selectBrand(brand) {
   selectedBrand = brand;
   document.querySelectorAll('.brand-opt').forEach(el => el.classList.remove('active'));
   document.getElementById('brand-' + brand).classList.add('active');
   document.getElementById('custom-brand-inputs').style.display = brand === 'custom' ? 'block' : 'none';
+  updateApplyBadge(brand);
 
   const uploadArea    = document.getElementById('master-upload-area');
   const sintesiNotice = document.getElementById('master-sintesi-notice');
@@ -1200,15 +1345,78 @@ const PAGE_CLEAN_CSS = `<style id="page-clean-override">
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
   }
+  /* PAGE BREAK FIXES — titoli orfani + contenuto spezzato */
+  h1, h2, h3, h4 { page-break-after: avoid !important; break-after: avoid !important; }
+  h1 + *, h2 + *, h3 + * { page-break-before: avoid !important; break-before: avoid !important; }
+  table, blockquote, pre, .toc, figure { page-break-inside: avoid !important; break-inside: avoid !important; }
+  tr { page-break-inside: avoid !important; break-inside: avoid !important; }
+  p { orphans: 4 !important; widows: 4 !important; }
+  li { orphans: 3 !important; widows: 3 !important; }
 }
 </style>`
 
 // ══ APPLY DNA ══
+// ══ SINTESIDIGITALE — PERCORSO OTTIMIZZATO ══
+// CSS hardcoded → zero token per lo stile
+// Prompt minimo → ~€0.001/doc vs ~€0.01 del percorso completo
+async function applyDNA_Sintesi(target) {
+  const tl = document.getElementById('target-loading');
+  tl.classList.add('visible');
+  try {
+    toast('\u25c8 Elaborazione SintesiDigitale (CSS hardcoded)...');
+    const rawBody = await callGemini(SINTESI_MINIMAL_PROMPT,
+      'Converti in HTML questo documento:\n\n' + target);
+    const bodyContent = rawBody
+      .replace(/^```(?:html)?\s*\r?\n?/im, '')
+      .replace(/\r?\n?```\s*$/im, '')
+      .trim();
+    const html = '<!DOCTYPE html>\n<html lang="it">\n<head>\n<meta charset="UTF-8">\n<title>\u200B</title>\n<style>\n'
+      + SINTESI_CSS_TEMPLATE + '\n</style>\n</head>\n<body>\n' + bodyContent + '\n</body>\n</html>';
+    outputHTML = html; outputText = target;
+    renderOutput(html);
+    toast('\u2713 Documento elaborato \u2014 SintesiDigitale \u25c8');
+  } catch(e) { toast('Errore: ' + e.message); console.error(e); }
+  finally { tl.classList.remove('visible'); }
+}
+
+async function applyDNA_SintesiChunked(target) {
+  const tl = document.getElementById('target-loading');
+  tl.classList.add('visible');
+  try {
+    // Documenti lunghi: 1 sola chiamata Gemini (vs 2 del percorso standard)
+    // CSS hardcoded — risparmio ~50% token
+    toast('Documento lungo \u2014 elaborazione SintesiDigitale...');
+    const sysChunked = SINTESI_MINIMAL_PROMPT + '\n\nNOTA: documento lungo — converti tutto il contenuto in una sola passata, preservando ogni dettaglio.';
+    const rawBody = await callGemini(sysChunked,
+      'Converti in HTML questo documento completo:\n\n' + target);
+    const bodyContent = rawBody
+      .replace(/^```(?:html)?\s*\r?\n?/im, '')
+      .replace(/\r?\n?```\s*$/im, '')
+      .trim();
+    const html = '<!DOCTYPE html>\n<html lang="it">\n<head>\n<meta charset="UTF-8">\n<title>\u200B</title>\n<style>\n'
+      + SINTESI_CSS_TEMPLATE + '\n</style>\n</head>\n<body>\n' + bodyContent + '\n</body>\n</html>';
+    outputHTML = html; outputText = target;
+    renderOutput(html);
+    toast('\u2713 Documento elaborato \u2014 SintesiDigitale \u25c8');
+  } catch(e) { toast('Errore: ' + e.message); console.error(e); }
+  finally { tl.classList.remove('visible'); }
+}
+
 async function applyDNA() {
   const target = document.getElementById('target-doc').value.trim();
   if (!target) { toast('Inserisci il documento da elaborare'); return; }
   if (selectedBrand === 'master' && !brandDNA) { toast('⚠ Analizza prima il Master Template'); return; }
   if (selectedBrand === 'custom' && !document.getElementById('cb-name').value) { toast('⚠ Inserisci il nome del brand personalizzato'); return; }
+
+  // ── ROUTING: SintesiDigitale usa percorso ottimizzato (CSS hardcoded + prompt minimo) ──
+  if (selectedBrand === 'sintesi') {
+    if (target.length > 8000) {
+      await applyDNA_SintesiChunked(target);
+    } else {
+      await applyDNA_Sintesi(target);
+    }
+    return;
+  }
 
   if (target.length > 8000) {
     await applyDNAChunked(target);
@@ -1503,6 +1711,7 @@ window.addEventListener('DOMContentLoaded', () => {
     document.getElementById('master-upload-area').style.display    = 'none';
     document.getElementById('master-sintesi-notice').style.display = 'flex';
     document.getElementById('apply-btn').disabled = false;
+    updateApplyBadge('sintesi');
   }
 });
 </script>
