@@ -712,7 +712,7 @@
   </main>
 
   <footer class="app-footer">
-    Brand DNA Engine · Luciano Bettoli · Google Gemini · SHA-256 Auth · v3.6
+    Brand DNA Engine · Luciano Bettoli · Google Gemini · SHA-256 Auth · v3.7
   </footer>
 </div>
 
@@ -803,7 +803,7 @@ td{padding:8px 14px;border-bottom:1px solid #e4e4e4;vertical-align:top}
 blockquote{border-left:3px solid #FF6600;background:#fff8f4;padding:10px 16px;margin:14px 0;page-break-inside:avoid;break-inside:avoid;-webkit-print-color-adjust:exact;print-color-adjust:exact}
 code{font-family:'DM Mono','Courier New',monospace;font-size:10px;background:#f0f0f0;padding:2px 6px;border-radius:2px;color:#222}
 pre{font-family:'DM Mono','Courier New',monospace;font-size:10px;background:#f0f0f0;padding:14px 16px;margin:14px 0;border-radius:3px;page-break-inside:avoid;break-inside:avoid;white-space:pre-wrap;word-wrap:break-word;border-left:3px solid #FF6600}
-.toc{background:#f8f8f8;border:1px solid #e0e0e0;border-left:3px solid #FF6600;padding:18px 24px 14px;margin:24px 0 32px;page-break-inside:avoid;break-inside:avoid}
+.toc{background:#f8f8f8;border:1px solid #e0e0e0;border-left:3px solid #FF6600;padding:18px 40px 14px;margin:24px 0 32px;page-break-inside:avoid;break-inside:avoid}
 .toc h2{font-family:'Montserrat',sans-serif;font-weight:700;font-size:12px;color:#FF6600;margin:0 0 12px;border:none;padding:0}
 .toc ol,.toc ul{margin-left:18px}
 .toc li{margin-bottom:5px;color:#333}
@@ -811,7 +811,7 @@ pre{font-family:'DM Mono','Courier New',monospace;font-size:10px;background:#f0f
 @media print{
 @page{margin:15mm 18mm!important;size:A4 portrait!important}
 body{padding:0!important;margin:0 auto!important;max-width:100%!important;width:100%!important;box-sizing:border-box!important;-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
-.cover{margin:0 -18mm!important;padding:52px 40px 44px!important;-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
+.cover{margin:-15mm -18mm 0!important;padding:calc(15mm + 30px) calc(18mm + 22px) 44px!important;-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
 .page-footer{margin:52px -18mm 0!important;padding:14px 40px!important;-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
 h1,h2,h3{color:#FF6600!important;-webkit-print-color-adjust:exact!important}
 thead tr{background:#000!important;color:#fff!important;-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
@@ -1337,15 +1337,22 @@ const PAGE_CLEAN_CSS = `<style id="page-clean-override">
     print-color-adjust: exact !important;
   }
   .cover {
-    margin-left: -18mm !important; margin-right: -18mm !important;
-    padding-top: 52px !important;
-    padding-left: 40px !important; padding-right: 40px !important;
+    margin: -15mm -18mm 0 !important;
+    padding: calc(15mm + 30px) calc(18mm + 22px) 44px !important;
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
   }
+  .toc {
+    padding-left: 40px !important;
+    padding-right: 40px !important;
+  }
+  .content {
+    padding-left: 40px !important;
+    padding-right: 40px !important;
+  }
   .page-footer {
     margin-left: -18mm !important; margin-right: -18mm !important;
-    padding-left: 40px !important; padding-right: 40px !important;
+    padding-left: calc(18mm + 22px) !important; padding-right: calc(18mm + 22px) !important;
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
   }
