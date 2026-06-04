@@ -693,7 +693,7 @@
         </div>
         <!-- TIP STAMPA -->
         <div class="print-tip" id="print-tip">
-          💡 <strong>Tip stampa pulita:</strong> header e footer del browser vengono soppressi automaticamente — solo il numero pagina rimane in basso a destra.
+          💡 <strong>Tip stampa pulita:</strong> header e footer del browser vengono soppressi automaticamente — margini professionali 15mm top/bottom, 18mm left/right su ogni pagina.
         </div>
       </div>
     </div>
@@ -712,7 +712,7 @@
   </main>
 
   <footer class="app-footer">
-    Brand DNA Engine · Luciano Bettoli · Google Gemini · SHA-256 Auth · v3.5
+    Brand DNA Engine · Luciano Bettoli · Google Gemini · SHA-256 Auth · v3.6
   </footer>
 </div>
 
@@ -772,6 +772,9 @@ function updateApplyBadge(brand) {
 }
 
 // ══ SINTESIDIGITALE — CSS HARDCODED (nessun token speso per lo stile) ══
+// v3.6 FIX MARGINI: @page margin:15mm 18mm — margini reali su ogni pagina
+// Tecnica editoriale: @page gestisce i margini, .cover e .page-footer
+// escono con margini negativi per coprire l'intera larghezza della pagina
 const SINTESI_CSS_TEMPLATE = `@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Montserrat:wght@400;700;900&display=swap');
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'Inter',sans-serif;font-size:11px;line-height:1.75;color:#1a1a1a;background:#fff;max-width:794px;margin:0 auto}
@@ -806,10 +809,10 @@ pre{font-family:'DM Mono','Courier New',monospace;font-size:10px;background:#f0f
 .toc li{margin-bottom:5px;color:#333}
 .page-footer{background:#000;color:#aaa;font-size:10px;font-family:'Montserrat',sans-serif;letter-spacing:.5px;padding:14px 40px;border-top:3px solid #FF6600;text-align:center;margin-top:52px;-webkit-print-color-adjust:exact;print-color-adjust:exact}
 @media print{
-@page{margin:0!important;size:A4 portrait!important}
-body{padding:14mm 18mm!important;margin:0!important;max-width:100%!important;width:100%!important;box-sizing:border-box!important;-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
-.cover{margin:-14mm -18mm 0!important;padding:52px 40px 44px!important;-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
-.page-footer{margin:52px -18mm -14mm!important;padding:14px 40px!important;-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
+@page{margin:15mm 18mm!important;size:A4 portrait!important}
+body{padding:0!important;margin:0 auto!important;max-width:100%!important;width:100%!important;box-sizing:border-box!important;-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
+.cover{margin:0 -18mm!important;padding:52px 40px 44px!important;-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
+.page-footer{margin:52px -18mm 0!important;padding:14px 40px!important;-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
 h1,h2,h3{color:#FF6600!important;-webkit-print-color-adjust:exact!important}
 thead tr{background:#000!important;color:#fff!important;-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
 tbody tr:nth-child(even){background:#f5f5f5!important;-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
@@ -1318,30 +1321,31 @@ function cleanGeminiHTML(raw) {
   return html;
 }
 
-// ══ CSS @PAGE — sopprime header/footer browser, mantiene solo numero pagina ══
-// MODIFICA v3.2: Questo blocco viene iniettato in printOutput() per garantire
-// output pulito indipendentemente da ciò che Gemini genera.
-// FIX STAMPA v3.4 — @page margin:0 elimina header/footer browser
-// Funziona su Chrome, Edge, Firefox, Safari.
+// ══ CSS @PAGE v3.6 — margini professionali 15mm top/bottom, 18mm left/right ══
+// @page con margini reali: elimina header/footer browser E garantisce
+// respiro uniforme su ogni pagina del documento stampato/PDF.
+// Tecnica editoriale: .cover e .page-footer escono con margin negativo
+// per occupare l'intera larghezza fino ai bordi fisici della pagina.
 const PAGE_CLEAN_CSS = `<style id="page-clean-override">
 @media print {
-  @page { margin: 0 !important; size: A4 portrait !important; }
+  @page { margin: 15mm 18mm !important; size: A4 portrait !important; }
   body {
-    padding: 14mm 18mm 14mm 18mm !important;
-    margin: 0 !important; max-width: 100% !important; width: 100% !important;
+    padding: 0 !important;
+    margin: 0 auto !important; max-width: 100% !important; width: 100% !important;
     box-sizing: border-box !important;
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
   }
   .cover {
     margin-left: -18mm !important; margin-right: -18mm !important;
-    padding-left: 18mm !important; padding-right: 18mm !important;
+    padding-top: 52px !important;
+    padding-left: 40px !important; padding-right: 40px !important;
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
   }
   .page-footer {
     margin-left: -18mm !important; margin-right: -18mm !important;
-    padding-left: 18mm !important; padding-right: 18mm !important;
+    padding-left: 40px !important; padding-right: 40px !important;
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
   }
@@ -1357,8 +1361,6 @@ const PAGE_CLEAN_CSS = `<style id="page-clean-override">
 
 // ══ APPLY DNA ══
 // ══ SINTESIDIGITALE — PERCORSO OTTIMIZZATO ══
-// CSS hardcoded → zero token per lo stile
-// Prompt minimo → ~€0.001/doc vs ~€0.01 del percorso completo
 async function applyDNA_Sintesi(target) {
   const tl = document.getElementById('target-loading');
   tl.classList.add('visible');
@@ -1383,8 +1385,6 @@ async function applyDNA_SintesiChunked(target) {
   const tl = document.getElementById('target-loading');
   tl.classList.add('visible');
   try {
-    // Documenti lunghi: 1 sola chiamata Gemini (vs 2 del percorso standard)
-    // CSS hardcoded — risparmio ~50% token
     toast('Documento lungo \u2014 elaborazione SintesiDigitale...');
     const sysChunked = SINTESI_MINIMAL_PROMPT + '\n\nNOTA: documento lungo — converti tutto il contenuto in una sola passata, preservando ogni dettaglio.';
     const rawBody = await callGemini(sysChunked,
@@ -1408,7 +1408,6 @@ async function applyDNA() {
   if (selectedBrand === 'master' && !brandDNA) { toast('⚠ Analizza prima il Master Template'); return; }
   if (selectedBrand === 'custom' && !document.getElementById('cb-name').value) { toast('⚠ Inserisci il nome del brand personalizzato'); return; }
 
-  // ── ROUTING: SintesiDigitale usa percorso ottimizzato (CSS hardcoded + prompt minimo) ──
   if (selectedBrand === 'sintesi') {
     if (target.length > 8000) {
       await applyDNA_SintesiChunked(target);
@@ -1449,9 +1448,9 @@ ISTRUZIONI HTML OBBLIGATORIE — SEGUI ESATTAMENTE:
 STRUTTURA PAGINA:
 - Importa Google Fonts: @import url Montserrat (400,700,900) e Inter (400,500;600)
 - Usa -webkit-print-color-adjust: exact e print-color-adjust: exact nel CSS
-- Orientamento SEMPRE verticale (portrait): @page { size: A4 portrait; margin: 20mm 15mm 25mm 15mm; }
-- Carta A4 verticale: max-width: 794px, margin: 0 auto, padding: 0 20px
-- CSS OBBLIGATORIO: @media print { @page { margin: 20mm 15mm 25mm 15mm; } }
+- Orientamento SEMPRE verticale (portrait): @page { size: A4 portrait; margin: 15mm 18mm; }
+- Carta A4 verticale: max-width: 794px, margin: 0 auto, padding: 0
+- CSS OBBLIGATORIO: @media print { @page { margin: 15mm 18mm; } }
 
 SOPPRESSIONE HEADER/FOOTER BROWSER — OBBLIGATORIO:
 Nel blocco @page includi SEMPRE queste regole per sopprimere data, titolo e URL del browser:
@@ -1502,8 +1501,8 @@ FOOTER GLOBALE (class .page-footer):
 - NON inserire URL, NON inserire numeri pagina nel footer HTML
 
 STAMPA @media print:
-- @page { size: A4 portrait; margin: 15mm; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-- body { background: #FFFFFF !important; color: #000000 !important; font-size: 10px !important; -webkit-print-color-adjust: exact; }
+- @page { size: A4 portrait; margin: 15mm 18mm; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+- body { background: #FFFFFF !important; color: #000000 !important; font-size: 10px !important; padding: 0 !important; -webkit-print-color-adjust: exact; }
 - h1,h2,h3 { color: #FF6600 !important; -webkit-print-color-adjust: exact; }
 - .cover { background: #f4f4f4 !important; -webkit-print-color-adjust: exact; }
 - .page-footer { background: #000000 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
@@ -1549,14 +1548,14 @@ async function applyDNAChunked(target) {
 ${brandContext}
 Restituisci SOLO il codice CSS (senza tag <style>, senza HTML, senza markdown fences), completo e pronto per essere inserito in un tag <style>.
 REGOLE CSS OBBLIGATORIE:
-- @page { size: A4 portrait; margin: 20mm 15mm 25mm 15mm; }
+- @page { size: A4 portrait; margin: 15mm 18mm; }
 - SOPPRESSIONE HEADER/FOOTER BROWSER — includi SEMPRE nel @page queste regole:
   @page { @top-left { content: none; } @top-center { content: none; } @top-right { content: none; } @bottom-left { content: none; } @bottom-center { content: none; } @bottom-right { content: counter(page) " / " counter(pages); font-size: 9px; font-family: Inter, sans-serif; color: #666; } }
-- body { font-size: 11px; background: #fff; color: #1a1a1a; font-family: Inter; max-width: 794px; margin: 0 auto; }
+- body { font-size: 11px; background: #fff; color: #1a1a1a; font-family: Inter; max-width: 794px; margin: 0 auto; padding: 0; }
 - h1 { font-size: 18px; color: #FF6600; } h2 { font-size: 15px; color: #FF6600; } h3 { font-size: 13px; color: #FF6600; }
 - .cover { background: #f4f4f4; padding: 40px 30px; }
 - .page-footer { background: #000; color: #aaa; padding: 12px 20px; border-top: 3px solid #FF6600; text-align: center; font-size: 10px; margin-top: 40px; }
-- @media print { @page { size: A4 portrait; margin: 15mm; } body { font-size: 10px !important; } .cover, .page-footer { -webkit-print-color-adjust: exact; print-color-adjust: exact; } }
+- @media print { @page { size: A4 portrait; margin: 15mm 18mm; } body { font-size: 10px !important; padding: 0 !important; } .cover, .page-footer { -webkit-print-color-adjust: exact; print-color-adjust: exact; } }
 - .content { padding: 20px; }
 - table { width: 100%; border-collapse: collapse; font-size: 11px; }
 - thead tr { background: #000; color: #fff; }
@@ -1640,10 +1639,6 @@ function renderOutput(html) {
 }
 
 // ══ OUTPUT ACTIONS ══
-
-// MODIFICA v3.2: printOutput inietta PAGE_CLEAN_CSS per sopprimere
-// data/ora, titolo e URL del browser — mantiene solo il numero pagina in basso a destra
-// preparePrintHTML — svuota <title> e inietta PAGE_CLEAN_CSS
 function preparePrintHTML(html) {
   let out = html.replace(/<title>[^<]*<\/title>/gi, '<title>\u200B</title>');
   return out.includes('</head>')
@@ -1658,7 +1653,7 @@ function printOutput() {
   win.document.write(preparePrintHTML(outputHTML));
   win.document.close();
   setTimeout(() => { win.print(); }, 900);
-  toast('✓ Stampa aperta — nessun header/footer browser');
+  toast('✓ Stampa aperta — margini professionali 15mm/18mm');
 }
 
 function downloadHTML() {
@@ -1668,7 +1663,7 @@ function downloadHTML() {
   a.href = URL.createObjectURL(blob);
   a.download = `brand-dna-output-${date}.html`;
   a.click(); URL.revokeObjectURL(a.href);
-  toast('✓ File HTML scaricato (print-clean incluso)');
+  toast('✓ File HTML scaricato (margini professionali inclusi)');
 }
 
 function copyOutput() {
