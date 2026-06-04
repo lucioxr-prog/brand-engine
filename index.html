@@ -712,7 +712,7 @@
   </main>
 
   <footer class="app-footer">
-    Brand DNA Engine · Luciano Bettoli · Google Gemini · SHA-256 Auth · v3.8
+    Brand DNA Engine · Luciano Bettoli · Google Gemini · SHA-256 Auth · v3.9
   </footer>
 </div>
 
@@ -805,8 +805,9 @@ code{font-family:'DM Mono','Courier New',monospace;font-size:10px;background:#f0
 pre{font-family:'DM Mono','Courier New',monospace;font-size:10px;background:#f0f0f0;padding:14px 16px;margin:14px 0;border-radius:3px;page-break-inside:avoid;break-inside:avoid;white-space:pre-wrap;word-wrap:break-word;border-left:3px solid #FF6600}
 .toc{background:#f8f8f8;border:1px solid #e0e0e0;border-left:3px solid #FF6600;padding:18px 40px 14px;margin:24px 0 32px;page-break-inside:avoid;break-inside:avoid}
 .toc h2{font-family:'Montserrat',sans-serif;font-weight:700;font-size:12px;color:#FF6600;margin:0 0 12px;border:none;padding:0}
-.toc ol,.toc ul{margin-left:0;padding-left:0;list-style-position:inside}
-.toc li{margin-bottom:5px;color:#333}
+.toc-item{display:block;padding:0;margin-bottom:5px;color:#333;line-height:1.6}
+.toc-item a{color:#FF6600;text-decoration:none}
+.toc-item a:hover{text-decoration:underline}
 .page-footer{background:#000;color:#aaa;font-size:10px;font-family:'Montserrat',sans-serif;letter-spacing:.5px;padding:14px 40px;border-top:3px solid #FF6600;text-align:center;margin-top:52px;-webkit-print-color-adjust:exact;print-color-adjust:exact}
 @media print{
 @page{margin:15mm 18mm!important;size:A4 portrait!important}
@@ -839,7 +840,13 @@ STRUTTURA OBBLIGATORIA (rispetta questo ordine):
      <div class="cover-subtitle">[sottotitolo o stack tecnico se presente]</div>
      <div class="cover-date">[data o versione se presenti, altrimenti ometti il tag]</div>
    </div>
-2. Se esiste un indice: <nav class="toc"><h2>Indice</h2><ol><li>...</li></ol></nav>
+2. Se esiste un indice:
+   <nav class="toc"><h2>Indice</h2>
+     <div class="toc-item">1. Nome prima sezione</div>
+     <div class="toc-item">2. Nome seconda sezione</div>
+     [una div.toc-item per ogni voce dell'indice]
+   </nav>
+   CRITICO: NON usare mai ol, ul, li per l'indice — SOLO div.toc-item
 3. <div class="content">
      [tutto il contenuto principale]
    </div>
