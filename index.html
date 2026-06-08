@@ -1634,6 +1634,8 @@ Restituisci SOLO il documento riscritto.`;
   try {
     const res = await apiCall({ action:'generate', token:sessionToken, systemPrompt:sys, userMessage:'Documento da stilizzare:\n\n'+target });
     if (!res.ok) { showErrorBanner(res.error, applyDNA); return; }
+
+    if (currentBrandMode === 'sintesi') {
       outputText = '<!DOCTYPE html><html lang="it"><head><meta charset="UTF-8"><title>\u200B</title>' + SINTESI_FONTS + '<style>' + SINTESI_CSS + '</style></head><body>' + res.result + '</body></html>';
       const outputArea = document.getElementById('output-area');
       outputArea.innerHTML = '';
