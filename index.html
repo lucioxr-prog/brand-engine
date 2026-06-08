@@ -1043,8 +1043,9 @@ let adminTargetUser = null;
 let currentBrandMode = 'sintesi'; // 'sintesi' | 'master' | 'custom'
 
 // ── SINTESIDIGITALE CSS TEMPLATE (hardcoded) ──────────────────────────────
+const SINTESI_FONTS = '<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">';
+
 const SINTESI_CSS = `
-  @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800&family=Inter:wght@400;500;600&display=swap');
   @page { margin: 15mm 18mm; }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body {
@@ -1483,15 +1484,24 @@ async function applyDNA() {
 
   let sys = '';
   if (currentBrandMode === 'sintesi') {
-    sys = `Sei un esperto di formattazione documenti per SintesiDigitale.
-Riscrivi il documento in HTML semantico pulito con queste regole di brand:
-- Tono: formale, autorevole, professionale, nessuna emoji decorativa
-- Struttura: sezioni con h1/h2/h3, paragrafi chiari
-- Cover: se il documento ha un titolo principale, crea un <div class="cover"> come prima sezione con il titolo in <h1>
-- Footer: aggiungi SEMPRE alla fine un <div class="footer-brand">SINTESIDIGITALE — Premium Digital Solutions · AI • Automation • Marketing</div>
-- Preserva TUTTO il contenuto informativo originale
-Restituisci SOLO l'HTML del corpo (no <!DOCTYPE>, no <html>, no <head>, no <style>).
-Usa solo: div, h1, h2, h3, h4, p, ul, ol, li, table, thead, tbody, tr, th, td, blockquote, strong, em, code.`;
+    sys = `Sei un esperto di formattazione documenti professionali per SintesiDigitale.
+Converti il documento in HTML semantico seguendo ESATTAMENTE queste regole:
+
+STRUTTURA OBBLIGATORIA:
+1. COVER (prima sezione): <div class="cover"><h1>[TITOLO DOCUMENTO]</h1><p>[Sottotitolo o descrizione breve]</p><p>[Versione e data se presenti]</p></div>
+2. CORPO: usa h2 per sezioni principali, h3 per sottosezioni, p per paragrafi
+3. TABELLE: usa sempre <table><thead><tr><th>...</th></tr></thead><tbody><tr><td>...</td></tr></tbody></table>
+4. FOOTER (ultima riga): <div class="footer-brand">SINTESIDIGITALE — Premium Digital Solutions · AI • Automation • Marketing</div>
+
+REGOLE TASSATIVE:
+- Tono: formale, professionale, autorevole — ZERO emoji decorative
+- Preserva TUTTO il contenuto informativo originale (dati, numeri, nomi, tabelle)
+- NON aggiungere testo che non c'è nell'originale
+- Per elenchi usa <ul><li> o <ol><li>
+- Per codice/comandi usa <code>
+- Restituisci SOLO l'HTML del corpo — NO <!DOCTYPE>, NO <html>, NO <head>, NO <style>, NO markdown
+
+TAG PERMESSI: div, h1, h2, h3, h4, p, ul, ol, li, table, thead, tbody, tr, th, td, blockquote, strong, em, code, br`;
   } else if (currentBrandMode === 'master') {
     sys = `Sei un esperto di brand consistency.
 Riscrivi il documento preservando TUTTO il contenuto informativo originale.
@@ -1520,7 +1530,7 @@ Restituisci SOLO il documento riscritto.`;
     if (!res.ok) { toast('Errore: ' + res.error); return; }
 
     if (currentBrandMode === 'sintesi') {
-      outputText = '<!DOCTYPE html><html lang="it"><head><meta charset="UTF-8"><title>\u200B</title><style>' + SINTESI_CSS + '</style></head><body>' + res.result + '</body></html>';
+      outputText = '<!DOCTYPE html><html lang="it"><head><meta charset="UTF-8"><title>\u200B</title>' + SINTESI_FONTS + '<style>' + SINTESI_CSS + '</style></head><body>' + res.result + '</body></html>';
       const outputArea = document.getElementById('output-area');
       outputArea.innerHTML = '';
       const iframe = document.createElement('iframe');
@@ -1834,6 +1844,11 @@ window.addEventListener('DOMContentLoaded', () => {
   setupDropZone('master-drop', 'master-doc', 'master-count');
   setupDropZone('target-drop', 'target-doc', 'target-count');
   toggleRoleFields();
+
+  // Stato iniziale brand: SintesiDigitale attivo, step1 nascosto
+  const step1Panel = document.getElementById('step1-panel');
+  if (step1Panel) step1Panel.style.display = 'none';
+  document.getElementById('apply-btn').disabled = false;
 
   // Chiudi modal cliccando overlay
   document.querySelectorAll('.modal-overlay').forEach(overlay => {
