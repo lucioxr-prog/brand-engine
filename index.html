@@ -3,1726 +3,1670 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Brand DNA Engine · Luciano Bettoli</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
+<title>Brand DNA Engine v5.0 · SintesiDigitale</title>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600&display=swap');
+:root {
+  --bg:           #1a1712;
+  --surface:      #211f1a;
+  --panel:        #272420;
+  --border:       #3a3530;
+  --border-accent:#5a4e3a;
+  --gold:         #c9a84c;
+  --gold-dim:     #8a6e32;
+  --gold-glow:    rgba(201,168,76,0.12);
+  --gold-glow2:   rgba(201,168,76,0.06);
+  --text:         #e8e0d0;
+  --text-dim:     #9a9080;
+  --text-muted:   #5a5248;
+  --red:          #c0392b;
+  --red-glow:     rgba(192,57,43,0.15);
+  --green:        #27ae60;
+  --green-glow:   rgba(39,174,96,0.15);
+  --blue:         #2980b9;
+  --radius:       6px;
+  --mono:         'Courier New', monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
 
-  :root {
-    --bg: #0f0e0b;
-    --surface: #1a1814;
-    --panel: #1e1c17;
-    --border: #2e2b24;
-    --border-gold: #4a3e28;
-    --gold: #c9a84c;
-    --gold-dim: #7a6030;
-    --gold-glow: rgba(201,168,76,0.12);
-    --gold-light: #e8c97a;
-    --text: #ede8dc;
-    --text-dim: #8a8070;
-    --text-muted: #4a4540;
-    --red: #b03030;
-    --green: #2d8a50;
-    --radius: 4px;
-    --mono: 'DM Mono', monospace;
-    --serif: 'Playfair Display', Georgia, serif;
-    --sans: 'DM Sans', system-ui, sans-serif;
-  }
+body{
+  background:var(--bg);color:var(--text);
+  font-family:Georgia,'Times New Roman',serif;
+  font-size:14px;min-height:100vh;
+}
 
-  * { box-sizing: border-box; margin: 0; padding: 0; }
+/* ── SCREENS ── */
+.screen{display:none;min-height:100vh}
+.screen.active{display:flex}
 
-  body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: var(--sans);
-    font-size: 13px;
-    min-height: 100vh;
-    line-height: 1.6;
-  }
+/* ── LOGIN ── */
+#screen-login{
+  align-items:center;justify-content:center;
+  background:var(--bg);
+  background-image:
+    radial-gradient(ellipse 60% 40% at 50% 0%, rgba(201,168,76,0.07) 0%, transparent 70%);
+}
 
-  /* ══ LOGIN ══ */
-  #login-screen {
-    position: fixed; inset: 0;
-    background: var(--bg);
-    display: flex; align-items: center; justify-content: center;
-    z-index: 1000;
-    background-image: radial-gradient(ellipse at 50% 0%, rgba(201,168,76,0.06) 0%, transparent 60%);
-  }
-  #login-screen.hidden { display: none; }
+.login-card{
+  background:var(--surface);
+  border:1px solid var(--border-accent);
+  border-radius:14px;padding:52px 46px;
+  width:440px;text-align:center;
+  box-shadow:0 32px 80px rgba(0,0,0,.5);
+}
+.login-monogram{
+  width:68px;height:68px;background:var(--gold);
+  border-radius:50%;display:flex;align-items:center;
+  justify-content:center;font-size:24px;font-weight:700;
+  color:#1a1712;margin:0 auto 14px;font-family:var(--mono);
+  box-shadow:0 0 40px rgba(201,168,76,.3);
+}
+.login-brand{color:var(--gold);font-size:12px;letter-spacing:3px;text-transform:uppercase;margin-bottom:6px}
+.login-title{font-size:24px;font-weight:400;margin-bottom:8px}
+.login-badge{
+  font-size:11px;letter-spacing:1px;color:var(--text-dim);
+  border:1px solid var(--border);border-radius:20px;
+  padding:4px 14px;display:inline-block;margin-bottom:32px;
+}
+.fg{text-align:left;margin-bottom:18px}
+.fg label{
+  display:block;font-size:11px;letter-spacing:1.5px;
+  text-transform:uppercase;color:var(--text-dim);
+  margin-bottom:8px;font-family:var(--mono);
+}
+.fg input{
+  width:100%;padding:13px 16px;
+  background:var(--bg);border:1px solid var(--border);
+  border-radius:var(--radius);color:var(--text);
+  font-size:14px;font-family:inherit;transition:border-color .2s;
+}
+.fg input:focus{outline:none;border-color:var(--gold)}
+.login-btn{
+  width:100%;padding:15px;
+  background:var(--gold);color:#1a1712;
+  border:none;border-radius:var(--radius);
+  font-size:13px;font-weight:700;letter-spacing:1.5px;
+  cursor:pointer;text-transform:uppercase;
+  font-family:var(--mono);transition:all .2s;margin-top:8px;
+}
+.login-btn:hover{background:#e0b85a;box-shadow:0 4px 20px rgba(201,168,76,.3)}
+.login-btn:disabled{background:var(--gold-dim);cursor:not-allowed;opacity:.6}
+.login-err{
+  color:var(--red);font-size:12px;margin-top:14px;
+  min-height:18px;font-family:var(--mono);
+  background:var(--red-glow);border-radius:var(--radius);
+  padding:8px 12px;display:none;
+}
+.login-err.show{display:block}
+.login-version{
+  font-size:10px;color:var(--text-muted);
+  margin-top:24px;font-family:var(--mono);letter-spacing:1px;
+}
 
-  .login-card {
-    background: var(--surface);
-    border: 1px solid var(--border-gold);
-    border-radius: 8px;
-    padding: 52px 48px;
-    width: 440px;
-    text-align: center;
-    box-shadow: 0 40px 80px rgba(0,0,0,0.6);
-  }
+/* ── APP SHELL ── */
+#screen-app{flex-direction:column}
 
-  .login-monogram {
-    width: 60px; height: 60px;
-    background: linear-gradient(135deg, var(--gold) 0%, var(--gold-dim) 100%);
-    border-radius: 8px;
-    display: flex; align-items: center; justify-content: center;
-    font-family: var(--serif); font-size: 24px; font-weight: 700;
-    color: #0f0e0b; margin: 0 auto 20px;
-    box-shadow: 0 8px 24px rgba(201,168,76,0.3);
-  }
-  .login-brand { font-family: var(--serif); font-size: 22px; color: var(--gold); margin-bottom: 4px; }
-  .login-tagline { font-size: 10px; letter-spacing: 2.5px; text-transform: uppercase; color: var(--text-dim); font-family: var(--mono); margin-bottom: 28px; }
-  .login-badge {
-    display: inline-flex; align-items: center; gap: 6px;
-    font-size: 10px; letter-spacing: 1px; color: var(--text-muted);
-    border: 1px solid var(--border); border-radius: 20px;
-    padding: 4px 14px; margin-bottom: 32px; font-family: var(--mono);
-  }
+.app-header{
+  background:var(--surface);border-bottom:1px solid var(--border);
+  padding:0 32px;height:62px;
+  display:flex;align-items:center;justify-content:space-between;
+  position:sticky;top:0;z-index:200;
+}
+.header-brand{display:flex;align-items:center;gap:14px}
+.brand-mark{
+  width:36px;height:36px;background:var(--gold);border-radius:6px;
+  display:flex;align-items:center;justify-content:center;
+  font-weight:900;color:#1a1712;font-size:15px;font-family:var(--mono);
+}
+.brand-name{font-size:15px;font-weight:600;color:var(--gold);letter-spacing:.5px}
+.brand-sub{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--text-dim);font-family:var(--mono)}
 
-  .fg { text-align: left; margin-bottom: 14px; }
-  .fg label { display: block; font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: var(--text-dim); margin-bottom: 7px; font-family: var(--mono); }
-  .fg input {
-    width: 100%; padding: 11px 14px;
-    background: var(--bg); border: 1px solid var(--border);
-    border-radius: var(--radius); color: var(--text);
-    font-size: 13px; font-family: var(--mono);
-    transition: border-color .2s;
-  }
-  .fg input:focus { outline: none; border-color: var(--gold); }
-  .api-note { font-size: 10px; color: var(--text-muted); margin-top: 5px; font-family: var(--mono); }
-  .api-sep { border-top: 1px solid var(--border); padding-top: 14px; margin-top: 4px; }
+.header-right{display:flex;align-items:center;gap:16px}
+.user-chip{
+  display:flex;align-items:center;gap:10px;
+  padding:6px 14px;
+  background:var(--gold-glow2);
+  border:1px solid var(--border);border-radius:20px;
+}
+.user-chip-dot{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 6px var(--green)}
+.user-chip-name{font-size:11px;letter-spacing:1px;font-family:var(--mono);color:var(--text)}
+.role-badge{
+  font-size:9px;letter-spacing:1px;text-transform:uppercase;
+  padding:2px 8px;border-radius:10px;font-family:var(--mono);font-weight:700;
+}
+.role-badge.admin{background:rgba(201,168,76,.2);color:var(--gold);border:1px solid var(--gold-dim)}
+.role-badge.pro{background:rgba(39,174,96,.15);color:var(--green);border:1px solid rgba(39,174,96,.3)}
+.role-badge.trial{background:rgba(41,128,185,.15);color:#5dade2;border:1px solid rgba(41,128,185,.3)}
+.session-timer{font-size:10px;color:var(--text-muted);font-family:var(--mono)}
 
-  .login-btn {
-    width: 100%; padding: 13px;
-    background: linear-gradient(135deg, var(--gold) 0%, #a8882e 100%);
-    color: #0f0e0b; border: none; border-radius: var(--radius);
-    font-size: 11px; font-weight: 600; letter-spacing: 2px;
-    cursor: pointer; text-transform: uppercase; font-family: var(--mono);
-    transition: opacity .2s; margin-top: 10px;
-  }
-  .login-btn:hover { opacity: .88; }
-  .login-err { color: #e05050; font-size: 11px; margin-top: 10px; min-height: 16px; font-family: var(--mono); }
+.btn-logout{
+  padding:6px 16px;background:transparent;
+  border:1px solid var(--border);border-radius:var(--radius);
+  color:var(--text-dim);font-size:11px;letter-spacing:1px;
+  cursor:pointer;font-family:var(--mono);text-transform:uppercase;
+  transition:all .2s;
+}
+.btn-logout:hover{border-color:var(--red);color:var(--red)}
 
-  /* ══ APP ══ */
-  #app { display: none; min-height: 100vh; flex-direction: column; }
-  #app.visible { display: flex; }
+/* ── NAV TABS ── */
+.app-nav{
+  background:var(--surface);border-bottom:1px solid var(--border);
+  padding:0 32px;display:flex;gap:0;
+}
+.nav-tab{
+  padding:14px 22px;font-size:11px;letter-spacing:1.5px;
+  text-transform:uppercase;font-family:var(--mono);
+  color:var(--text-muted);cursor:pointer;
+  border-bottom:2px solid transparent;transition:all .2s;
+  border:none;background:none;
+}
+.nav-tab:hover{color:var(--text-dim)}
+.nav-tab.active{color:var(--gold);border-bottom:2px solid var(--gold)}
+.nav-tab.admin-only{display:none}
+.nav-tab.admin-only.show{display:block}
 
-  /* ══ HEADER ══ */
-  .app-header {
-    background: var(--surface);
-    border-bottom: 1px solid var(--border);
-    padding: 0 28px;
-    height: 56px;
-    display: flex; align-items: center; justify-content: space-between;
-    position: sticky; top: 0; z-index: 100;
-  }
-  .hbrand { display: flex; align-items: center; gap: 12px; }
-  .hmark {
-    width: 32px; height: 32px;
-    background: linear-gradient(135deg, var(--gold), var(--gold-dim));
-    border-radius: 6px;
-    display: flex; align-items: center; justify-content: center;
-    font-family: var(--serif); font-weight: 700; color: #0f0e0b; font-size: 15px;
-  }
-  .hname { font-family: var(--serif); font-size: 15px; color: var(--gold); }
-  .htag { font-size: 9px; letter-spacing: 2px; text-transform: uppercase; color: var(--text-dim); font-family: var(--mono); }
+/* ── VIEWS ── */
+.view{display:none;flex:1}
+.view.active{display:block}
 
-  .hactions { display: flex; align-items: center; gap: 12px; }
-  .dna-pill {
-    display: flex; align-items: center; gap: 7px;
-    padding: 5px 14px; border: 1px solid var(--border);
-    border-radius: 20px; font-size: 10px; letter-spacing: 1px;
-    text-transform: uppercase; color: var(--text-dim); font-family: var(--mono);
-    transition: all .3s;
-  }
-  .dna-pill.active { border-color: var(--green); color: #4aba78; }
-  .dna-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--text-muted); transition: all .3s; }
-  .dna-pill.active .dna-dot { background: #4aba78; box-shadow: 0 0 8px #4aba78; }
-  .cost-pill {
-    display:flex; align-items:center; gap:6px;
-    padding:4px 14px; border:1px solid var(--border); border-radius:20px;
-    font-size:10px; font-family:var(--mono); color:var(--text-muted);
-    transition:all .4s; cursor:default; white-space:nowrap;
-  }
-  .cost-pill.active { border-color:var(--gold-dim); color:var(--gold-dim); }
-  .cost-pill.warn   { border-color:#c07820; color:#c07820; }
-  .cost-pill-sep    { opacity:.3; }
-  .sess-time { font-size:10px; color:var(--text-muted); font-family:var(--mono); }
-  .logout-btn {
-    padding: 5px 14px; background: transparent;
-    border: 1px solid var(--border); border-radius: var(--radius);
-    color: var(--text-dim); font-size: 10px; letter-spacing: 1px;
-    cursor: pointer; font-family: var(--mono); text-transform: uppercase;
-    transition: all .2s;
-  }
-  .logout-btn:hover { border-color: var(--red); color: #e05050; }
+/* ── MAIN LAYOUT ── */
+.app-main{
+  max-width:1400px;margin:0 auto;width:100%;
+  display:grid;grid-template-columns:1fr 1fr;
+  gap:24px;padding:28px 32px;
+}
+.full-width{grid-column:1/-1}
 
-  /* ══ LAYOUT ══ */
-  .app-main {
-    flex: 1; display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 20px; padding: 24px 28px;
-    max-width: 1440px; margin: 0 auto; width: 100%;
-    align-content: start;
-  }
+/* ── PANELS ── */
+.panel{
+  background:var(--panel);border:1px solid var(--border);
+  border-radius:10px;overflow:hidden;
+}
+.panel-header{
+  padding:18px 22px;border-bottom:1px solid var(--border);
+  background:var(--surface);
+  display:flex;align-items:center;justify-content:space-between;
+}
+.panel-title-wrap{display:flex;align-items:center;gap:14px}
+.panel-num{
+  width:30px;height:30px;background:var(--gold);color:#1a1712;
+  border-radius:50%;display:flex;align-items:center;justify-content:center;
+  font-weight:900;font-size:13px;font-family:var(--mono);flex-shrink:0;
+}
+.panel-title{font-size:16px;font-weight:600;margin-bottom:2px}
+.panel-desc{font-size:11px;color:var(--text-dim);letter-spacing:.5px;font-family:var(--mono)}
+.panel-body{padding:20px 22px}
 
-  /* ══ PANELS ══ */
-  .panel {
-    background: var(--panel);
-    border: 1px solid var(--border);
-    border-radius: 6px; overflow: hidden;
-  }
-  .panel-head {
-    padding: 16px 20px;
-    border-bottom: 1px solid var(--border);
-    background: var(--surface);
-    display: flex; align-items: center; gap: 12px;
-  }
-  .pnum {
-    width: 26px; height: 26px;
-    background: var(--gold); color: #0f0e0b;
-    border-radius: 50%; display: flex; align-items: center; justify-content: center;
-    font-weight: 700; font-size: 11px; font-family: var(--mono); flex-shrink: 0;
-  }
-  .ptitle { font-family: var(--serif); font-size: 15px; color: var(--text); }
-  .pdesc { font-size: 10px; color: var(--text-dim); letter-spacing: .5px; font-family: var(--mono); }
-  .panel-body { padding: 18px 20px; }
+/* ── DROP ZONES ── */
+.drop-zone{
+  position:relative;border:2px dashed var(--border);
+  border-radius:var(--radius);transition:all .2s;
+  background:var(--bg);margin-bottom:6px;
+}
+.drop-zone.drag-over{border-color:var(--gold);background:var(--gold-glow)}
+.drop-zone textarea{
+  width:100%;min-height:200px;background:transparent;
+  border:none;color:var(--text);font-size:13px;
+  font-family:Georgia,serif;line-height:1.7;
+  padding:14px;resize:vertical;
+}
+.drop-zone textarea:focus{outline:none}
+.drop-hint{
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  padding:8px 14px;border-top:1px dashed var(--border);
+  font-size:11px;color:var(--text-muted);font-family:var(--mono);letter-spacing:.5px;
+}
 
-  /* ══ UPLOAD ══ */
-  .upload-row { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; flex-wrap: wrap; }
-  .upload-btn {
-    display: inline-flex; align-items: center; gap: 5px;
-    padding: 5px 12px; background: transparent;
-    border: 1px solid var(--border-gold); border-radius: var(--radius);
-    color: var(--gold-dim); font-size: 10px; letter-spacing: 1px;
-    text-transform: uppercase; cursor: pointer; font-family: var(--mono);
-    transition: all .2s;
-  }
-  .upload-btn:hover { border-color: var(--gold); color: var(--gold); background: var(--gold-glow); }
-  input[type="file"] { display: none; }
+/* ── UPLOAD ROW ── */
+.upload-row{display:flex;gap:8px;align-items:center;margin-bottom:10px}
+.upload-btn{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:6px 14px;background:transparent;
+  border:1px solid var(--border-accent);border-radius:var(--radius);
+  color:var(--gold-dim);font-size:11px;letter-spacing:1px;
+  text-transform:uppercase;cursor:pointer;font-family:var(--mono);transition:all .2s;
+}
+.upload-btn:hover{border-color:var(--gold);color:var(--gold);background:var(--gold-glow)}
+.upload-label{font-size:11px;color:var(--text-muted);font-family:var(--mono)}
+input[type="file"]{display:none}
+.char-count{font-size:11px;color:var(--text-muted);text-align:right;margin-bottom:14px;font-family:var(--mono)}
 
-  /* ══ DROP ZONE ══ */
-  .drop-zone {
-    position: relative; border: 1px dashed var(--border);
-    border-radius: var(--radius); background: var(--bg);
-    transition: all .2s; margin-bottom: 6px;
-  }
-  .drop-zone.drag-over { border-color: var(--gold); background: var(--gold-glow); }
-  .drop-zone.drag-over::after {
-    content: '⬇ Rilascia qui';
-    position: absolute; inset: 0;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 14px; color: var(--gold); font-family: var(--mono);
-    background: rgba(15,14,11,0.85); border-radius: var(--radius);
-    pointer-events: none;
-  }
-  .drop-zone textarea {
-    width: 100%; min-height: 190px; background: transparent; border: none;
-    color: var(--text); font-size: 12px; font-family: var(--sans);
-    line-height: 1.7; padding: 13px; resize: vertical;
-  }
-  .drop-zone textarea:focus { outline: none; }
-  .drop-hint-bar {
-    border-top: 1px dashed var(--border); padding: 6px 13px;
-    font-size: 10px; color: var(--text-muted); font-family: var(--mono);
-    display: flex; align-items: center; gap: 6px;
-  }
+/* ── PAGE OPTIONS ── */
+.page-options{
+  display:flex;align-items:center;gap:16px;
+  padding:10px 14px;background:var(--bg);
+  border:1px solid var(--border);border-radius:var(--radius);
+  margin-bottom:14px;flex-wrap:wrap;
+}
+.page-options-label{font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--text-dim);font-family:var(--mono);flex-shrink:0}
+.toggle-wrap{display:flex;align-items:center;gap:8px}
+.toggle-label{font-size:12px;color:var(--text-dim);font-family:var(--mono)}
+.toggle{
+  position:relative;width:36px;height:20px;
+  background:var(--border);border-radius:10px;
+  cursor:pointer;transition:background .2s;flex-shrink:0;
+}
+.toggle.on{background:var(--gold)}
+.toggle::after{
+  content:'';position:absolute;top:3px;left:3px;
+  width:14px;height:14px;background:white;border-radius:50%;transition:transform .2s;
+}
+.toggle.on::after{transform:translateX(16px)}
+.page-select{
+  background:var(--bg);border:1px solid var(--border);
+  border-radius:var(--radius);color:var(--text);
+  padding:4px 10px;font-size:12px;font-family:var(--mono);cursor:pointer;
+}
+.page-select:focus{outline:none;border-color:var(--gold)}
+.page-select:disabled{opacity:.4;cursor:not-allowed}
+.page-start-input{
+  width:52px;background:var(--bg);border:1px solid var(--border);
+  border-radius:var(--radius);color:var(--text);
+  padding:4px 8px;font-size:12px;font-family:var(--mono);text-align:center;
+}
+.page-start-input:focus{outline:none;border-color:var(--gold)}
+.page-start-input:disabled{opacity:.4}
 
-  .char-count { font-size: 10px; color: var(--text-muted); text-align: right; margin-bottom: 12px; font-family: var(--mono); }
+/* ── LOADING ── */
+.loading-wrap{
+  display:none;align-items:center;gap:12px;
+  padding:12px 14px;background:var(--gold-glow);
+  border:1px solid var(--gold-dim);border-radius:var(--radius);margin-bottom:14px;
+}
+.loading-wrap.visible{display:flex}
+.spinner{
+  width:16px;height:16px;border:2px solid var(--gold-dim);
+  border-top-color:var(--gold);border-radius:50%;
+  animation:spin .8s linear infinite;flex-shrink:0;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading-text{font-size:12px;color:var(--gold);font-family:var(--mono);letter-spacing:.5px}
 
-  /* ══ VISUAL ANALYSIS ══ */
-  .visual-section {
-    margin-top: 14px; padding-top: 14px;
-    border-top: 1px solid var(--border);
-  }
-  .visual-label {
-    font-size: 10px; letter-spacing: 1.5px; text-transform: uppercase;
-    color: var(--gold-dim); font-family: var(--mono); margin-bottom: 8px;
-    display: flex; align-items: center; gap: 6px;
-  }
-  #visual-preview { display:none; margin-top: 10px; }
-  #visual-img { max-width:100%; max-height:160px; border-radius:4px; border:1px solid var(--border); }
-  #visual-results { margin-top: 10px; }
+/* ── BUTTONS ── */
+.btn-row{display:flex;gap:10px}
+.btn{
+  padding:10px 20px;border-radius:var(--radius);
+  font-size:12px;letter-spacing:1.5px;text-transform:uppercase;
+  cursor:pointer;font-family:var(--mono);transition:all .2s;border:none;
+}
+.btn-primary{background:var(--gold);color:#1a1712;font-weight:700}
+.btn-primary:hover{background:#e0b85a}
+.btn-primary:disabled{background:var(--gold-dim);cursor:not-allowed;opacity:.6}
+.btn-outline{background:transparent;border:1px solid var(--border);color:var(--text-dim)}
+.btn-outline:hover{border-color:var(--gold-dim);color:var(--text)}
+.btn-danger{background:transparent;border:1px solid var(--border);color:var(--red)}
+.btn-danger:hover{background:var(--red-glow);border-color:var(--red)}
+.btn-success{background:transparent;border:1px solid rgba(39,174,96,.4);color:var(--green)}
+.btn-success:hover{background:var(--green-glow)}
 
-  /* ══ PAGE OPTIONS ══ */
-  .page-opts {
-    display: flex; align-items: center; gap: 12px;
-    padding: 9px 12px; background: var(--bg);
-    border: 1px solid var(--border); border-radius: var(--radius);
-    margin-bottom: 12px; flex-wrap: wrap;
-  }
-  .page-opts-label { font-size: 10px; letter-spacing: 1px; text-transform: uppercase; color: var(--text-dim); font-family: var(--mono); flex-shrink: 0; }
-  .toggle { position: relative; width: 34px; height: 18px; background: var(--border); border-radius: 9px; cursor: pointer; transition: background .2s; flex-shrink: 0; }
-  .toggle.on { background: var(--gold); }
-  .toggle::after { content:''; position:absolute; top:3px; left:3px; width:12px; height:12px; background:white; border-radius:50%; transition: transform .2s; }
-  .toggle.on::after { transform: translateX(16px); }
-  .toggle-lbl { font-size: 11px; color: var(--text-dim); font-family: var(--mono); }
-  .pselect {
-    background: var(--bg); border: 1px solid var(--border);
-    border-radius: var(--radius); color: var(--text);
-    padding: 3px 8px; font-size: 11px; font-family: var(--mono); cursor: pointer;
-  }
-  .pselect:disabled { opacity:.4; cursor:not-allowed; }
-  .pselect:focus { outline:none; border-color: var(--gold); }
-  .pstart { width:48px; background:var(--bg); border:1px solid var(--border); border-radius:var(--radius); color:var(--text); padding:3px 6px; font-size:11px; font-family:var(--mono); text-align:center; }
-  .pstart:disabled { opacity:.4; }
+/* ── DNA PANEL ── */
+.dna-panel{
+  background:var(--panel);border:1px solid var(--gold-dim);
+  border-radius:10px;overflow:hidden;display:none;
+}
+.dna-panel.visible{display:block}
+.dna-panel-header{
+  background:var(--surface);padding:16px 22px;
+  border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;
+}
+.dna-panel-title{font-size:13px;letter-spacing:2px;text-transform:uppercase;color:var(--gold);font-family:var(--mono)}
+.dna-panel-body{padding:20px 22px}
+.dna-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px}
+.dna-cell{background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);padding:12px 14px}
+.dna-cell-label{font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--gold-dim);margin-bottom:6px;font-family:var(--mono)}
+.dna-cell-value{font-size:12px;color:var(--text);line-height:1.5}
+.dna-rules-title{font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-dim);margin-bottom:12px;font-family:var(--mono)}
+.dna-rules-list{list-style:none;display:flex;flex-direction:column;gap:8px}
+.dna-rules-list li{display:flex;gap:12px;align-items:flex-start}
+.rule-num{
+  background:var(--gold);color:#1a1712;font-size:10px;font-weight:700;font-family:var(--mono);
+  width:20px;height:20px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+}
+.dna-rules-list li span:last-child{font-size:13px;color:var(--text);line-height:1.5;padding-top:2px}
 
-  /* ══ LOADING ══ */
-  .loading-wrap {
-    display: none; align-items: center; gap: 10px;
-    padding: 10px 13px; background: var(--gold-glow);
-    border: 1px solid var(--gold-dim); border-radius: var(--radius); margin-bottom: 12px;
-  }
-  .loading-wrap.visible { display: flex; }
-  .spinner { width:14px; height:14px; border:2px solid var(--gold-dim); border-top-color:var(--gold); border-radius:50%; animation:spin .8s linear infinite; flex-shrink:0; }
-  @keyframes spin { to { transform:rotate(360deg); } }
-  .loading-text { font-size:11px; color:var(--gold); font-family:var(--mono); }
+/* ── OUTPUT ── */
+.output-panel{background:var(--panel);border:1px solid var(--border);border-radius:10px;overflow:hidden}
+.output-header{
+  background:var(--surface);padding:16px 22px;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;
+}
+.output-body{padding:20px 22px}
+.output-area{
+  min-height:240px;background:var(--bg);border:1px solid var(--border);
+  border-radius:var(--radius);padding:18px;font-size:13px;line-height:1.8;
+  color:var(--text);white-space:pre-wrap;font-family:Georgia,serif;
+}
+.empty-output{
+  display:flex;flex-direction:column;align-items:center;
+  justify-content:center;gap:12px;min-height:240px;color:var(--text-muted);
+}
+.empty-icon{font-size:32px;opacity:.4}
+.empty-text{font-size:11px;letter-spacing:2px;text-transform:uppercase;font-family:var(--mono)}
+.output-actions{display:flex;gap:10px;margin-top:16px}
 
-  /* ══ BUTTONS ══ */
-  .btn-row { display: flex; gap: 8px; flex-wrap: wrap; }
-  .btn { padding:9px 18px; border-radius:var(--radius); font-size:10px; letter-spacing:1.5px; text-transform:uppercase; cursor:pointer; font-family:var(--mono); transition:all .2s; border:none; }
-  .btn-gold { background:linear-gradient(135deg,var(--gold),#a8882e); color:#0f0e0b; font-weight:700; }
-  .btn-gold:hover { opacity:.88; }
-  .btn-gold:disabled { opacity:.4; cursor:not-allowed; }
-  .btn-outline { background:transparent; border:1px solid var(--border); color:var(--text-dim); }
-  .btn-outline:hover { border-color:var(--gold-dim); color:var(--text); }
+/* ── TRIAL BANNER ── */
+.trial-banner{
+  background:rgba(41,128,185,.1);border:1px solid rgba(41,128,185,.3);
+  border-radius:var(--radius);padding:12px 16px;
+  display:flex;align-items:center;justify-content:space-between;
+  margin-bottom:20px;
+}
+.trial-banner-text{font-size:12px;color:#5dade2;font-family:var(--mono)}
+.trial-counter{
+  font-size:18px;font-weight:700;color:#5dade2;font-family:var(--mono);
+}
 
-  /* ══ DNA PANEL ══ */
-  .dna-panel { grid-column:1/-1; background:var(--panel); border:1px solid var(--gold-dim); border-radius:6px; overflow:hidden; display:none; }
-  .dna-panel.visible { display:block; }
-  .dna-panel-head { background:var(--surface); padding:14px 20px; border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; }
-  .dna-panel-title { font-size:10px; letter-spacing:2px; text-transform:uppercase; color:var(--gold); font-family:var(--mono); }
-  .dna-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:10px; padding:16px 20px 10px; }
-  .dna-cell { background:var(--bg); border:1px solid var(--border); border-radius:var(--radius); padding:10px 12px; }
-  .dna-cell-lbl { font-size:9px; letter-spacing:1.5px; text-transform:uppercase; color:var(--gold-dim); margin-bottom:5px; font-family:var(--mono); }
-  .dna-cell-val { font-size:11px; color:var(--text); line-height:1.5; }
-  .dna-rules { padding:0 20px 16px; }
-  .dna-rules-title { font-size:9px; letter-spacing:1.5px; text-transform:uppercase; color:var(--text-dim); margin-bottom:10px; font-family:var(--mono); }
-  .dna-rules-list { list-style:none; display:flex; flex-direction:column; gap:6px; }
-  .dna-rules-list li { display:flex; gap:10px; align-items:flex-start; }
-  .rnum { background:var(--gold); color:#0f0e0b; font-size:9px; font-weight:700; font-family:var(--mono); width:18px; height:18px; border-radius:50%; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
-  .dna-rules-list li span:last-child { font-size:12px; color:var(--text); line-height:1.5; padding-top:1px; }
+.pro-banner{
+  background:var(--green-glow);border:1px solid rgba(39,174,96,.3);
+  border-radius:var(--radius);padding:12px 16px;
+  display:flex;align-items:center;justify-content:space-between;
+  margin-bottom:20px;
+}
+.pro-banner-text{font-size:12px;color:var(--green);font-family:var(--mono)}
 
-  /* ══ VISUAL DNA PANEL ══ */
-  .visual-dna-panel { grid-column:1/-1; background:var(--panel); border:1px solid var(--border-gold); border-radius:6px; overflow:hidden; display:none; }
-  .visual-dna-panel.visible { display:block; }
-  .vdna-head { background:var(--surface); padding:14px 20px; border-bottom:1px solid var(--border); }
-  .vdna-title { font-size:10px; letter-spacing:2px; text-transform:uppercase; color:var(--gold); font-family:var(--mono); }
-  .vdna-body { padding:16px 20px; display:grid; grid-template-columns:200px 1fr 1fr; gap:16px; }
-  .vdna-section-title { font-size:9px; letter-spacing:1.5px; text-transform:uppercase; color:var(--gold-dim); font-family:var(--mono); margin-bottom:10px; }
-  .color-swatches { display:flex; flex-direction:column; gap:6px; }
-  .swatch-row { display:flex; align-items:center; gap:8px; }
-  .swatch { width:20px; height:20px; border-radius:3px; border:1px solid rgba(255,255,255,0.1); flex-shrink:0; }
-  .swatch-info { font-size:10px; font-family:var(--mono); color:var(--text-dim); }
-  .swatch-info span { color:var(--text); }
-  .vdna-card { background:var(--bg); border:1px solid var(--border); border-radius:var(--radius); padding:10px 12px; margin-bottom:8px; }
-  .vdna-card-lbl { font-size:9px; letter-spacing:1px; text-transform:uppercase; color:var(--gold-dim); font-family:var(--mono); margin-bottom:4px; }
-  .vdna-card-val { font-size:11px; color:var(--text); line-height:1.5; }
+/* ── HISTORY ── */
+.history-section{background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden}
+.history-header{padding:14px 22px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.history-title{font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--text-dim);font-family:var(--mono)}
+.history-list{padding:12px 22px;display:flex;flex-direction:column;gap:8px;max-height:200px;overflow-y:auto}
+.history-item{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:10px 14px;background:var(--bg);border:1px solid var(--border);
+  border-radius:var(--radius);cursor:pointer;transition:all .2s;
+}
+.history-item:hover{border-color:var(--gold-dim)}
+.history-item-left{display:flex;align-items:center;gap:12px}
+.history-dot{width:6px;height:6px;background:var(--gold);border-radius:50%;flex-shrink:0}
+.history-label{font-size:12px;color:var(--text);font-family:var(--mono)}
+.history-date{font-size:11px;color:var(--text-muted);font-family:var(--mono)}
+.history-empty{font-size:12px;color:var(--text-muted);font-family:var(--mono);padding:12px 0;text-align:center}
 
-  /* ══ DIVIDER ══ */
-  .divider { grid-column:1/-1; display:flex; align-items:center; justify-content:center; color:var(--gold-dim); font-size:16px; }
+/* ── ADMIN PANEL ── */
+.admin-main{max-width:1200px;margin:0 auto;padding:28px 32px}
+.admin-section{margin-bottom:36px}
+.admin-section-title{
+  font-size:12px;letter-spacing:2px;text-transform:uppercase;
+  color:var(--gold);font-family:var(--mono);margin-bottom:16px;
+  padding-bottom:10px;border-bottom:1px solid var(--border);
+}
 
-  /* ══ OUTPUT PANEL ══ */
-  .output-panel { grid-column:1/-1; background:var(--panel); border:1px solid var(--border); border-radius:6px; overflow:hidden; }
-  .output-head { background:var(--surface); padding:14px 20px; border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px; }
-  .output-title-wrap { display:flex; align-items:center; gap:12px; }
-  .output-body { padding:20px; }
+/* Stats row */
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:32px}
+.stat-card{
+  background:var(--panel);border:1px solid var(--border);
+  border-radius:10px;padding:20px;text-align:center;
+}
+.stat-num{font-size:32px;font-weight:700;color:var(--gold);font-family:var(--mono);margin-bottom:4px}
+.stat-label{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--text-dim);font-family:var(--mono)}
 
-  /* ══ OUTPUT RENDERED ══ */
-  #output-rendered {
-    min-height: 300px;
-    background: white;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    overflow: hidden;
-  }
-  #output-rendered.empty {
-    display: flex; align-items: center; justify-content: center;
-    flex-direction: column; gap: 10px; color: var(--text-muted);
-  }
-  .empty-icon { font-size: 28px; opacity:.3; }
-  .empty-txt { font-size:10px; letter-spacing:2px; text-transform:uppercase; font-family:var(--mono); }
+/* Users table */
+.users-table{width:100%;border-collapse:collapse}
+.users-table th{
+  text-align:left;padding:10px 14px;font-size:10px;letter-spacing:1.5px;
+  text-transform:uppercase;color:var(--gold-dim);font-family:var(--mono);
+  border-bottom:1px solid var(--border);background:var(--surface);
+}
+.users-table td{
+  padding:12px 14px;font-size:12px;border-bottom:1px solid var(--border);
+  vertical-align:middle;font-family:var(--mono);
+}
+.users-table tr:hover td{background:var(--gold-glow2)}
+.users-table tr:last-child td{border-bottom:none}
 
-  /* Output iframe */
-  #output-iframe {
-    width:100%; min-height:600px; border:none; display:none;
-    border-radius: 4px;
-  }
+.status-dot{
+  width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:6px;
+}
+.status-dot.active{background:var(--green)}
+.status-dot.inactive{background:var(--red)}
 
-  .output-actions { display:flex; gap:8px; margin-top:14px; flex-wrap:wrap; }
+.expired-badge{
+  font-size:10px;color:var(--red);background:var(--red-glow);
+  border:1px solid rgba(192,57,43,.3);border-radius:10px;
+  padding:2px 8px;font-family:var(--mono);
+}
+.expiry-soon{
+  font-size:10px;color:#e67e22;background:rgba(230,126,34,.1);
+  border:1px solid rgba(230,126,34,.3);border-radius:10px;
+  padding:2px 8px;font-family:var(--mono);
+}
 
-  /* ══ PRINT TIP ══ */
-  .print-tip {
-    display: none;
-    align-items: center; gap: 8px;
-    padding: 8px 12px;
-    background: rgba(201,168,76,0.08);
-    border: 1px solid var(--border-gold);
-    border-radius: var(--radius);
-    font-size: 10px; color: var(--text-dim);
-    font-family: var(--mono); margin-top: 10px;
-  }
-  .print-tip.visible { display: flex; }
+/* Create user form */
+.create-user-form{
+  background:var(--panel);border:1px solid var(--border);
+  border-radius:10px;padding:24px;
+}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px}
+.form-group{display:flex;flex-direction:column;gap:6px}
+.form-label{font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--text-dim);font-family:var(--mono)}
+.form-input{
+  padding:10px 14px;background:var(--bg);border:1px solid var(--border);
+  border-radius:var(--radius);color:var(--text);font-size:13px;
+  font-family:inherit;transition:border-color .2s;
+}
+.form-input:focus{outline:none;border-color:var(--gold)}
+.form-select{
+  padding:10px 14px;background:var(--bg);border:1px solid var(--border);
+  border-radius:var(--radius);color:var(--text);font-size:13px;
+  font-family:inherit;cursor:pointer;
+}
+.form-select:focus{outline:none;border-color:var(--gold)}
+.form-note{font-size:11px;color:var(--text-muted);font-family:var(--mono)}
 
-  /* ══ HISTORY ══ */
-  .history-section { grid-column:1/-1; background:var(--surface); border:1px solid var(--border); border-radius:6px; overflow:hidden; }
-  .history-head { padding:12px 20px; border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; }
-  .history-title { font-size:10px; letter-spacing:2px; text-transform:uppercase; color:var(--text-dim); font-family:var(--mono); }
-  .history-list { padding:10px 20px; display:flex; flex-direction:column; gap:6px; max-height:180px; overflow-y:auto; }
-  .history-item { display:flex; align-items:center; justify-content:space-between; padding:8px 12px; background:var(--bg); border:1px solid var(--border); border-radius:var(--radius); cursor:pointer; transition:all .2s; }
-  .history-item:hover { border-color:var(--gold-dim); }
-  .history-lbl { font-size:11px; color:var(--text); font-family:var(--mono); }
-  .history-date { font-size:10px; color:var(--text-muted); font-family:var(--mono); }
-  .history-empty { font-size:11px; color:var(--text-muted); font-family:var(--mono); padding:10px 0; text-align:center; }
+/* Row actions */
+.action-btns{display:flex;gap:6px;flex-wrap:wrap}
+.btn-xs{
+  padding:4px 10px;font-size:10px;letter-spacing:1px;
+  text-transform:uppercase;border-radius:4px;
+  cursor:pointer;font-family:var(--mono);transition:all .2s;border:1px solid;
+}
+.btn-xs-outline{background:transparent;border-color:var(--border);color:var(--text-dim)}
+.btn-xs-outline:hover{border-color:var(--gold-dim);color:var(--text)}
+.btn-xs-danger{background:transparent;border-color:rgba(192,57,43,.4);color:var(--red)}
+.btn-xs-danger:hover{background:var(--red-glow)}
+.btn-xs-success{background:transparent;border-color:rgba(39,174,96,.4);color:var(--green)}
+.btn-xs-success:hover{background:var(--green-glow)}
 
-  /* ══ TOAST ══ */
-  #toast { position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(16px); background:var(--surface); border:1px solid var(--gold-dim); border-radius:20px; padding:9px 20px; font-size:11px; font-family:var(--mono); color:var(--gold); opacity:0; transition:all .3s; pointer-events:none; z-index:999; }
-  #toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
+/* Admin Alert */
+.admin-alert{
+  padding:12px 16px;border-radius:var(--radius);margin-bottom:16px;
+  font-size:12px;font-family:var(--mono);display:none;
+}
+.admin-alert.show{display:block}
+.admin-alert.success{background:var(--green-glow);border:1px solid rgba(39,174,96,.4);color:var(--green)}
+.admin-alert.error{background:var(--red-glow);border:1px solid rgba(192,57,43,.4);color:var(--red)}
 
-  /* ══ FOOTER ══ */
-  .app-footer { border-top:1px solid var(--border); padding:12px 28px; text-align:center; font-size:9px; letter-spacing:2px; text-transform:uppercase; color:var(--text-muted); font-family:var(--mono); }
+/* ── ORNAMENT ── */
+.ornament-divider{
+  grid-column:1/-1;display:flex;align-items:center;
+  justify-content:center;color:var(--gold-dim);font-size:18px;
+}
 
-  /* ══ BADGE FREE / API ══ */
-  .badge-free {
-    display:inline-block; padding:1px 7px;
-    background:rgba(45,138,80,.15); border:1px solid rgba(45,138,80,.45);
-    border-radius:3px; font-size:8px; font-weight:700; letter-spacing:.5px;
-    color:#2d8a50; font-family:var(--mono); vertical-align:middle; text-transform:uppercase;
-  }
-  .badge-api {
-    display:inline-block; padding:1px 7px;
-    background:rgba(201,168,76,.15); border:1px solid rgba(201,168,76,.45);
-    border-radius:3px; font-size:8px; font-weight:700; letter-spacing:.5px;
-    color:var(--gold-dim); font-family:var(--mono); vertical-align:middle; text-transform:uppercase;
-  }
-  .badge-api-min {
-    display:inline-block; padding:1px 7px;
-    background:rgba(201,168,76,.08); border:1px dashed rgba(201,168,76,.35);
-    border-radius:3px; font-size:8px; font-weight:600; letter-spacing:.5px;
-    color:var(--gold-dim); font-family:var(--mono); vertical-align:middle; text-transform:uppercase;
-  }
-  /* ══ COST INFO BOX ══ */
-  .cost-info-box {
-    display:flex; align-items:flex-start; gap:10px;
-    padding:8px 12px; margin-top:8px;
-    background:var(--bg); border:1px solid var(--border); border-radius:var(--radius);
-    font-size:10px; font-family:var(--mono); color:var(--text-dim); line-height:1.6;
-  }
-  .cost-info-icon { font-size:14px; flex-shrink:0; margin-top:1px; }
-  .cost-info-text b { color:var(--text); }
+/* ── TOAST ── */
+#toast{
+  position:fixed;bottom:28px;left:50%;
+  transform:translateX(-50%) translateY(20px);
+  background:var(--surface);border:1px solid var(--gold-dim);
+  border-radius:24px;padding:10px 22px;
+  font-size:12px;font-family:var(--mono);letter-spacing:.5px;
+  color:var(--gold);opacity:0;transition:all .3s;
+  pointer-events:none;z-index:999;
+}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 
-  /* ══ BRAND SELECTOR ══ */
-  .brand-opt {
-    display: flex; align-items: center; gap: 10px;
-    padding: 9px 14px; background: var(--bg);
-    border: 1px solid var(--border); border-radius: var(--radius);
-    cursor: pointer; transition: all .2s; flex: 1; min-width: 160px;
-  }
-  .brand-opt:hover { border-color: var(--gold-dim); }
-  .brand-opt.active { border-color: var(--gold); background: var(--gold-glow); }
-  .brand-opt-dot { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; }
-  .brand-opt-name { font-size: 12px; color: var(--text); font-family: var(--mono); font-weight: 500; }
-  .brand-opt-desc { font-size: 10px; color: var(--text-muted); font-family: var(--mono); }
+/* ── FOOTER ── */
+.app-footer{
+  border-top:1px solid var(--border);padding:14px 32px;
+  text-align:center;font-size:10px;letter-spacing:2px;
+  text-transform:uppercase;color:var(--text-muted);font-family:var(--mono);
+}
 
-  /* ══ RESPONSIVE ══ */
-  @media(max-width:900px) {
-    .app-main { grid-template-columns:1fr; padding:16px; }
-    .dna-grid { grid-template-columns:repeat(2,1fr); }
-    .vdna-body { grid-template-columns:1fr; }
-  }
+/* ── MODAL ── */
+.modal-overlay{
+  position:fixed;inset:0;background:rgba(0,0,0,.7);
+  display:none;align-items:center;justify-content:center;z-index:500;
+}
+.modal-overlay.show{display:flex}
+.modal{
+  background:var(--surface);border:1px solid var(--border-accent);
+  border-radius:12px;padding:32px;width:440px;
+  box-shadow:0 32px 80px rgba(0,0,0,.6);
+}
+.modal-title{font-size:16px;font-weight:600;margin-bottom:6px}
+.modal-desc{font-size:12px;color:var(--text-dim);font-family:var(--mono);margin-bottom:24px}
+.modal-actions{display:flex;gap:10px;margin-top:24px;justify-content:flex-end}
+
+/* ── RESPONSIVE ── */
+@media(max-width:900px){
+  .app-main{grid-template-columns:1fr;padding:20px 16px}
+  .dna-grid{grid-template-columns:repeat(2,1fr)}
+  .stats-row{grid-template-columns:repeat(2,1fr)}
+  .form-grid{grid-template-columns:1fr}
+}
 </style>
 </head>
 <body>
 
-<!-- ══ LOGIN ══ -->
-<div id="login-screen">
+<!-- ══ SCREEN: LOGIN ══ -->
+<div id="screen-login" class="screen active">
   <div class="login-card">
     <div class="login-monogram">LB</div>
     <div class="login-brand">Brand DNA Engine</div>
-    <div class="login-tagline">Document Styling &amp; Brand Consistency</div>
-    <div class="login-badge">🔐 SHA-256 Protected Access</div>
+    <h1 class="login-title">Accesso Riservato</h1>
+    <div class="login-badge">🔐 Autenticazione Sicura v5.0</div>
 
     <div class="fg">
-      <label>Password di accesso</label>
-      <input type="password" id="pwd" placeholder="••••••••••••" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()">
+      <label>Username</label>
+      <input type="text" id="inp-username" placeholder="username"
+        autocomplete="username" autocapitalize="none"
+        onkeydown="if(event.key==='Enter')document.getElementById('inp-password').focus()">
     </div>
-    <div class="api-sep">
-      <div class="fg">
-        <label>Google Gemini API Key</label>
-        <input type="password" id="akey" placeholder="AIza..." autocomplete="off" onkeydown="if(event.key==='Enter')doLogin()" value="">
-        <p class="api-note">Usata solo localmente nel browser — mai inviata a server terzi.</p>
-      </div>
+    <div class="fg">
+      <label>Password</label>
+      <input type="password" id="inp-password" placeholder="••••••••••••"
+        autocomplete="current-password"
+        onkeydown="if(event.key==='Enter')doLogin()">
     </div>
-    <button class="login-btn" onclick="doLogin()">Entra nel Sistema →</button>
-    <div class="login-err" id="lerr"></div>
+
+    <button class="login-btn" id="login-btn" onclick="doLogin()">Entra nel Sistema →</button>
+    <div class="login-err" id="login-err"></div>
+    <div class="login-version">v5.0.0 · SintesiDigitale · Google Gemini</div>
   </div>
 </div>
 
-<!-- ══ APP ══ -->
-<div id="app">
+<!-- ══ SCREEN: APP ══ -->
+<div id="screen-app" class="screen">
 
   <header class="app-header">
-    <div class="hbrand">
-      <div class="hmark">B</div>
+    <div class="header-brand">
+      <div class="brand-mark">B</div>
       <div>
-        <div class="hname">Brand DNA Engine</div>
-        <div class="htag">Document Styling &amp; Brand Consistency</div>
+        <div class="brand-name">Brand DNA Engine</div>
+        <div class="brand-sub">Document Styling &amp; Brand Consistency</div>
       </div>
     </div>
-    <div class="hactions">
-      <div class="dna-pill" id="dna-pill"><div class="dna-dot"></div><span>DNA Non Acquisito</span></div>
-      <div class="cost-pill" id="cost-pill" title="Token consumati e costo Gemini stimato questa sessione">
-        <span style="letter-spacing:.5px;font-size:9px">API</span>
-        <span id="cost-val" style="font-weight:700">$0.0000</span>
-        <span class="cost-pill-sep">|</span>
-        <span id="cost-tok">0 tok</span>
+    <div class="header-right">
+      <div class="user-chip">
+        <div class="user-chip-dot"></div>
+        <span class="user-chip-name" id="header-username">—</span>
+        <span class="role-badge" id="header-role-badge">—</span>
       </div>
-      <div class="sess-time" id="sess-time"></div>
-      <button class="logout-btn" onclick="doLogout()">⎋ Esci</button>
+      <div class="session-timer" id="session-timer">00:00</div>
+      <button class="btn-logout" onclick="doLogout()">⎋ Esci</button>
     </div>
   </header>
 
-  <main class="app-main">
+  <nav class="app-nav">
+    <button class="nav-tab active" onclick="showView('view-engine',this)">◈ Brand Engine</button>
+    <button class="nav-tab admin-only" id="nav-admin" onclick="showView('view-admin',this)">⚙ Gestione Utenti</button>
+  </nav>
 
-    <!-- ── STEP 1: MASTER TEMPLATE ── -->
-    <div class="panel">
-      <div class="panel-head">
-        <div class="pnum">1</div>
-        <div>
-          <div class="ptitle">Master Template</div>
-          <div class="pdesc">Il documento che definisce il tuo brand visivo</div>
-        </div>
+  <!-- ── VIEW: ENGINE ── -->
+  <div id="view-engine" class="view active">
+    <main class="app-main">
+
+      <!-- Trial banner -->
+      <div id="trial-banner" class="trial-banner full-width" style="display:none">
+        <span class="trial-banner-text">⚡ Account Trial — Utilizzi disponibili:</span>
+        <span class="trial-counter" id="trial-counter">2</span>
       </div>
-      <div class="panel-body">
 
-        <div id="master-sintesi-notice" style="
-          display:flex; align-items:flex-start; gap:12px;
-          padding:14px 16px;
-          background:rgba(255,102,0,0.07);
-          border:1px solid rgba(255,102,0,0.35);
-          border-radius:4px;
-          margin-bottom:12px;">
-          <span style="font-size:18px;line-height:1;margin-top:1px">🟠</span>
-          <div>
-            <div style="font-family:var(--mono);font-size:11px;font-weight:600;color:#FF6600;letter-spacing:.5px;margin-bottom:4px">
-              SintesiDigitale Brand Kit — precaricato
-            </div>
-            <div style="font-family:var(--mono);font-size:10px;color:var(--text-dim);line-height:1.6">
-              Layout, colori (#FF6600 / #000000), tipografia (Montserrat + Inter),
-              regole header/footer e stile tabelle sono già configurati.<br>
-              Il documento Master Template non è necessario.<br>
-              <span style="color:var(--text-muted)">Seleziona "Brand da Master" per caricare un template personalizzato.</span>
+      <!-- Pro banner -->
+      <div id="pro-banner" class="pro-banner full-width" style="display:none">
+        <span class="pro-banner-text">✓ Account Pro attivo</span>
+        <span class="pro-banner-text" id="pro-expiry">Scade il: —</span>
+      </div>
+
+      <!-- STEP 1: MASTER TEMPLATE -->
+      <div class="panel">
+        <div class="panel-header">
+          <div class="panel-title-wrap">
+            <div class="panel-num">1</div>
+            <div>
+              <div class="panel-title">Master Template</div>
+              <div class="panel-desc">Il documento che definisce il tuo brand</div>
             </div>
           </div>
         </div>
-
-        <div id="master-upload-area" style="display:none;">
+        <div class="panel-body">
           <div class="upload-row">
-            <label for="master-file" class="upload-btn" style="cursor:pointer;">📎 Carica File</label>
-            <span class="upload-hint">oppure trascina · .txt · .md · .docx</span>
-            <input type="file" id="master-file" accept=".txt,.md,.pdf,.docx" style="display:none" onchange="handleFileInput(event,'master-doc','master-count')">
+            <button class="upload-btn" onclick="document.getElementById('master-file').click()">📎 Carica File</button>
+            <span class="upload-label">oppure trascina .txt / .md / .docx qui sotto</span>
+            <input type="file" id="master-file" accept=".txt,.md,.docx" onchange="handleFileInput(event,'master-doc','master-count')">
           </div>
-          <div class="drop-zone" id="master-drop"
-            ondragover="event.preventDefault();this.classList.add('drag-over')"
-            ondragleave="this.classList.remove('drag-over')"
-            ondrop="handleDrop(event,'master-doc','master-count');this.classList.remove('drag-over')">
-            <textarea id="master-doc" placeholder="Incolla qui il tuo documento master — lettera, report, proposta commerciale, vademecum...&#10;&#10;Puoi anche trascinare un file .txt .md .docx qui sopra." oninput="updateCount('master-doc','master-count')"></textarea>
-            <div class="drop-hint-bar">⬇ Drag &amp; drop .txt · .md · .docx · .pdf</div>
+          <div class="drop-zone" id="master-drop">
+            <textarea id="master-doc"
+              placeholder="Incolla qui il documento master — lettera, email tipo, report, proposta...&#10;&#10;Tutto ciò che usi come standard del tuo stile comunicativo."
+              oninput="updateCharCount('master-doc','master-count')"></textarea>
+            <div class="drop-hint"><span>⬇</span><span>Drag & drop .txt · .md · .docx</span></div>
           </div>
           <div class="char-count" id="master-count">0 caratteri</div>
+          <div class="loading-wrap" id="master-loading">
+            <div class="spinner"></div>
+            <span class="loading-text">Analisi Brand DNA in corso...</span>
+          </div>
+          <div class="btn-row">
+            <button class="btn btn-primary" onclick="analyzeDNA()">◈ Analizza Brand DNA</button>
+            <button class="btn btn-outline" onclick="clearPanel('master-doc','master-count')">Svuota</button>
+          </div>
         </div>
+      </div>
 
-        <!-- Analisi visiva -->
-        <div class="visual-section">
-          <div class="visual-label">🎨 Analisi Visiva Brand (opzionale)</div>
+      <!-- STEP 2: DOCUMENTO DA STILIZZARE -->
+      <div class="panel">
+        <div class="panel-header">
+          <div class="panel-title-wrap">
+            <div class="panel-num">2</div>
+            <div>
+              <div class="panel-title">Documento da Stilizzare</div>
+              <div class="panel-desc">Applica il Brand DNA a qualsiasi testo</div>
+            </div>
+          </div>
+        </div>
+        <div class="panel-body">
           <div class="upload-row">
-            <button class="upload-btn" onclick="document.getElementById('visual-file').click()">🖼 Screenshot / Immagine</button>
-            <span class="upload-hint">estrae colori, font e stile grafico</span>
-            <input type="file" id="visual-file" accept="image/*" onchange="handleVisualFile(event)">
+            <button class="upload-btn" onclick="document.getElementById('target-file').click()">📎 Carica File</button>
+            <span class="upload-label">oppure trascina .txt / .md / .docx qui sotto</span>
+            <input type="file" id="target-file" accept=".txt,.md,.docx" onchange="handleFileInput(event,'target-doc','target-count')">
           </div>
-          <div id="visual-preview">
-            <img id="visual-img" style="max-width:100%;max-height:140px;border-radius:4px;border:1px solid var(--border);margin-bottom:8px;">
-            <div class="loading-wrap" id="visual-loading"><div class="spinner"></div><span class="loading-text">Analisi visiva in corso...</span></div>
-            <div id="visual-results"></div>
+          <div class="drop-zone" id="target-drop">
+            <textarea id="target-doc"
+              placeholder="Incolla qui il documento da riformattare...&#10;&#10;Il contenuto verrà preservato, il Brand DNA verrà applicato."
+              oninput="updateCharCount('target-doc','target-count')"></textarea>
+            <div class="drop-hint"><span>⬇</span><span>Drag & drop .txt · .md · .docx</span></div>
           </div>
-        </div>
+          <div class="char-count" id="target-count">0 caratteri</div>
 
-        <div class="loading-wrap" id="master-loading"><div class="spinner"></div><span class="loading-text">Analisi Brand DNA in corso...</span></div>
-        <div class="btn-row">
-          <button class="btn btn-gold" onclick="analyzeDNA()">◈ Analizza Brand DNA <span class="badge-api">API</span></button>
-          <button class="btn btn-outline" onclick="clearPanel('master-doc','master-count')">Svuota</button>
+          <!-- Page numbers -->
+          <div class="page-options">
+            <span class="page-options-label">◈ Numerazione Pagine</span>
+            <div class="toggle-wrap">
+              <div class="toggle" id="page-toggle" onclick="togglePageNumbers()"></div>
+              <span class="toggle-label" id="page-toggle-label">Disattiva</span>
+            </div>
+            <select class="page-select" id="page-position" disabled>
+              <option value="bottom-center">Centro Basso</option>
+              <option value="bottom-right">Destra Basso</option>
+              <option value="bottom-left">Sinistra Basso</option>
+              <option value="top-center">Centro Alto</option>
+              <option value="top-right">Destra Alto</option>
+            </select>
+            <select class="page-select" id="page-format" disabled>
+              <option value="n">Solo numero (1)</option>
+              <option value="pagina-n">Pagina N</option>
+              <option value="n-di-tot">N di TOT</option>
+              <option value="pagina-n-di-tot">Pagina N di TOT</option>
+            </select>
+            <div style="display:flex;align-items:center;gap:6px">
+              <span style="font-size:11px;color:var(--text-muted);font-family:var(--mono)">Da pag.</span>
+              <input type="number" class="page-start-input" id="page-start" value="1" min="1" max="999" disabled>
+            </div>
+          </div>
+
+          <div class="loading-wrap" id="target-loading">
+            <div class="spinner"></div>
+            <span class="loading-text" id="target-loading-text">Applicazione Brand DNA in corso...</span>
+          </div>
+          <div class="btn-row">
+            <button class="btn btn-primary" id="apply-btn" onclick="applyDNA()" disabled>✦ Applica Brand Kit</button>
+            <button class="btn btn-outline" onclick="clearPanel('target-doc','target-count')">Svuota</button>
+          </div>
         </div>
       </div>
-    </div>
 
-    <!-- ── STEP 2: DOCUMENTO DA ELABORARE ── -->
-    <div class="panel">
-      <div class="panel-head">
-        <div class="pnum">2</div>
-        <div>
-          <div class="ptitle">Documento da Elaborare</div>
-          <div class="pdesc">Applica il Brand DNA — formattazione speculare al master</div>
+      <!-- DNA PANEL -->
+      <div class="dna-panel full-width" id="dna-panel">
+        <div class="dna-panel-header">
+          <span class="dna-panel-title">◈ Brand DNA Estratto</span>
+          <span style="font-size:11px;color:var(--text-muted);font-family:var(--mono)">Profilo stilistico acquisito</span>
+        </div>
+        <div class="dna-panel-body">
+          <div class="dna-grid" id="dna-grid"></div>
+          <div class="dna-rules-title">Regole stilistiche identificate</div>
+          <ul class="dna-rules-list" id="rules-list"></ul>
         </div>
       </div>
-      <div class="panel-body">
-        <div class="upload-row">
-          <label for="target-file" class="upload-btn" style="cursor:pointer;">📎 Carica File</label>
-          <span class="upload-hint">oppure trascina · .txt · .md · .docx</span>
-          <input type="file" id="target-file" accept=".txt,.md,.pdf,.docx" style="display:none" onchange="handleFileInput(event,'target-doc','target-count')">
-        </div>
-        <div class="drop-zone" id="target-drop"
-          ondragover="event.preventDefault();this.classList.add('drag-over')"
-          ondragleave="this.classList.remove('drag-over')"
-          ondrop="handleDrop(event,'target-doc','target-count');this.classList.remove('drag-over')">
-          <textarea id="target-doc" placeholder="Incolla qui il documento da elaborare...&#10;&#10;Puoi anche trascinare un file .txt .md .docx qui sopra." oninput="updateCount('target-doc','target-count')"></textarea>
-          <div class="drop-hint-bar">⬇ Drag &amp; drop .txt · .md · .docx · .pdf</div>
-        </div>
-        <div class="char-count" id="target-count">0 caratteri</div>
 
-        <!-- Brand Selector -->
-        <div style="margin-bottom:12px;">
-          <div style="font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--gold-dim);font-family:var(--mono);margin-bottom:8px;">◈ Brand da Applicare</div>
-          <div style="display:flex;gap:8px;flex-wrap:wrap;" id="brand-selector">
-            <div class="brand-opt active" id="brand-sintesi" onclick="selectBrand('sintesi')">
-              <div class="brand-opt-dot" style="background:#FF6600"></div>
-              <div><div class="brand-opt-name">🟠 SintesiDigitale</div><div class="brand-opt-desc">Brand Kit precaricato</div></div>
-            </div>
-            <div class="brand-opt" id="brand-master" onclick="selectBrand('master')">
-              <div class="brand-opt-dot" style="background:var(--gold)"></div>
-              <div><div class="brand-opt-name">🎨 Brand da Master</div><div class="brand-opt-desc">DNA estratto dal template</div></div>
-            </div>
-            <div class="brand-opt" id="brand-custom" onclick="selectBrand('custom')">
-              <div class="brand-opt-dot" style="background:var(--text-dim)"></div>
-              <div><div class="brand-opt-name">➕ Brand Personalizzato</div><div class="brand-opt-desc">Configura manualmente</div></div>
-            </div>
-          </div>
-          <!-- Cost info box — aggiornato da selectBrand() -->
-          <div class="cost-info-box" id="cost-info-box">
-            <span class="cost-info-icon">🟠</span>
-            <span class="cost-info-text" id="cost-info-text">
-              <b>SintesiDigitale</b> — CSS hardcoded · prompt Gemini minimo ·
-              <span class="badge-api-min">API min.</span> ~€0.001/doc<br>
-              <span style="color:var(--text-muted)">Stampa · Scarica · Copia · Salva in storia → <span class="badge-free">FREE</span></span>
-            </span>
-          </div>
-          <div id="custom-brand-inputs" style="display:none;margin-top:10px;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);padding:12px;">
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
-              <div><label style="font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--text-dim);font-family:var(--mono);display:block;margin-bottom:5px">Nome Brand</label><input type="text" id="cb-name" placeholder="Es. Acme Srl" style="width:100%;padding:7px 10px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-size:12px;font-family:var(--mono)"></div>
-              <div><label style="font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--text-dim);font-family:var(--mono);display:block;margin-bottom:5px">Colore Primario</label><div style="display:flex;gap:6px;align-items:center"><input type="color" id="cb-primary" value="#FF6600" style="width:36px;height:30px;border:none;background:none;cursor:pointer" oninput="document.getElementById('cb-primary-hex').value=this.value"><input type="text" id="cb-primary-hex" placeholder="#FF6600" style="flex:1;padding:7px 10px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-size:12px;font-family:var(--mono)"></div></div>
-              <div><label style="font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--text-dim);font-family:var(--mono);display:block;margin-bottom:5px">Colore Secondario</label><div style="display:flex;gap:6px;align-items:center"><input type="color" id="cb-secondary" value="#000000" style="width:36px;height:30px;border:none;background:none;cursor:pointer" oninput="document.getElementById('cb-secondary-hex').value=this.value"><input type="text" id="cb-secondary-hex" placeholder="#000000" style="flex:1;padding:7px 10px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-size:12px;font-family:var(--mono)"></div></div>
-              <div><label style="font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--text-dim);font-family:var(--mono);display:block;margin-bottom:5px">Font Titoli</label><select id="cb-font-head" style="width:100%;padding:7px 10px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-size:12px;font-family:var(--mono)"><option value="Montserrat">Montserrat</option><option value="Orbitron">Orbitron</option><option value="Playfair Display">Playfair Display</option><option value="Poppins">Poppins</option><option value="Raleway">Raleway</option></select></div>
-              <div><label style="font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--text-dim);font-family:var(--mono);display:block;margin-bottom:5px">Font Corpo</label><select id="cb-font-body" style="width:100%;padding:7px 10px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-size:12px;font-family:var(--mono)"><option value="Inter">Inter</option><option value="Roboto">Roboto</option><option value="DM Sans">DM Sans</option><option value="Open Sans">Open Sans</option></select></div>
-              <div><label style="font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--text-dim);font-family:var(--mono);display:block;margin-bottom:5px">Tagline</label><input type="text" id="cb-tagline" placeholder="Es. Premium Digital Solutions" style="width:100%;padding:7px 10px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-size:12px;font-family:var(--mono)"></div>
+      <div class="ornament-divider full-width">◆</div>
+
+      <!-- OUTPUT -->
+      <div class="output-panel full-width">
+        <div class="output-header">
+          <div style="display:flex;align-items:center;gap:14px">
+            <div class="panel-num">3</div>
+            <div>
+              <div class="panel-title">Output — Documento Stilizzato</div>
+              <div class="panel-desc">Risultato con Brand DNA applicato</div>
             </div>
           </div>
         </div>
-
-        <!-- Numerazione pagine -->
-        <div class="page-opts">
-          <span class="page-opts-label">◈ Num. Pagine</span>
-          <div class="toggle" id="page-toggle" onclick="togglePages()"></div>
-          <span class="toggle-lbl" id="page-lbl">Off</span>
-          <select class="pselect" id="page-pos" disabled>
-            <option value="bottom-center">Centro Basso</option>
-            <option value="bottom-right">Destra Basso</option>
-            <option value="bottom-left">Sinistra Basso</option>
-            <option value="top-center">Centro Alto</option>
-            <option value="top-right">Destra Alto</option>
-          </select>
-          <select class="pselect" id="page-fmt" disabled>
-            <option value="n">1</option>
-            <option value="pag-n">Pag. N</option>
-            <option value="n-di-tot">N / TOT</option>
-            <option value="pagina-n-di-tot">Pagina N di TOT</option>
-          </select>
-          <span style="font-size:10px;color:var(--text-muted);font-family:var(--mono)">Da</span>
-          <input type="number" class="pstart" id="page-start" value="1" min="1" disabled>
-        </div>
-
-        <div class="loading-wrap" id="target-loading"><div class="spinner"></div><span class="loading-text">Elaborazione Brand DNA in corso...</span></div>
-        <div class="btn-row">
-          <button class="btn btn-gold" id="apply-btn" onclick="applyDNA()" disabled>✦ Applica Brand Kit <span id="apply-badge" class="badge-api-min" title="CSS hardcoded · prompt Gemini minimo · ~€0.001/doc">API min.</span></button>
-          <button class="btn btn-outline" onclick="clearPanel('target-doc','target-count')">Svuota</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- ── DNA ESTRATTO ── -->
-    <div class="dna-panel" id="dna-panel">
-      <div class="dna-panel-head">
-        <span class="dna-panel-title">◈ Brand DNA Testuale Estratto</span>
-        <span style="font-size:10px;color:var(--text-muted);font-family:var(--mono)">Profilo stilistico acquisito</span>
-      </div>
-      <div class="dna-grid" id="dna-grid"></div>
-      <div class="dna-rules">
-        <div class="dna-rules-title">Regole stilistiche identificate</div>
-        <ul class="dna-rules-list" id="rules-list"></ul>
-      </div>
-    </div>
-
-    <!-- ── VISUAL DNA ── -->
-    <div class="visual-dna-panel" id="visual-dna-panel">
-      <div class="vdna-head"><span class="vdna-title">🎨 Brand DNA Visivo Estratto</span></div>
-      <div class="vdna-body" id="vdna-body"></div>
-    </div>
-
-    <!-- ── DIVIDER ── -->
-    <div class="divider">◆</div>
-
-    <!-- ── OUTPUT ── -->
-    <div class="output-panel">
-      <div class="output-head">
-        <div class="output-title-wrap">
-          <div class="pnum">3</div>
-          <div>
-            <div class="ptitle">Output — Documento Elaborato</div>
-            <div class="pdesc">Formattazione speculare al Master Template · pronto per stampa/PDF</div>
+        <div class="output-body">
+          <div class="output-area" id="output-area">
+            <div class="empty-output" id="empty-output">
+              <div class="empty-icon">◆</div>
+              <div class="empty-text">Nessun output ancora</div>
+            </div>
+          </div>
+          <div class="output-actions" id="output-actions" style="display:none">
+            <button class="btn btn-primary" onclick="copyOutput()">⎘ Copia Testo</button>
+            <button class="btn btn-outline" onclick="downloadOutput()">↓ Scarica .txt</button>
+            <button class="btn btn-outline" onclick="saveToHistory()">◈ Salva in Storia</button>
           </div>
         </div>
       </div>
-      <div class="output-body">
-        <div id="output-rendered" class="empty">
-          <div class="empty-icon">◆</div>
-          <div class="empty-txt">Nessun output ancora</div>
-        </div>
-        <iframe id="output-iframe"></iframe>
-        <div class="output-actions" id="output-actions" style="display:none">
-          <button class="btn btn-gold" onclick="printOutput()">🖨 Stampa / Salva PDF <span class="badge-free">FREE</span></button>
-          <button class="btn btn-outline" onclick="downloadHTML()">↓ Scarica .html <span class="badge-free">FREE</span></button>
-          <button class="btn btn-outline" onclick="copyOutput()">⎘ Copia Testo <span class="badge-free">FREE</span></button>
-          <button class="btn btn-outline" onclick="saveToHistory()">◈ Salva in Storia <span class="badge-free">FREE</span></button>
-        </div>
-        <!-- TIP STAMPA -->
-        <div class="print-tip" id="print-tip">
-          💡 <strong>Tip stampa pulita:</strong> header e footer del browser vengono soppressi automaticamente — margini professionali 15mm top/bottom, 18mm left/right su ogni pagina.
-        </div>
-      </div>
-    </div>
 
-    <!-- ── HISTORY ── -->
-    <div class="history-section">
-      <div class="history-head">
-        <span class="history-title">◈ Documenti Elaborati</span>
-        <button class="btn btn-outline" style="padding:4px 10px;font-size:9px" onclick="clearHistory()">Svuota</button>
+      <!-- HISTORY -->
+      <div class="history-section full-width">
+        <div class="history-header">
+          <span class="history-title">◈ Documenti Processati</span>
+          <button class="btn btn-outline" style="padding:4px 12px;font-size:10px" onclick="clearHistory()">Svuota</button>
+        </div>
+        <div class="history-list" id="history-list">
+          <div class="history-empty">Nessun documento processato in questa sessione</div>
+        </div>
       </div>
-      <div class="history-list" id="history-list">
-        <div class="history-empty">Nessun documento elaborato in questa sessione</div>
-      </div>
-    </div>
 
-  </main>
+    </main>
+  </div><!-- /view-engine -->
+
+  <!-- ── VIEW: ADMIN ── -->
+  <div id="view-admin" class="view">
+    <div class="admin-main">
+
+      <div class="admin-alert" id="admin-alert"></div>
+
+      <!-- Stats -->
+      <div class="stats-row">
+        <div class="stat-card">
+          <div class="stat-num" id="stat-total">—</div>
+          <div class="stat-label">Utenti Totali</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-num" id="stat-pro">—</div>
+          <div class="stat-label">Utenti Pro</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-num" id="stat-trial">—</div>
+          <div class="stat-label">Account Trial</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-num" id="stat-expiring">—</div>
+          <div class="stat-label">In Scadenza (30gg)</div>
+        </div>
+      </div>
+
+      <!-- Crea nuovo utente -->
+      <div class="admin-section">
+        <div class="admin-section-title">◈ Crea Nuovo Utente</div>
+        <div class="create-user-form">
+          <div class="form-grid">
+            <div class="form-group">
+              <label class="form-label">Username</label>
+              <input type="text" class="form-input" id="new-username" placeholder="mario_rossi" autocapitalize="none">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Password</label>
+              <input type="password" class="form-input" id="new-password" placeholder="••••••••">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Ruolo</label>
+              <select class="form-select" id="new-role" onchange="toggleRoleFields()">
+                <option value="pro">Pro</option>
+                <option value="trial">Trial</option>
+              </select>
+            </div>
+            <div class="form-group" id="field-expires">
+              <label class="form-label">Scadenza (Pro)</label>
+              <input type="date" class="form-input" id="new-expires">
+            </div>
+            <div class="form-group" id="field-uses" style="display:none">
+              <label class="form-label">Utilizzi Trial</label>
+              <select class="form-select" id="new-uses">
+                <option value="2">2 utilizzi</option>
+                <option value="3">3 utilizzi</option>
+                <option value="5">5 utilizzi</option>
+              </select>
+              <span class="form-note">Default: 2</span>
+            </div>
+          </div>
+          <div class="btn-row">
+            <button class="btn btn-primary" onclick="createUser()">+ Crea Utente</button>
+            <button class="btn btn-outline" onclick="resetCreateForm()">Reset</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Lista utenti -->
+      <div class="admin-section">
+        <div class="admin-section-title" style="display:flex;align-items:center;justify-content:space-between">
+          <span>◈ Utenti Registrati</span>
+          <button class="btn btn-outline" style="padding:5px 14px;font-size:10px" onclick="loadUsers()">↻ Aggiorna</button>
+        </div>
+        <div style="background:var(--panel);border:1px solid var(--border);border-radius:10px;overflow:hidden">
+          <div style="overflow-x:auto">
+            <table class="users-table">
+              <thead>
+                <tr>
+                  <th>Utente</th>
+                  <th>Ruolo</th>
+                  <th>Stato</th>
+                  <th>Scadenza / Utilizzi</th>
+                  <th>Creato</th>
+                  <th>Azioni</th>
+                </tr>
+              </thead>
+              <tbody id="users-tbody">
+                <tr><td colspan="6" style="text-align:center;color:var(--text-muted);padding:20px">Caricamento...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div><!-- /view-admin -->
 
   <footer class="app-footer">
-    Brand DNA Engine · Luciano Bettoli · Google Gemini · SHA-256 Auth · v4.0
+    Brand DNA Engine v5.0 · Luciano Bettoli · SintesiDigitale · Google Gemini 2.5 Flash
   </footer>
+
+</div><!-- /screen-app -->
+
+<!-- ── MODAL: CHANGE PASSWORD ── -->
+<div class="modal-overlay" id="modal-pwd">
+  <div class="modal">
+    <div class="modal-title">Cambia Password</div>
+    <div class="modal-desc" id="modal-pwd-desc">Inserisci la nuova password per l'utente.</div>
+    <div class="form-group" style="margin-top:8px">
+      <label class="form-label">Nuova Password</label>
+      <input type="password" class="form-input" id="modal-new-pwd" placeholder="••••••••"
+        onkeydown="if(event.key==='Enter')confirmChangePassword()">
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="closeModal('modal-pwd')">Annulla</button>
+      <button class="btn btn-primary" onclick="confirmChangePassword()">Salva Password</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── MODAL: RESET TRIAL ── -->
+<div class="modal-overlay" id="modal-trial">
+  <div class="modal">
+    <div class="modal-title">Reset Utilizzi Trial</div>
+    <div class="modal-desc" id="modal-trial-desc">Reimposta il contatore utilizzi.</div>
+    <div class="form-group" style="margin-top:8px">
+      <label class="form-label">Nuovo numero utilizzi</label>
+      <select class="form-select" id="modal-trial-uses">
+        <option value="2">2 utilizzi</option>
+        <option value="3">3 utilizzi</option>
+        <option value="5">5 utilizzi</option>
+        <option value="10">10 utilizzi</option>
+      </select>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="closeModal('modal-trial')">Annulla</button>
+      <button class="btn btn-primary" onclick="confirmResetTrial()">Reset</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── MODAL: EXTEND PRO ── -->
+<div class="modal-overlay" id="modal-extend">
+  <div class="modal">
+    <div class="modal-title">Estendi Scadenza Pro</div>
+    <div class="modal-desc" id="modal-extend-desc">Modifica la data di scadenza.</div>
+    <div class="form-group" style="margin-top:8px">
+      <label class="form-label">Nuova data scadenza</label>
+      <input type="date" class="form-input" id="modal-extend-date">
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="closeModal('modal-extend')">Annulla</button>
+      <button class="btn btn-primary" onclick="confirmExtend()">Salva</button>
+    </div>
+  </div>
 </div>
 
 <div id="toast"></div>
 
 <script>
-let selectedBrand = 'sintesi';
+// ══════════════════════════════════════════════════════════════════════════════
+//  BRAND DNA ENGINE v5.0 — Frontend
+//  IMPORTANTE: Sostituisci WORKER_URL con l'URL della tua Google Apps Script
+//  Web App dopo il deploy.
+// ══════════════════════════════════════════════════════════════════════════════
 
-// ══ BRAND SINTESIDIGITALE KIT ══
-const SINTESI_BRAND = {
-  name: 'SintesiDigitale',
-  tagline: 'Premium Digital Solutions',
-  primary: '#FF6600',
-  secondary: '#000000',
-  white: '#FFFFFF',
-  fontHead: 'Montserrat',
-  fontBody: 'Inter',
-  logo: 'SINTESIDIGITALE',
-  rules: [
-    'PRIMO FOGLIO: Grande intestazione con nome SINTESIDIGITALE in arancione (#FF6600) bold maiuscolo, sottotitolo "Premium Digital Solutions" in corsivo nero su sfondo grigio chiaro (#f0f0f0)',
-    'HEADER GLOBALE (tutte le pagine): sfondo nero (#000000), testo "— Vademecum Operativo SINTESIDIGITALE | Control Panel" con SINTESIDIGITALE in arancione, separatore arancione in basso',
-    'FOOTER GLOBALE (tutte le pagine): sfondo nero (#000000), separatore arancione in alto, testo centrato "Sintesidigitale — Premium Digital Solutions | Pagina N" in grigio chiaro',
-    'SCHERMO: sfondo body bianco (#FFFFFF), testo quasi nero (#1a1a1a), titoli H1/H2/H3 in arancione (#FF6600)',
-    'STAMPA @media print: sfondo bianco (#FFFFFF), testo nero (#000000), titoli H1/H2/H3 in arancione (#FF6600)',
-    'NESSUNA icona informale o decorativa (no razzo, no graffetta, no emoji decorative) — solo icone funzionali indispensabili',
-    'Tipografia titoli: Montserrat Bold, corpo: Inter',
-    'Tabelle: header sfondo nero testo bianco, righe alternate #1a1a1a (schermo) / #f5f5f5 (stampa)',
-    'Indice/TOC: voci in arancione (#FF6600)',
-    'Accenti, link, bordi: sempre #FF6600',
-    'Design flat: no ombre, no gradienti, no effetti decorativi',
-    'Documento formale e professionale — tono tecnico-operativo'
-  ]
-};
+const WORKER_URL = 'https://script.google.com/macros/s/AKfycbyZWR1QhyUW7ayKKi7xCw6okY1crRB9RKCh0GxHoeMUpLJQlTf39KQR77L_Ehk4wQPI/exec';
 
-// ══ BADGE UPDATER ══
-function updateApplyBadge(brand) {
-  const badge   = document.getElementById('apply-badge');
-  const infoTxt = document.getElementById('cost-info-text');
-  const infoBox = document.getElementById('cost-info-box');
-  if (!badge) return;
-  if (brand === 'sintesi') {
-    badge.textContent = 'API min.';
-    badge.className   = 'badge-api-min';
-    badge.title       = 'CSS hardcoded · prompt Gemini minimo · ~€0.001/doc';
-    if (infoTxt) infoTxt.innerHTML = '<b>SintesiDigitale</b> — CSS hardcoded · prompt Gemini minimo · <span class="badge-api-min">API min.</span> ~€0.001/doc<br><span style="color:var(--text-muted)">Stampa · Scarica · Copia · Salva → <span class="badge-free">FREE</span></span>';
-  } else if (brand === 'master') {
-    badge.textContent = 'API';
-    badge.className   = 'badge-api';
-    badge.title       = 'Analisi DNA + generazione CSS · ~€0.01/doc';
-    if (infoTxt) infoTxt.innerHTML = '<b>Brand da Master</b> — prompt Gemini completo (DNA+CSS) · <span class="badge-api">API</span> ~€0.01/doc<br><span style="color:var(--text-muted)">Stampa · Scarica · Copia → <span class="badge-free">FREE</span></span>';
-  } else {
-    badge.textContent = 'API';
-    badge.className   = 'badge-api';
-    badge.title       = 'Generazione CSS personalizzata · ~€0.01/doc';
-    if (infoTxt) infoTxt.innerHTML = '<b>Brand Personalizzato</b> — prompt Gemini completo · <span class="badge-api">API</span> ~€0.01/doc<br><span style="color:var(--text-muted)">Stampa · Scarica · Copia → <span class="badge-free">FREE</span></span>';
+// ── STATE ──────────────────────────────────────────────────────────────────
+let sessionToken    = null;
+let currentUser     = null;
+let currentRole     = null;
+let brandDNA        = null;
+let outputText      = '';
+let sessionHistory  = [];
+let pageNumbersEnabled = false;
+let sessionStart    = null;
+let timerInterval   = null;
+let adminTargetUser = null; // per modali admin
+
+// ── SHA-256 (lato client, solo per hash password prima di inviarle) ──────────
+async function sha256(str) {
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
+}
+
+// ── UTILS ──────────────────────────────────────────────────────────────────
+function toast(msg, duration=3000) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), duration);
+}
+
+function showError(id, msg) {
+  const el = document.getElementById(id);
+  el.textContent = msg;
+  el.classList.add('show');
+}
+
+function hideError(id) {
+  const el = document.getElementById(id);
+  el.classList.remove('show');
+}
+
+function adminAlert(msg, type='success') {
+  const el = document.getElementById('admin-alert');
+  el.textContent = msg;
+  el.className = `admin-alert show ${type}`;
+  setTimeout(() => el.classList.remove('show'), 4000);
+}
+
+function showModal(id) { document.getElementById(id).classList.add('show') }
+function closeModal(id) { document.getElementById(id).classList.remove('show') }
+
+function showView(viewId, tabEl) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById(viewId).classList.add('active');
+  tabEl.classList.add('active');
+  if (viewId === 'view-admin') loadUsers();
+}
+
+// ── API CALL al Worker (Apps Script) ────────────────────────────────────────
+async function apiCall(payload) {
+  if (!WORKER_URL || WORKER_URL === 'INSERISCI_QUI_URL_APPS_SCRIPT') {
+    throw new Error('URL Worker non configurato. Leggi SETUP.md.');
   }
+  // IMPORTANTE: Content-Type 'text/plain' è intenzionale.
+  // Apps Script non gestisce preflight OPTIONS — usando text/plain
+  // il browser non invia la preflight e la richiesta passa senza errori CORS.
+  // Il corpo rimane JSON valido e viene parsato normalmente dal backend.
+  const resp = await fetch(WORKER_URL, {
+    method:  'POST',
+    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+    body:    JSON.stringify(payload)
+  });
+  if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+  return resp.json();
 }
 
-// ══ SINTESIDIGITALE — CSS HARDCODED (nessun token speso per lo stile) ══
-// v3.6 FIX MARGINI: @page margin:15mm 18mm — margini reali su ogni pagina
-// Tecnica editoriale: @page gestisce i margini, .cover e .page-footer
-// escono con margini negativi per coprire l'intera larghezza della pagina
-const SINTESI_CSS_TEMPLATE = `@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Montserrat:wght@400;700;900&display=swap');
-*{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'Inter',sans-serif;font-size:11px;line-height:1.75;color:#1a1a1a;background:#fff;max-width:794px;margin:0 auto}
-.cover{background:#f4f4f4;padding:36px 40px 32px;border-bottom:3px solid #FF6600}
-.cover-brand{font-family:'Montserrat',sans-serif;font-weight:900;font-size:34px;color:#FF6600;letter-spacing:3px;text-transform:uppercase;line-height:1;margin-bottom:8px}
-.cover-line{height:3px;background:#FF6600;width:260px;margin:10px 0 14px}
-.cover-tagline{font-style:italic;font-size:13px;color:#555;margin-bottom:40px}
-.cover-title{font-family:'Montserrat',sans-serif;font-weight:700;font-size:22px;color:#FF6600;line-height:1.3;margin-bottom:10px}
-.cover-subtitle{font-size:12px;color:#555;line-height:1.5;margin-bottom:6px}
-.cover-date{font-size:10px;color:#888;margin-top:4px}
-.content{padding:24px 40px}
-h1{font-family:'Montserrat',sans-serif;font-weight:700;font-size:17px;color:#FF6600;margin:36px 0 14px;padding-bottom:7px;border-bottom:2px solid #FF6600;page-break-after:avoid;break-after:avoid}
-h2{font-family:'Montserrat',sans-serif;font-weight:700;font-size:14px;color:#FF6600;margin:28px 0 10px;page-break-after:avoid;break-after:avoid}
-h3{font-family:'Montserrat',sans-serif;font-weight:700;font-size:12px;color:#FF6600;margin:20px 0 8px;page-break-after:avoid;break-after:avoid}
-h1+*,h2+*,h3+*{page-break-before:avoid;break-before:avoid}
-p{margin-bottom:10px;orphans:4;widows:4}
-ul,ol{margin:8px 0 14px 26px}
-li{margin-bottom:5px;orphans:3;widows:3}
-strong{font-weight:600}
-table{width:100%;border-collapse:collapse;font-size:11px;margin:18px 0;page-break-inside:avoid;break-inside:avoid}
-thead tr{background:#000;color:#fff;-webkit-print-color-adjust:exact;print-color-adjust:exact}
-thead th{font-family:'Montserrat',sans-serif;font-weight:700;font-size:10px;letter-spacing:.5px;padding:9px 14px;text-align:left}
-tbody tr{background:#fff}
-tbody tr:nth-child(even){background:#f5f5f5;-webkit-print-color-adjust:exact;print-color-adjust:exact}
-td{padding:8px 14px;border-bottom:1px solid #e4e4e4;vertical-align:top}
-blockquote{border-left:3px solid #FF6600;background:#fff8f4;padding:10px 12px;margin:14px 0;page-break-inside:avoid;break-inside:avoid;-webkit-print-color-adjust:exact;print-color-adjust:exact}
-code{font-family:'DM Mono','Courier New',monospace;font-size:10px;background:#f0f0f0;padding:2px 6px;border-radius:2px;color:#222}
-pre{font-family:'DM Mono','Courier New',monospace;font-size:10px;background:#f0f0f0;padding:14px 16px;margin:14px 0;border-radius:3px;page-break-inside:avoid;break-inside:avoid;white-space:pre-wrap;word-wrap:break-word;border-left:3px solid #FF6600}
-.toc{background:#f8f8f8;border:1px solid #e0e0e0;border-left:3px solid #FF6600;padding:18px 40px 14px;margin:16px 0 20px;page-break-inside:avoid;break-inside:avoid}
-.toc h2{font-family:'Montserrat',sans-serif;font-weight:700;font-size:12px;color:#FF6600;margin:0 0 12px;border:none;padding:0}
-.toc-item{display:block;padding:0;margin-bottom:5px;color:#333;line-height:1.6}
-.toc-item a{color:#FF6600;text-decoration:none}
-.toc-item a:hover{text-decoration:underline}
-.page-footer{background:#000;color:#aaa;font-size:10px;font-family:'Montserrat',sans-serif;letter-spacing:.5px;padding:14px 40px;border-top:3px solid #FF6600;text-align:center;margin-top:52px;-webkit-print-color-adjust:exact;print-color-adjust:exact}
-@media print{
-@page{margin:15mm 18mm!important;size:A4 portrait!important}
-body{padding:0!important;margin:0 auto!important;max-width:100%!important;width:100%!important;box-sizing:border-box!important;-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
-.cover{margin:-15mm -18mm 0!important;padding:calc(15mm + 30px) calc(18mm + 22px) 44px!important;-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
-.page-footer{margin:52px -18mm 0!important;padding:14px 40px!important;-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
-h1,h2,h3{color:#FF6600!important;-webkit-print-color-adjust:exact!important}
-thead tr{background:#000!important;color:#fff!important;-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
-tbody tr:nth-child(even){background:#f5f5f5!important;-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
-blockquote{background:#fff8f4!important;-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
-h1,h2,h3{page-break-after:avoid!important;break-after:avoid!important}
-h1+*,h2+*,h3+*{page-break-before:avoid!important;break-before:avoid!important}
-table,blockquote,.toc,pre{page-break-inside:avoid!important;break-inside:avoid!important}
-tr{page-break-inside:avoid!important;break-inside:avoid!important}
-p{orphans:4!important;widows:4!important}
-li{orphans:3!important;widows:3!important}
-}`;
-
-// ══ SINTESIDIGITALE — PROMPT MINIMO (CSS hardcoded, zero token per lo stile) ══
-const SINTESI_MINIMAL_PROMPT = `Sei un convertitore HTML semantico. Converti il testo in HTML strutturato.
-OUTPUT: SOLO contenuto HTML interno — NO DOCTYPE, NO html, NO head, NO style, NO body tag.
-NESSUN markdown fence, nessun testo prima o dopo l'HTML.
-
-STRUTTURA OBBLIGATORIA (rispetta questo ordine):
-1. <div class="cover">
-     <div class="cover-brand">SINTESIDIGITALE</div>
-     <div class="cover-line"></div>
-     <div class="cover-tagline">Premium Digital Solutions</div>
-     <div class="cover-title">[TITOLO PRINCIPALE estratto dal documento]</div>
-     <div class="cover-subtitle">[sottotitolo o stack tecnico se presente]</div>
-     <div class="cover-date">[data o versione se presenti, altrimenti ometti il tag]</div>
-   </div>
-2. Se esiste un indice:
-   <nav class="toc"><h2>Indice</h2>
-     <div class="toc-item">1. Nome prima sezione</div>
-     <div class="toc-item">2. Nome seconda sezione</div>
-     [una div.toc-item per ogni voce dell'indice]
-   </nav>
-   CRITICO: NON usare mai ol, ul, li per l'indice — SOLO div.toc-item
-3. <div class="content">
-     [tutto il contenuto principale]
-   </div>
-4. <div class="page-footer">SINTESIDIGITALE — Premium Digital Solutions</div>
-
-REGOLE HTML:
-- h1 = sezione principale (es. "1. Setup", "FASE 2"), h2 = sottosezione, h3 = paragrafo minore
-- ul/li per liste puntate, ol/li per liste numerate
-- table > thead > tr > th + tbody > tr > td per tabelle
-- <blockquote> per avvisi critici, REGOLA CRITICA, warning (righe con emoji o testo enfatizzato)
-- <code> per comandi, URL, variabili, valori tecnici inline
-- <pre><code> per blocchi multi-riga di codice/configurazione
-- Preserva TUTTO il contenuto originale — zero omissioni
-- ZERO stili inline, ZERO CSS aggiunto, ZERO emoji decorative
-- Output puro: inizia esattamente con <div class="cover">`;
-
-function selectBrand(brand) {
-  selectedBrand = brand;
-  document.querySelectorAll('.brand-opt').forEach(el => el.classList.remove('active'));
-  document.getElementById('brand-' + brand).classList.add('active');
-  document.getElementById('custom-brand-inputs').style.display = brand === 'custom' ? 'block' : 'none';
-  updateApplyBadge(brand);
-
-  const uploadArea    = document.getElementById('master-upload-area');
-  const sintesiNotice = document.getElementById('master-sintesi-notice');
-  const applyBtn      = document.getElementById('apply-btn');
-
-  if (brand === 'sintesi') {
-    uploadArea.style.display    = 'none';
-    sintesiNotice.style.display = 'flex';
-    applyBtn.disabled = false;
-    toast('🟠 Brand SintesiDigitale attivo — template non necessario');
-  } else {
-    uploadArea.style.display    = 'block';
-    sintesiNotice.style.display = 'none';
-    if (brand === 'master') {
-      applyBtn.disabled = !brandDNA;
-      if (!brandDNA) toast('⚠ Analizza prima il Master Template');
-      else toast('🎨 Brand da Master attivo');
-    } else {
-      applyBtn.disabled = false;
-      toast('➕ Configura il brand personalizzato');
-    }
-  }
-}
-
-function getBrandContext() {
-  if (selectedBrand === 'sintesi') {
-    return `
-BRAND KIT ATTIVO: SintesiDigitale
-- Nome brand: ${SINTESI_BRAND.name}
-- Tagline: ${SINTESI_BRAND.tagline}
-- Colore primario (Sintesi Action): ${SINTESI_BRAND.primary}
-- Colore secondario (Deep Neural): ${SINTESI_BRAND.secondary}
-- Colore sfondo puro (Data Pure): ${SINTESI_BRAND.white}
-- Font titoli: ${SINTESI_BRAND.fontHead} Bold (alternativa: Orbitron per look tech)
-- Font corpo: ${SINTESI_BRAND.fontBody} (alternativa: Roboto)
-- Logo simbolo: griglia esagonale ⬡ in arancione ${SINTESI_BRAND.primary}
-- Regole brand:
-${SINTESI_BRAND.rules.map((r,i) => `  ${i+1}. ${r}`).join('\n')}
-`;
-  } else if (selectedBrand === 'master' && brandDNA) {
-    return `
-BRAND DA MASTER TEMPLATE:
-- Brand: ${brandDNA.brand_name||''}
-- Tono: ${brandDNA.tone}
-- Struttura: ${brandDNA.structure}
-- Tabelle: ${brandDNA.tables}
-- Emoji/Icone: ${brandDNA.emoji}
-- Intestazioni: ${brandDNA.headers}
-- Colori: ${brandDNA.colors_mentioned||''}
-- Regole: ${(brandDNA.rules||[]).join('; ')}
-${visualDNA ? `
-VISUAL DNA:
-- Colori: ${JSON.stringify(visualDNA.colors)}
-- Header: ${visualDNA.header_style}
-- Footer: ${visualDNA.footer_style}
-- Tabelle: ${visualDNA.table_style}
-` : ''}
-`;
-  } else if (selectedBrand === 'custom') {
-    const name = document.getElementById('cb-name').value || 'Brand';
-    const primary = document.getElementById('cb-primary-hex').value || document.getElementById('cb-primary').value;
-    const secondary = document.getElementById('cb-secondary-hex').value || document.getElementById('cb-secondary').value;
-    const fontHead = document.getElementById('cb-font-head').value;
-    const fontBody = document.getElementById('cb-font-body').value;
-    const tagline = document.getElementById('cb-tagline').value;
-    return `
-BRAND PERSONALIZZATO:
-- Nome brand: ${name}
-- Tagline: ${tagline}
-- Colore primario: ${primary}
-- Colore secondario: ${secondary}
-- Font titoli: ${fontHead}
-- Font corpo: ${fontBody}
-`;
-  }
-  return '';
-}
-
-// ── COST TRACKER ──
-// Gemini 2.5 Flash pricing (giugno 2026)
-const PRICE_IN_PER_M  = 0.075; // USD / 1M token input
-const PRICE_OUT_PER_M = 0.300; // USD / 1M token output
-let sessTokensIn = 0, sessTokensOut = 0, sessCallCount = 0;
-
-function trackCost(tokIn, tokOut) {
-  sessTokensIn  += (tokIn  || 0);
-  sessTokensOut += (tokOut || 0);
-  sessCallCount += 1;
-  const costIn   = (sessTokensIn  / 1000000) * PRICE_IN_PER_M;
-  const costOut  = (sessTokensOut / 1000000) * PRICE_OUT_PER_M;
-  const total    = costIn + costOut;
-  const totTok   = sessTokensIn + sessTokensOut;
-  const pill     = document.getElementById('cost-pill');
-  const valEl    = document.getElementById('cost-val');
-  const tokEl    = document.getElementById('cost-tok');
-  if (!pill) return;
-  valEl.textContent = '$' + total.toFixed(4);
-  tokEl.textContent = totTok.toLocaleString('it') + ' tok';
-  pill.classList.toggle('active', total > 0 && total < 0.05);
-  pill.classList.toggle('warn',   total >= 0.05);
-}
-
-function resetCostTracker() {
-  sessTokensIn = sessTokensOut = sessCallCount = 0;
-  const pill  = document.getElementById('cost-pill');
-  const valEl = document.getElementById('cost-val');
-  const tokEl = document.getElementById('cost-tok');
-  if (valEl) valEl.textContent = '$0.0000';
-  if (tokEl) tokEl.textContent = '0 tok';
-  if (pill)  { pill.classList.remove('active','warn'); }
-}
-
-// ══ CONFIG ══
-const PWD_HASH = 'fcd476b39d0442520601f01fe534a16267371685e4235855da7e8aeafbae5eda'; // brandDNA2026
-
-let apiKey = '';
-let brandDNA = null;
-let visualDNA = null;
-let sessionHistory = [];
-let outputHTML = '';
-let outputText = '';
-let pagesEnabled = false;
-
-// ══ AUTH ══
-async function sha256(s) {
-  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(s));
-  return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
-}
-
+// ── LOGIN ──────────────────────────────────────────────────────────────────
 async function doLogin() {
-  const pwd = document.getElementById('pwd').value;
-  const key = document.getElementById('akey').value.trim();
-  const lerr = document.getElementById('lerr');
-  if (!pwd || !key) { lerr.textContent = 'Inserisci password e API key.'; return; }
-  if (!key.startsWith('AIza')) { lerr.textContent = 'API Key non valida.'; return; }
-  const hash = await sha256(pwd);
-  if (hash !== PWD_HASH) { lerr.textContent = '✕ Password errata.'; return; }
-  apiKey = key;
-  document.getElementById('login-screen').classList.add('hidden');
-  document.getElementById('app').classList.add('visible');
-  startTimer();
+  const username = document.getElementById('inp-username').value.trim().toLowerCase();
+  const password = document.getElementById('inp-password').value;
+  const btn      = document.getElementById('login-btn');
+
+  hideError('login-err');
+
+  if (!username || !password) {
+    showError('login-err', 'Inserisci username e password.');
+    return;
+  }
+
+  btn.disabled = true;
+  btn.textContent = 'Autenticazione...';
+
+  try {
+    const passwordHash = await sha256(password);
+    const res = await apiCall({ action: 'auth', username, passwordHash });
+
+    if (!res.ok) {
+      showError('login-err', res.error || 'Errore di autenticazione.');
+      return;
+    }
+
+    // Salva sessione
+    sessionToken   = res.token;
+    currentUser    = username;
+    currentRole    = res.role;
+    sessionStart   = Date.now();
+
+    // Aggiorna UI
+    document.getElementById('header-username').textContent = username;
+    const badge = document.getElementById('header-role-badge');
+    badge.textContent = res.role.toUpperCase();
+    badge.className   = `role-badge ${res.role}`;
+
+    // Mostra tab admin se admin
+    if (res.role === 'admin') {
+      document.getElementById('nav-admin').classList.add('show');
+    }
+
+    // Banners per Pro / Trial
+    if (res.role === 'trial') {
+      const banner = document.getElementById('trial-banner');
+      banner.style.display = 'flex';
+      document.getElementById('trial-counter').textContent = res.usesRemaining;
+    }
+    if (res.role === 'pro') {
+      const banner = document.getElementById('pro-banner');
+      banner.style.display = 'flex';
+      document.getElementById('pro-expiry').textContent =
+        'Scade il: ' + formatDate(res.expires);
+    }
+
+    // Switch screen
+    document.getElementById('screen-login').classList.remove('active');
+    document.getElementById('screen-app').classList.add('active');
+
+    startSessionTimer();
+
+  } catch(err) {
+    showError('login-err', 'Errore di connessione al server. Riprova.');
+    console.error(err);
+  } finally {
+    btn.disabled  = false;
+    btn.textContent = 'Entra nel Sistema →';
+  }
 }
 
 function doLogout() {
-  apiKey=''; brandDNA=null; visualDNA=null; outputHTML=''; outputText='';
-  resetCostTracker();
-  document.getElementById('login-screen').classList.remove('hidden');
-  document.getElementById('app').classList.remove('visible');
-  document.getElementById('pwd').value='';
-  document.getElementById('akey').value='';
-  document.getElementById('lerr').textContent='';
+  sessionToken  = null;
+  currentUser   = null;
+  currentRole   = null;
+  brandDNA      = null;
+  outputText    = '';
+  sessionHistory = [];
+  clearInterval(timerInterval);
+
+  // Reset login form
+  document.getElementById('inp-username').value = '';
+  document.getElementById('inp-password').value = '';
+  hideError('login-err');
+
+  // Reset UI
+  document.getElementById('trial-banner').style.display = 'none';
+  document.getElementById('pro-banner').style.display   = 'none';
+  document.getElementById('nav-admin').classList.remove('show');
+  document.getElementById('output-actions').style.display = 'none';
+  document.getElementById('empty-output').style.display   = 'flex';
+  document.getElementById('output-area').innerHTML = '';
+  document.getElementById('output-area').appendChild(document.getElementById('empty-output'));
+  document.getElementById('dna-panel').classList.remove('visible');
+  document.getElementById('apply-btn').disabled = true;
+  document.getElementById('history-list').innerHTML =
+    '<div class="history-empty">Nessun documento processato in questa sessione</div>';
+
+  document.getElementById('screen-app').classList.remove('active');
+  document.getElementById('screen-login').classList.add('active');
+
+  // Torna al tab engine
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('view-engine').classList.add('active');
+  document.querySelector('.nav-tab').classList.add('active');
 }
 
-function startTimer() {
-  const start = Date.now();
-  const el = document.getElementById('sess-time');
-  setInterval(() => {
-    const d = Date.now()-start;
-    const m = Math.floor(d/60000);
-    const s = Math.floor((d%60000)/1000);
-    el.textContent = `Login ${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+// ── SESSION TIMER ──────────────────────────────────────────────────────────
+function startSessionTimer() {
+  const el = document.getElementById('session-timer');
+  timerInterval = setInterval(() => {
+    const d = Date.now() - sessionStart;
+    const m = Math.floor(d / 60000);
+    const s = Math.floor((d % 60000) / 1000);
+    el.textContent = `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
   }, 1000);
 }
 
-// ══ DRAG & DROP ══
-async function handleDrop(ev, taId, countId) {
-  ev.preventDefault();
-  ev.stopPropagation();
-  const file = ev.dataTransfer?.files?.[0];
-  if (file) await readFile(file, taId, countId);
-}
-
-function setupDrop(zoneId, taId, countId) {
+// ── FILE HANDLING ──────────────────────────────────────────────────────────
+function setupDropZone(zoneId, taId, countId) {
   const zone = document.getElementById(zoneId);
-  if (!zone) return;
-  zone.addEventListener('dragover', ev => { ev.preventDefault(); zone.classList.add('drag-over'); });
-  zone.addEventListener('dragleave', ev => { if(!zone.contains(ev.relatedTarget)) zone.classList.remove('drag-over'); });
-  zone.addEventListener('drop', async ev => {
-    ev.preventDefault(); zone.classList.remove('drag-over');
-    const file = ev.dataTransfer?.files?.[0];
-    if (file) await readFile(file, taId, countId);
+  ['dragenter','dragover'].forEach(ev =>
+    zone.addEventListener(ev, e => { e.preventDefault(); zone.classList.add('drag-over'); })
+  );
+  ['dragleave','dragend'].forEach(ev =>
+    zone.addEventListener(ev, e => { if (!zone.contains(e.relatedTarget)) zone.classList.remove('drag-over'); })
+  );
+  zone.addEventListener('drop', async e => {
+    e.preventDefault(); zone.classList.remove('drag-over');
+    const f = e.dataTransfer.files[0];
+    if (f) await readFileIntoTextarea(f, taId, countId);
   });
 }
 
-async function readFile(file, taId, countId) {
+async function readFileIntoTextarea(file, taId, countId) {
   const name = file.name.toLowerCase();
-  const ta = document.getElementById(taId);
+  const ta   = document.getElementById(taId);
+
   if (name.endsWith('.txt') || name.endsWith('.md') || name.endsWith('.csv')) {
     ta.value = await file.text();
-    updateCount(taId, countId);
-    toast(`✓ ${file.name}`);
+    updateCharCount(taId, countId);
+    toast(`✓ File caricato: ${file.name}`);
+
   } else if (name.endsWith('.docx')) {
-    toast('Lettura DOCX...');
+    toast('📄 DOCX — estrazione testo...');
     try {
       const ab = await file.arrayBuffer();
       const result = await mammoth.extractRawText({ arrayBuffer: ab });
-      ta.value = result.value.trim();
-      updateCount(taId, countId);
+      ta.value = result.value;
+      updateCharCount(taId, countId);
       toast(`✓ DOCX caricato: ${file.name}`);
-    } catch(e) { toast('⚠ Errore DOCX — incolla il testo manualmente'); }
-  } else if (name.endsWith('.pdf')) {
-    toast('📄 PDF rilevato — estrazione testo in corso...');
-    try {
-      const ab = await file.arrayBuffer();
-      const base64 = btoa(String.fromCharCode(...new Uint8Array(ab)));
-      const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
-      const resp = await fetch(url, {
-        method: 'POST',
-        headers: {'Content-Type':'application/json'},
-        body: JSON.stringify({
-          contents: [{
-            role: 'user',
-            parts: [
-              { inline_data: { mime_type: 'application/pdf', data: base64 } },
-              { text: 'Estrai tutto il testo da questo PDF mantenendo la struttura originale (titoli, paragrafi, liste, tabelle). Restituisci SOLO il testo estratto, nessun commento.' }
-            ]
-          }],
-          generationConfig: { maxOutputTokens: 32768, temperature: 0 }
-        })
-      });
-      if (!resp.ok) throw new Error('Errore API');
-      const data = await resp.json();
-      const text = data.candidates[0].content.parts[0].text;
-      ta.value = text.trim();
-      updateCount(taId, countId);
-      toast(`✓ PDF caricato: ${file.name}`);
     } catch(e) {
-      toast('⚠ Errore PDF — incolla il testo manualmente');
-      console.error(e);
+      toast('⚠ Impossibile leggere il DOCX. Incolla il testo manualmente.');
     }
   } else {
-    toast('⚠ Formato non supportato');
+    toast('⚠ Formato non supportato. Usa .txt .md .docx');
   }
 }
 
-function handleFileInput(ev, taId, countId) {
-  const file = ev.target.files[0];
-  if (file) readFile(file, taId, countId);
-  ev.target.value='';
+function handleFileInput(event, taId, countId) {
+  const f = event.target.files[0];
+  if (f) readFileIntoTextarea(f, taId, countId);
+  event.target.value = '';
 }
 
-// ══ UTILS ══
-function updateCount(taId, countId) {
-  document.getElementById(countId).textContent = document.getElementById(taId).value.length.toLocaleString('it') + ' caratteri';
+// ── CHAR COUNT / CLEAR ────────────────────────────────────────────────────
+function updateCharCount(taId, countId) {
+  const v = document.getElementById(taId).value;
+  document.getElementById(countId).textContent = v.length.toLocaleString('it') + ' caratteri';
 }
+
 function clearPanel(taId, countId) {
-  document.getElementById(taId).value='';
-  document.getElementById(countId).textContent='0 caratteri';
-}
-function toast(msg, dur=3000) {
-  const el = document.getElementById('toast');
-  el.textContent=msg; el.classList.add('show');
-  setTimeout(()=>el.classList.remove('show'), dur);
+  document.getElementById(taId).value = '';
+  document.getElementById(countId).textContent = '0 caratteri';
 }
 
-// ══ PAGE NUMBERS ══
-function togglePages() {
-  pagesEnabled = !pagesEnabled;
-  document.getElementById('page-toggle').classList.toggle('on', pagesEnabled);
-  document.getElementById('page-lbl').textContent = pagesEnabled ? 'On' : 'Off';
-  ['page-pos','page-fmt','page-start'].forEach(id => document.getElementById(id).disabled = !pagesEnabled);
+// ── PAGE NUMBERS ──────────────────────────────────────────────────────────
+function togglePageNumbers() {
+  pageNumbersEnabled = !pageNumbersEnabled;
+  const toggle = document.getElementById('page-toggle');
+  toggle.classList.toggle('on', pageNumbersEnabled);
+  document.getElementById('page-toggle-label').textContent = pageNumbersEnabled ? 'Attiva' : 'Disattiva';
+  document.getElementById('page-position').disabled = !pageNumbersEnabled;
+  document.getElementById('page-format').disabled   = !pageNumbersEnabled;
+  document.getElementById('page-start').disabled    = !pageNumbersEnabled;
 }
 
-function getPageCfg() {
+function getPageConfig() {
   return {
-    enabled: pagesEnabled,
-    pos: document.getElementById('page-pos').value,
-    fmt: document.getElementById('page-fmt').value,
-    start: parseInt(document.getElementById('page-start').value)||1
+    enabled:   pageNumbersEnabled,
+    position:  document.getElementById('page-position').value,
+    format:    document.getElementById('page-format').value,
+    startFrom: parseInt(document.getElementById('page-start').value) || 1
   };
 }
 
-// ══ GEMINI API ══
-async function callGemini(system, userMsg, imageData=null, imageMime=null, retries=3) {
-  const model = 'gemini-2.5-flash';
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+function renderOutputWithPages(text, pageConfig) {
+  const outputArea = document.getElementById('output-area');
 
-  const parts = [];
-  if (imageData) parts.push({ inline_data: { mime_type: imageMime, data: imageData } });
-  parts.push({ text: userMsg });
-
-  const body = {
-    system_instruction: { parts: [{ text: system }] },
-    contents: [{ role: 'user', parts }],
-    generationConfig: { maxOutputTokens: 65536, temperature: 0.4 }
-  };
-
-  for (let attempt = 1; attempt <= retries; attempt++) {
-    const resp = await fetch(url, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body) });
-    if (resp.ok) {
-      const data = await resp.json();
-      if (data.usageMetadata) {
-        trackCost(
-          data.usageMetadata.promptTokenCount     || 0,
-          data.usageMetadata.candidatesTokenCount || 0
-        );
-      }
-      return data.candidates[0].content.parts[0].text;
-    }
-    const e = await resp.json();
-    const msg = e.error?.message || 'Gemini error';
-    if (resp.status === 503 && attempt < retries) {
-      toast(`⏳ Gemini sovraccarico — riprovo (${attempt}/${retries})...`);
-      await new Promise(r => setTimeout(r, 4000 * attempt));
-      continue;
-    }
-    throw new Error(msg);
+  if (!pageConfig.enabled) {
+    outputArea.innerHTML = '';
+    const div = document.createElement('div');
+    div.style.cssText = 'white-space:pre-wrap;font-family:Georgia,serif;font-size:13px;line-height:1.8;';
+    div.textContent = text;
+    outputArea.appendChild(div);
+    return;
   }
+
+  const CHARS_PER_PAGE = 3000;
+  const pages = [];
+  let remaining = text;
+  while (remaining.length > 0) {
+    pages.push(remaining.slice(0, CHARS_PER_PAGE));
+    remaining = remaining.slice(CHARS_PER_PAGE);
+  }
+  if (pages.length === 0) pages.push(text);
+
+  const total     = pages.length;
+  const startFrom = pageConfig.startFrom;
+  const pos       = pageConfig.position;
+
+  outputArea.innerHTML = '';
+
+  pages.forEach((pageText, i) => {
+    const pageNum = startFrom + i;
+    const fmtMap  = {
+      'n':              String(pageNum),
+      'pagina-n':       `Pagina ${pageNum}`,
+      'n-di-tot':       `${pageNum} di ${total + startFrom - 1}`,
+      'pagina-n-di-tot':`Pagina ${pageNum} di ${total + startFrom - 1}`
+    };
+    const numStr = fmtMap[pageConfig.format] || String(pageNum);
+
+    const pageDiv = document.createElement('div');
+    pageDiv.style.cssText = 'border:1px solid var(--border);border-radius:4px;margin-bottom:16px;background:var(--bg);padding:18px;';
+
+    const numEl = document.createElement('div');
+    numEl.textContent = numStr;
+    numEl.style.cssText = `font-size:10px;color:var(--text-muted);font-family:var(--mono);letter-spacing:1px;padding:4px 0;margin-top:12px;border-top:1px solid var(--border);text-align:${pos.includes('right')?'right':pos.includes('left')?'left':'center'};`;
+
+    const contentEl = document.createElement('div');
+    contentEl.style.cssText = 'white-space:pre-wrap;font-family:Georgia,serif;font-size:13px;line-height:1.8;';
+    contentEl.textContent = pageText;
+
+    if (pos.startsWith('top')) {
+      numEl.style.marginTop    = '0';
+      numEl.style.marginBottom = '12px';
+      numEl.style.borderTop    = 'none';
+      numEl.style.borderBottom = '1px solid var(--border)';
+      numEl.style.paddingBottom = '8px';
+      numEl.style.paddingTop   = '0';
+      pageDiv.appendChild(numEl);
+      pageDiv.appendChild(contentEl);
+    } else {
+      pageDiv.appendChild(contentEl);
+      pageDiv.appendChild(numEl);
+    }
+
+    outputArea.appendChild(pageDiv);
+  });
 }
 
-// ══ ANALYZE DNA ══
+// ── ANALYZE DNA ──────────────────────────────────────────────────────────
 async function analyzeDNA() {
   const master = document.getElementById('master-doc').value.trim();
   if (!master) { toast('Inserisci il documento master'); return; }
+
   const ml = document.getElementById('master-loading');
   ml.classList.add('visible');
 
-  const sys = `Sei un esperto di brand identity e comunicazione professionale italiana.
-Analizza il documento e restituisci SOLO JSON valido senza markdown o backtick:
-{
-  "tone":"tono comunicativo",
-  "structure":"struttura e organizzazione",
-  "density":"densità informativa",
-  "lists":"uso delle liste",
-  "opening":"stile apertura documenti",
-  "closing":"stile chiusura documenti",
-  "vocabulary":"vocabolario e termini tipici",
-  "formality":"livello formalità",
-  "tables":"uso delle tabelle",
-  "emoji":"uso di emoji e icone",
-  "headers":"stile intestazioni e titoli",
-  "brand_name":"nome brand/azienda identificato",
-  "colors_mentioned":"colori o elementi visivi menzionati nel testo",
-  "rules":["regola stilistica 1","regola2","regola3","regola4","regola5","regola6","regola7","regola8"]
-}`;
+  const sys = `Sei un esperto di brand identity e comunicazione professionale.
+Analizza il documento e restituisci SOLO JSON valido (no markdown, no backtick, no testo extra):
+{"tone":"...","structure":"...","density":"...","lists":"...","opening":"...","closing":"...","vocabulary":"...","formality":"...","rules":["regola1","regola2","regola3","regola4","regola5","regola6"]}`;
 
   try {
-    const raw = await callGemini(sys, 'Analizza questo documento master:\n\n' + master);
-    brandDNA = JSON.parse(raw.replace(/```json|```/g,'').trim());
+    const res = await apiCall({
+      action:       'generate',
+      token:        sessionToken,
+      systemPrompt: sys,
+      userMessage:  'Analizza:\n\n' + master
+    });
+
+    if (!res.ok) { toast('Errore: ' + res.error); return; }
+
+    brandDNA = JSON.parse(res.result.replace(/```json|```/g,'').trim());
     renderDNA(brandDNA);
-    setDNAStatus(true);
     document.getElementById('apply-btn').disabled = false;
-    toast('✓ Brand DNA acquisito');
-  } catch(e) { toast('Errore: '+e.message); console.error(e); }
-  finally { ml.classList.remove('visible'); }
+    toast('✓ Brand DNA acquisito con successo');
+
+    // Aggiorna contatore trial
+    if (currentRole === 'trial' && res.usesRemaining !== null) {
+      document.getElementById('trial-counter').textContent = res.usesRemaining;
+    }
+
+  } catch(e) {
+    toast('Errore: ' + e.message);
+    console.error(e);
+  } finally {
+    ml.classList.remove('visible');
+  }
 }
 
 function renderDNA(dna) {
   const fields = [
-    ['Tono','tone'],['Struttura','structure'],['Densità','density'],['Tabelle','tables'],
-    ['Apertura','opening'],['Chiusura','closing'],['Emoji/Icone','emoji'],['Intestazioni','headers']
+    ['Tono','tone'],['Struttura','structure'],['Densità','density'],['Liste','lists'],
+    ['Apertura','opening'],['Chiusura','closing'],['Vocabolario','vocabulary'],['Formalità','formality']
   ];
-  document.getElementById('dna-grid').innerHTML = fields.map(([l,k])=>
-    `<div class="dna-cell"><div class="dna-cell-lbl">${l}</div><div class="dna-cell-val">${dna[k]||'—'}</div></div>`
+  document.getElementById('dna-grid').innerHTML = fields.map(([l,k]) =>
+    `<div class="dna-cell"><div class="dna-cell-label">${l}</div><div class="dna-cell-value">${dna[k]||'—'}</div></div>`
   ).join('');
-  document.getElementById('rules-list').innerHTML = (dna.rules||[]).map((r,i)=>
-    `<li><span class="rnum">${i+1}</span><span>${r}</span></li>`
+  document.getElementById('rules-list').innerHTML = (dna.rules||[]).map((r,i) =>
+    `<li><span class="rule-num">${i+1}</span><span>${r}</span></li>`
   ).join('');
   document.getElementById('dna-panel').classList.add('visible');
 }
 
-function setDNAStatus(active) {
-  const el = document.getElementById('dna-pill');
-  el.classList.toggle('active', active);
-  el.querySelector('span').textContent = active ? 'Brand DNA Attivo' : 'DNA Non Acquisito';
-}
-
-// ══ VISUAL ANALYSIS ══
-let visualBase64 = null;
-let visualMime = null;
-
-async function handleVisualFile(ev) {
-  const file = ev.target.files[0];
-  if (!file) return;
-  ev.target.value='';
-  const reader = new FileReader();
-  reader.onload = async e => {
-    const dataUrl = e.target.result;
-    visualBase64 = dataUrl.split(',')[1];
-    visualMime = file.type || 'image/png';
-    document.getElementById('visual-img').src = dataUrl;
-    document.getElementById('visual-preview').style.display = 'block';
-    const vl = document.getElementById('visual-loading');
-    vl.classList.add('visible');
-    document.getElementById('visual-results').innerHTML = '';
-    try {
-      const sys = `Sei un esperto di brand identity visiva. Analizza l'immagine e restituisci SOLO JSON valido senza markdown:
-{
-  "colors":{"primary":"#hex nome","secondary":"#hex nome","accent":"#hex nome","background":"#hex nome","text":"#hex nome","header_bg":"#hex nome","border":"#hex nome"},
-  "typography":{"headings":"descrizione font titoli","body":"descrizione font testo","size":"dimensioni tipiche"},
-  "layout":"descrizione layout e spaziatura",
-  "style":"stile grafico generale",
-  "mood":"atmosfera brand",
-  "header_style":"descrizione visiva dell'header",
-  "footer_style":"descrizione visiva del footer",
-  "table_style":"descrizione stile tabelle",
-  "recommendations":["consiglio1","consiglio2","consiglio3"]
-}`;
-      const raw = await callGemini(sys, 'Analizza questo documento visivamente:', visualBase64, visualMime);
-      visualDNA = JSON.parse(raw.replace(/```json|```/g,'').trim());
-      renderVisualDNA(visualDNA);
-      toast('✓ Analisi visiva completata');
-    } catch(e) { toast('Errore analisi visiva: '+e.message); }
-    finally { vl.classList.remove('visible'); }
-  };
-  reader.readAsDataURL(file);
-}
-
-function renderVisualDNA(v) {
-  const colors = v.colors || {};
-  const swatches = Object.entries(colors).map(([name,val]) => {
-    const hex = val.match(/#[0-9a-fA-F]{3,6}/)?.[0] || '#888';
-    return `<div class="swatch-row">
-      <div class="swatch" style="background:${hex}"></div>
-      <div class="swatch-info">${name}: <span>${val}</span></div>
-    </div>`;
-  }).join('');
-
-  document.getElementById('vdna-body').innerHTML = `
-    <div>
-      <div class="vdna-section-title">Palette Colori</div>
-      <div class="color-swatches">${swatches}</div>
-    </div>
-    <div>
-      <div class="vdna-section-title">Tipografia &amp; Layout</div>
-      <div class="vdna-card"><div class="vdna-card-lbl">Titoli</div><div class="vdna-card-val">${v.typography?.headings||'—'}</div></div>
-      <div class="vdna-card"><div class="vdna-card-lbl">Corpo Testo</div><div class="vdna-card-val">${v.typography?.body||'—'}</div></div>
-      <div class="vdna-card"><div class="vdna-card-lbl">Layout</div><div class="vdna-card-val">${v.layout||'—'}</div></div>
-      <div class="vdna-card"><div class="vdna-card-lbl">Stile Header</div><div class="vdna-card-val">${v.header_style||'—'}</div></div>
-    </div>
-    <div>
-      <div class="vdna-section-title">Stile &amp; Mood</div>
-      <div class="vdna-card"><div class="vdna-card-lbl">Stile Grafico</div><div class="vdna-card-val">${v.style||'—'}</div></div>
-      <div class="vdna-card"><div class="vdna-card-lbl">Mood</div><div class="vdna-card-val">${v.mood||'—'}</div></div>
-      <div class="vdna-card"><div class="vdna-card-lbl">Tabelle</div><div class="vdna-card-val">${v.table_style||'—'}</div></div>
-      <div class="vdna-section-title" style="margin-top:10px">Raccomandazioni</div>
-      ${(v.recommendations||[]).map((r,i)=>`<div style="display:flex;gap:8px;margin-bottom:6px;align-items:flex-start;"><div style="background:var(--gold);color:#0f0e0b;font-size:9px;font-weight:700;width:16px;height:16px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-family:var(--mono)">${i+1}</div><div style="font-size:11px;color:var(--text);line-height:1.5">${r}</div></div>`).join('')}
-    </div>
-  `;
-  document.getElementById('visual-dna-panel').classList.add('visible');
-}
-
-// ══ CLEAN HTML OUTPUT ══
-function cleanGeminiHTML(raw) {
-  let html = raw.trim();
-  html = html.replace(/^```(?:html)?\s*\r?\n?/im, '');
-  html = html.replace(/\r?\n?```\s*$/im, '');
-  html = html.trim();
-  if (!html.startsWith('<!DOCTYPE') && !html.startsWith('<html')) {
-    const docStart = html.indexOf('<!DOCTYPE');
-    const htmlStart = html.indexOf('<html');
-    const start = docStart !== -1 ? docStart : (htmlStart !== -1 ? htmlStart : 0);
-    html = html.slice(start);
-  }
-  const closeTag = html.lastIndexOf('</html>');
-  if (closeTag !== -1) html = html.slice(0, closeTag + 7);
-  return html;
-}
-
-// ══ CSS @PAGE v3.6 — margini professionali 15mm top/bottom, 18mm left/right ══
-// @page con margini reali: elimina header/footer browser E garantisce
-// respiro uniforme su ogni pagina del documento stampato/PDF.
-// Tecnica editoriale: .cover e .page-footer escono con margin negativo
-// per occupare l'intera larghezza fino ai bordi fisici della pagina.
-const PAGE_CLEAN_CSS = `<style id="page-clean-override">
-@media print {
-  @page { margin: 15mm 18mm !important; size: A4 portrait !important; }
-  body {
-    padding: 0 !important;
-    margin: 0 auto !important; max-width: 100% !important; width: 100% !important;
-    box-sizing: border-box !important;
-    -webkit-print-color-adjust: exact !important;
-    print-color-adjust: exact !important;
-  }
-  .cover {
-    margin: -15mm -18mm 0 !important;
-    padding: calc(15mm + 30px) calc(18mm + 22px) 44px !important;
-    -webkit-print-color-adjust: exact !important;
-    print-color-adjust: exact !important;
-  }
-  .toc {
-    padding-left: 40px !important;
-    padding-right: 40px !important;
-  }
-  .content {
-    padding-left: 40px !important;
-    padding-right: 40px !important;
-  }
-  .page-footer {
-    margin-left: -18mm !important; margin-right: -18mm !important;
-    padding-left: calc(18mm + 22px) !important; padding-right: calc(18mm + 22px) !important;
-    -webkit-print-color-adjust: exact !important;
-    print-color-adjust: exact !important;
-  }
-  /* PAGE BREAK FIXES — titoli orfani + contenuto spezzato */
-  h1, h2, h3, h4 { page-break-after: avoid !important; break-after: avoid !important; }
-  h1 + *, h2 + *, h3 + * { page-break-before: avoid !important; break-before: avoid !important; }
-  table, blockquote, pre, .toc, figure { page-break-inside: avoid !important; break-inside: avoid !important; }
-  tr { page-break-inside: avoid !important; break-inside: avoid !important; }
-  p { orphans: 4 !important; widows: 4 !important; }
-  li { orphans: 3 !important; widows: 3 !important; }
-}
-</style>`
-
-// ══ APPLY DNA ══
-// ══ SINTESIDIGITALE — PERCORSO OTTIMIZZATO ══
-async function applyDNA_Sintesi(target) {
-  const tl = document.getElementById('target-loading');
-  tl.classList.add('visible');
-  try {
-    toast('\u25c8 Elaborazione SintesiDigitale (CSS hardcoded)...');
-    const rawBody = await callGemini(SINTESI_MINIMAL_PROMPT,
-      'Converti in HTML questo documento:\n\n' + target);
-    const bodyContent = rawBody
-      .replace(/^```(?:html)?\s*\r?\n?/im, '')
-      .replace(/\r?\n?```\s*$/im, '')
-      .trim();
-    const html = '<!DOCTYPE html>\n<html lang="it">\n<head>\n<meta charset="UTF-8">\n<title>\u200B</title>\n<style>\n'
-      + SINTESI_CSS_TEMPLATE + '\n</style>\n</head>\n<body>\n' + bodyContent + '\n</body>\n</html>';
-    outputHTML = html; outputText = target;
-    renderOutput(html);
-    toast('\u2713 Documento elaborato \u2014 SintesiDigitale \u25c8');
-  } catch(e) { toast('Errore: ' + e.message); console.error(e); }
-  finally { tl.classList.remove('visible'); }
-}
-
-async function applyDNA_SintesiChunked(target) {
-  const tl = document.getElementById('target-loading');
-  tl.classList.add('visible');
-  try {
-    toast('Documento lungo \u2014 elaborazione SintesiDigitale...');
-    const sysChunked = SINTESI_MINIMAL_PROMPT + '\n\nNOTA: documento lungo — converti tutto il contenuto in una sola passata, preservando ogni dettaglio.';
-    const rawBody = await callGemini(sysChunked,
-      'Converti in HTML questo documento completo:\n\n' + target);
-    const bodyContent = rawBody
-      .replace(/^```(?:html)?\s*\r?\n?/im, '')
-      .replace(/\r?\n?```\s*$/im, '')
-      .trim();
-    const html = '<!DOCTYPE html>\n<html lang="it">\n<head>\n<meta charset="UTF-8">\n<title>\u200B</title>\n<style>\n'
-      + SINTESI_CSS_TEMPLATE + '\n</style>\n</head>\n<body>\n' + bodyContent + '\n</body>\n</html>';
-    outputHTML = html; outputText = target;
-    renderOutput(html);
-    toast('\u2713 Documento elaborato \u2014 SintesiDigitale \u25c8');
-  } catch(e) { toast('Errore: ' + e.message); console.error(e); }
-  finally { tl.classList.remove('visible'); }
-}
-
+// ── APPLY DNA ────────────────────────────────────────────────────────────
 async function applyDNA() {
   const target = document.getElementById('target-doc').value.trim();
-  if (!target) { toast('Inserisci il documento da elaborare'); return; }
-  if (selectedBrand === 'master' && !brandDNA) { toast('⚠ Analizza prima il Master Template'); return; }
-  if (selectedBrand === 'custom' && !document.getElementById('cb-name').value) { toast('⚠ Inserisci il nome del brand personalizzato'); return; }
+  if (!target)   { toast('Inserisci il documento da stilizzare'); return; }
+  if (!brandDNA) { toast('Analizza prima il Master Template'); return; }
 
-  if (selectedBrand === 'sintesi') {
-    if (target.length > 8000) {
-      await applyDNA_SintesiChunked(target);
-    } else {
-      await applyDNA_Sintesi(target);
+  // Blocca trial se esaurito
+  if (currentRole === 'trial') {
+    const rem = parseInt(document.getElementById('trial-counter').textContent);
+    if (rem <= 0) {
+      toast('⚠ Utilizzi trial esauriti. Contatta l\'amministratore.');
+      return;
     }
-    return;
-  }
-
-  if (target.length > 8000) {
-    await applyDNAChunked(target);
-    return;
   }
 
   const tl = document.getElementById('target-loading');
   tl.classList.add('visible');
+  document.getElementById('target-loading-text').textContent = 'Applicazione Brand DNA in corso...';
 
-  const pageCfg = getPageCfg();
-  const pageInstructions = pageCfg.enabled ?
-    `- Aggiungi numerazione pagine nel HTML: formato "${pageCfg.fmt}", posizione "${pageCfg.pos}", partendo da ${pageCfg.start}` :
-    '- Non aggiungere numerazione pagine nel HTML (viene gestita automaticamente dal sistema di stampa)';
+  const sys = `Sei un esperto di brand consistency.
+Riscrivi il documento preservando TUTTO il contenuto informativo originale (dati, fatti, numeri, tecnicismi).
+Adatta esclusivamente forma, stile e struttura al Brand DNA fornito.
 
-  const brandContext = getBrandContext();
+Brand DNA:
+- Tono: ${brandDNA.tone}
+- Struttura: ${brandDNA.structure}
+- Densità: ${brandDNA.density}
+- Liste: ${brandDNA.lists}
+- Apertura tipica: ${brandDNA.opening}
+- Chiusura tipica: ${brandDNA.closing}
+- Vocabolario: ${brandDNA.vocabulary}
+- Formalità: ${brandDNA.formality}
 
-  const sys = `Sei un esperto di brand consistency e document design. Il tuo compito è riscrivere un documento in HTML che rispetti ESATTAMENTE il Brand Kit fornito.
+Regole stilistiche:
+${(brandDNA.rules||[]).map((r,i)=>`${i+1}. ${r}`).join('\n')}
 
-REGOLE FONDAMENTALI:
-1. Preserva TUTTO il contenuto informativo originale — nessun dato, fatto o numero deve andare perso
-2. L'output DEVE essere HTML completo e autocontenuto, pronto per la stampa/PDF
-3. Replica ESATTAMENTE la struttura visiva del master: header, body, footer
-4. Usa CSS inline per garantire la stampa corretta
-5. Il documento deve sembrare uscito dalla stessa stampante del master
-
-${brandContext}
-
-ISTRUZIONI HTML OBBLIGATORIE — SEGUI ESATTAMENTE:
-
-STRUTTURA PAGINA:
-- Importa Google Fonts: @import url Montserrat (400,700,900) e Inter (400,500;600)
-- Usa -webkit-print-color-adjust: exact e print-color-adjust: exact nel CSS
-- Orientamento SEMPRE verticale (portrait): @page { size: A4 portrait; margin: 15mm 18mm; }
-- Carta A4 verticale: max-width: 794px, margin: 0 auto, padding: 0
-- CSS OBBLIGATORIO: @media print { @page { margin: 15mm 18mm; } }
-
-SOPPRESSIONE HEADER/FOOTER BROWSER — OBBLIGATORIO:
-Nel blocco @page includi SEMPRE queste regole per sopprimere data, titolo e URL del browser:
-@page {
-  @top-left   { content: none; }
-  @top-center { content: none; }
-  @top-right  { content: none; }
-  @bottom-left { content: none; }
-  @bottom-center { content: none; }
-  @bottom-right { content: counter(page) " / " counter(pages); font-size: 9px; font-family: Inter, sans-serif; color: #666; }
-}
-
-FONT SIZE — TUTTO PIÙ PICCOLO:
-- body: font-size: 11px
-- h1: font-size: 18px
-- h2: font-size: 15px
-- h3: font-size: 13px
-- p, li, td: font-size: 11px
-- small: font-size: 10px
-
-PRIMO FOGLIO (solo prima pagina, class .cover):
-- Sfondo grigio chiarissimo (#f4f4f4), padding: 40px 30px 30px 30px
-- Nome brand "SINTESIDIGITALE" in Montserrat 900, font-size: 36px, color: #FF6600, letter-spacing: 2px
-- Linea sottile arancione (border-bottom: 3px solid #FF6600) sotto il nome, margin: 8px 0 12px 0
-- Sottotitolo tagline in Inter italic, font-size: 14px, color: #333
-- NON mettere sfondo nero sul cover — solo grigio chiaro
-
-HEADER GLOBALE:
-- NON inserire NESSUNA banda nera con testo nel documento
-- NON inserire .page-header con sfondo nero nel body del documento
-- L'unico header permesso è quello della cover (primo foglio)
-- Usa SOLO una linea decorativa arancione (border: 2px solid #FF6600) come separatore tra sezioni se necessario
-
-BODY:
-- background: #FFFFFF
-- color: #1a1a1a
-- H1, H2, H3: color #FF6600, font-family: Montserrat Bold
-- Indice/TOC: voci in #FF6600
-- Tabelle: header sfondo #000000 testo bianco, righe alternate #f9f9f9, font-size: 11px
-- Contenuto in div.content con padding: 20px
-
-FOOTER GLOBALE (class .page-footer):
-- Inserisci UN SOLO footer alla fine del documento (non su ogni pagina)
-- Sfondo nero (#000000), padding: 12px 20px
-- Linea arancione in alto: border-top: 3px solid #FF6600
-- Testo centrato: "SINTESIDIGITALE — Premium Digital Solutions" in color: #aaaaaa, font-size: 10px
-- Sotto: anno copyright in color: #666, font-size: 9px
-- NON inserire URL, NON inserire numeri pagina nel footer HTML
-
-STAMPA @media print:
-- @page { size: A4 portrait; margin: 15mm 18mm; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-- body { background: #FFFFFF !important; color: #000000 !important; font-size: 10px !important; padding: 0 !important; -webkit-print-color-adjust: exact; }
-- h1,h2,h3 { color: #FF6600 !important; -webkit-print-color-adjust: exact; }
-- .cover { background: #f4f4f4 !important; -webkit-print-color-adjust: exact; }
-- .page-footer { background: #000000 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-
-ICONE E TONO:
-- VIETATO: emoji decorative, razzo, graffetta, occhio e simili
-- PERMESSO: solo per avvisi critici, per stati completati
-- Tono formale, professionale, tecnico-operativo
-- Font monospace SOLO per codice/URL, non per testo normale
-
-IMPORTANTE — OUTPUT PURO:
-- Restituisci SOLO il codice HTML, iniziando ESATTAMENTE con <!DOCTYPE html>
-- NON aggiungere nessun testo prima o dopo il codice HTML
-- NON usare markdown code fences (niente backtick, niente \`\`\`html)
-
-${pageInstructions}`;
+Restituisci SOLO il documento riscritto, senza commenti o introduzioni.`;
 
   try {
-    const rawHTML = await callGemini(sys, `Documento da elaborare:\n\n${target}`);
-    const html = cleanGeminiHTML(rawHTML);
-    outputHTML = html;
-    outputText = target;
-    renderOutput(html);
-    const brandName = selectedBrand==='sintesi' ? 'SintesiDigitale' : selectedBrand==='master' ? 'Master' : 'Custom';
-    toast(`✓ Documento elaborato — Brand ${brandName}`);
-  } catch(e) { toast('Errore: '+e.message); console.error(e); }
-  finally { tl.classList.remove('visible'); }
-}
+    const res = await apiCall({
+      action:       'generate',
+      token:        sessionToken,
+      systemPrompt: sys,
+      userMessage:  'Documento da stilizzare:\n\n' + target
+    });
 
-async function applyDNAChunked(target) {
-  const tl = document.getElementById('target-loading');
-  tl.classList.add('visible');
+    if (!res.ok) {
+      toast('Errore: ' + res.error);
+      return;
+    }
 
-  const brandContext = getBrandContext();
-  const pageCfg = getPageCfg();
-  const pageInstructions = pageCfg.enabled ?
-    `- Aggiungi numerazione pagine nel HTML: formato "${pageCfg.fmt}", posizione "${pageCfg.pos}", partendo da ${pageCfg.start}` :
-    '- Non aggiungere numerazione pagine nel HTML (viene gestita automaticamente dal sistema di stampa)';
+    outputText = res.result;
+    const pageConfig = getPageConfig();
+    document.getElementById('empty-output').style.display = 'none';
+    renderOutputWithPages(res.result, pageConfig);
+    document.getElementById('output-actions').style.display = 'flex';
+    toast('✓ Brand DNA applicato con successo');
 
-  try {
-    toast('Step 1/2 — Generazione template brand...');
-    const cssSystem = `Sei un esperto di document design. Genera SOLO il blocco CSS completo per un documento HTML branded SintesiDigitale.
-${brandContext}
-Restituisci SOLO il codice CSS (senza tag <style>, senza HTML, senza markdown fences), completo e pronto per essere inserito in un tag <style>.
-REGOLE CSS OBBLIGATORIE:
-- @page { size: A4 portrait; margin: 15mm 18mm; }
-- SOPPRESSIONE HEADER/FOOTER BROWSER — includi SEMPRE nel @page queste regole:
-  @page { @top-left { content: none; } @top-center { content: none; } @top-right { content: none; } @bottom-left { content: none; } @bottom-center { content: none; } @bottom-right { content: counter(page) " / " counter(pages); font-size: 9px; font-family: Inter, sans-serif; color: #666; } }
-- body { font-size: 11px; background: #fff; color: #1a1a1a; font-family: Inter; max-width: 794px; margin: 0 auto; padding: 0; }
-- h1 { font-size: 18px; color: #FF6600; } h2 { font-size: 15px; color: #FF6600; } h3 { font-size: 13px; color: #FF6600; }
-- .cover { background: #f4f4f4; padding: 40px 30px; }
-- .page-footer { background: #000; color: #aaa; padding: 12px 20px; border-top: 3px solid #FF6600; text-align: center; font-size: 10px; margin-top: 40px; }
-- @media print { @page { size: A4 portrait; margin: 15mm 18mm; } body { font-size: 10px !important; padding: 0 !important; } .cover, .page-footer { -webkit-print-color-adjust: exact; print-color-adjust: exact; } }
-- .content { padding: 20px; }
-- table { width: 100%; border-collapse: collapse; font-size: 11px; }
-- thead tr { background: #000; color: #fff; }
-- tbody tr:nth-child(even) { background: #f9f9f9; }
-- td, th { padding: 6px 10px; border: 1px solid #ddd; }
-Includi: body, h1/h2/h3, tabelle, .cover, .page-footer, .content, @page margin boxes, @media print.`;
+    // Aggiorna contatore trial
+    if (currentRole === 'trial' && res.usesRemaining !== null) {
+      document.getElementById('trial-counter').textContent = res.usesRemaining;
+      if (res.usesRemaining <= 0) {
+        toast('⚠ Ultimo utilizzo trial consumato.', 5000);
+      }
+    }
 
-    const cssRaw = await callGemini(cssSystem, 'Genera il CSS completo per il documento branded SintesiDigitale.');
-    const css = cssRaw.replace(/^```(?:css)?\s*\r?\n?/im,'').replace(/\r?\n?```\s*$/im,'').trim();
-
-    toast('Step 2/2 — Elaborazione contenuto...');
-    const contentSystem = `Sei un esperto di document design. Converti il testo fornito in HTML semantico professionale.
-NON includere DOCTYPE, html, head, style o body tags — solo il contenuto interno.
-NON usare markdown code fences.
-Usa classi: .cover per cover prima pagina, .page-footer per footer, .content per contenuto.
-${brandContext}
-REGOLE:
-- Preserva TUTTO il contenuto originale
-- Converti titoli in <h1><h2><h3>
-- Converti liste in <ul><li> o <ol><li>
-- Converti tabelle in <table><thead><tbody>
-- NESSUNA emoji decorativa, solo funzionali
-- Tono formale e professionale
-- Cover prima pagina con nome brand e titolo documento
-- Footer in fondo al documento`;
-
-    const bodyRaw = await callGemini(contentSystem, `Converti in HTML questo documento:\n\n${target}`);
-    const bodyContent = bodyRaw.replace(/^```(?:html)?\s*\r?\n?/im,'').replace(/\r?\n?```\s*$/im,'').trim();
-
-    const today = new Date().toLocaleDateString('it-IT', {day:'2-digit', month:'long', year:'numeric'});
-    const html = `<!DOCTYPE html>
-<html lang="it">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Documento SintesiDigitale — ${today}</title>
-<style>
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Montserrat:wght@400;700;900&display=swap');
-${css}
-</style>
-</head>
-<body>
-${bodyContent}
-</body>
-</html>`;
-
-    outputHTML = html;
-    outputText = target;
-    renderOutput(html);
-    const brandName = selectedBrand==='sintesi' ? 'SintesiDigitale' : selectedBrand==='master' ? 'Master' : 'Custom';
-    toast(`✓ Documento elaborato — Brand ${brandName}`);
-
-  } catch(e) { toast('Errore: '+e.message); console.error(e); }
-  finally { tl.classList.remove('visible'); }
-}
-
-function renderOutput(html) {
-  const rendered = document.getElementById('output-rendered');
-  const iframe = document.getElementById('output-iframe');
-
-  rendered.style.display = 'none';
-  iframe.style.display = 'block';
-  iframe.style.height = '600px';
-
-  try {
-    const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
-    const url = URL.createObjectURL(blob);
-    iframe.src = url;
-    iframe.onload = () => {
-      try {
-        const h = iframe.contentDocument?.body?.scrollHeight || 600;
-        iframe.style.height = Math.max(h + 40, 400) + 'px';
-      } catch(e) { iframe.style.height = '600px'; }
-    };
   } catch(e) {
-    console.error('renderOutput error:', e);
+    toast('Errore: ' + e.message);
+    console.error(e);
+  } finally {
+    tl.classList.remove('visible');
   }
-
-  document.getElementById('output-actions').style.display = 'flex';
-  document.getElementById('print-tip').classList.add('visible');
 }
 
-// ══ OUTPUT ACTIONS ══
-function preparePrintHTML(html) {
-  let out = html.replace(/<title>[^<]*<\/title>/gi, '<title>\u200B</title>');
-  return out.includes('</head>')
-    ? out.replace('</head>', PAGE_CLEAN_CSS + '\n</head>')
-    : PAGE_CLEAN_CSS + out;
-}
-
-function printOutput() {
-  const win = window.open('', '_blank', 'width=960,height=800');
-  if (!win) { toast('⚠ Popup bloccato — abilita i popup per questo sito'); return; }
-  win.document.open();
-  win.document.write(preparePrintHTML(outputHTML));
-  win.document.close();
-  setTimeout(() => { win.print(); }, 900);
-  toast('✓ Stampa aperta — margini professionali 15mm/18mm');
-}
-
-function downloadHTML() {
-  const date = new Date().toISOString().slice(0,10);
-  const blob = new Blob([preparePrintHTML(outputHTML)], { type:'text/html;charset=utf-8' });
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = `brand-dna-output-${date}.html`;
-  a.click(); URL.revokeObjectURL(a.href);
-  toast('✓ File HTML scaricato (margini professionali inclusi)');
-}
-
+// ── OUTPUT ACTIONS ────────────────────────────────────────────────────────
 function copyOutput() {
-  navigator.clipboard.writeText(outputText).then(()=>toast('✓ Testo copiato'));
+  navigator.clipboard.writeText(outputText).then(() => toast('✓ Testo copiato negli appunti'));
+}
+
+function downloadOutput() {
+  const blob = new Blob([outputText], { type: 'text/plain;charset=utf-8' });
+  const a    = document.createElement('a');
+  a.href     = URL.createObjectURL(blob);
+  a.download = 'brand-dna-output-' + new Date().toISOString().slice(0,10) + '.txt';
+  a.click();
+  URL.revokeObjectURL(a.href);
+  toast('✓ File scaricato');
 }
 
 function saveToHistory() {
-  const preview = outputText.slice(0,70).replace(/\n/g,' ')+'...';
-  const now = new Date().toLocaleString('it-IT',{hour:'2-digit',minute:'2-digit',day:'2-digit',month:'2-digit'});
-  sessionHistory.unshift({ html: outputHTML, text: outputText, preview, date: now });
+  const preview = outputText.slice(0, 60).replace(/\n/g,' ') + '...';
+  const now     = new Date().toLocaleString('it-IT', { hour:'2-digit', minute:'2-digit', day:'2-digit', month:'2-digit' });
+  sessionHistory.unshift({ text: outputText, preview, date: now });
   renderHistory();
-  toast('✓ Salvato in storia');
+  toast('✓ Salvato in storia sessione');
 }
 
 function renderHistory() {
   const list = document.getElementById('history-list');
-  if (!sessionHistory.length) { list.innerHTML = '<div class="history-empty">Nessun documento elaborato in questa sessione</div>'; return; }
-  list.innerHTML = sessionHistory.map((item,i)=>`
+  if (!sessionHistory.length) {
+    list.innerHTML = '<div class="history-empty">Nessun documento processato in questa sessione</div>';
+    return;
+  }
+  list.innerHTML = sessionHistory.map((item, i) => `
     <div class="history-item" onclick="loadHistory(${i})">
-      <span class="history-lbl">${item.preview}</span>
-      <span class="history-date">${item.date}</span>
-    </div>`).join('');
+      <div class="history-item-left">
+        <div class="history-dot"></div>
+        <div class="history-label">${item.preview}</div>
+      </div>
+      <div class="history-date">${item.date}</div>
+    </div>
+  `).join('');
 }
 
 function loadHistory(i) {
   const item = sessionHistory[i];
   if (!item) return;
-  outputHTML = item.html; outputText = item.text;
-  renderOutput(item.html);
+  outputText = item.text;
+  document.getElementById('empty-output').style.display = 'none';
+  renderOutputWithPages(item.text, getPageConfig());
+  document.getElementById('output-actions').style.display = 'flex';
   toast('✓ Documento caricato dalla storia');
 }
 
-function clearHistory() { sessionHistory=[]; renderHistory(); toast('Storia svuotata'); }
+function clearHistory() {
+  sessionHistory = [];
+  renderHistory();
+  toast('Storia svuotata');
+}
 
-// ══ INIT ══
-window.addEventListener('DOMContentLoaded', () => {
-  setupDrop('master-drop','master-doc','master-count');
-  setupDrop('target-drop','target-doc','target-count');
-  if (selectedBrand === 'sintesi') {
-    document.getElementById('master-upload-area').style.display    = 'none';
-    document.getElementById('master-sintesi-notice').style.display = 'flex';
-    document.getElementById('apply-btn').disabled = false;
-    updateApplyBadge('sintesi');
+// ── ADMIN: LOAD USERS ────────────────────────────────────────────────────
+async function loadUsers() {
+  const tbody = document.getElementById('users-tbody');
+  tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--text-muted);padding:20px">Caricamento...</td></tr>';
+
+  try {
+    const res = await apiCall({ action: 'admin', token: sessionToken, operation: 'list_users' });
+    if (!res.ok) { adminAlert(res.error, 'error'); return; }
+
+    const users = res.users;
+    const today = new Date();
+    today.setHours(0,0,0,0);
+
+    // Stats
+    document.getElementById('stat-total').textContent = users.length;
+    document.getElementById('stat-pro').textContent   = users.filter(u => u.role==='pro').length;
+    document.getElementById('stat-trial').textContent = users.filter(u => u.role==='trial').length;
+
+    const expiringSoon = users.filter(u => {
+      if (u.role !== 'pro' || !u.expires) return false;
+      const exp = new Date(u.expires);
+      const diff = (exp - today) / (1000*60*60*24);
+      return diff >= 0 && diff <= 30;
+    });
+    document.getElementById('stat-expiring').textContent = expiringSoon.length;
+
+    if (!users.length) {
+      tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--text-muted);padding:20px">Nessun utente</td></tr>';
+      return;
+    }
+
+    tbody.innerHTML = users.map(u => {
+      const isAdmin   = u.role === 'admin';
+      const isActive  = u.active === true || u.active === 'true' || u.active === 'TRUE';
+      const statusDot = `<span class="status-dot ${isActive?'active':'inactive'}"></span>${isActive?'Attivo':'Disattivo'}`;
+
+      let expiryCell = '—';
+      if (u.role === 'pro' && u.expires) {
+        const exp  = new Date(u.expires);
+        const diff = Math.ceil((exp - today) / (1000*60*60*24));
+        if (diff < 0) {
+          expiryCell = `${u.expires} <span class="expired-badge">SCADUTO</span>`;
+        } else if (diff <= 30) {
+          expiryCell = `${u.expires} <span class="expiry-soon">tra ${diff}gg</span>`;
+        } else {
+          expiryCell = u.expires;
+        }
+      } else if (u.role === 'trial') {
+        const rem = u.usesRemaining !== null ? u.usesRemaining : 0;
+        expiryCell = `${rem} utilizzi rimasti`;
+      }
+
+      const actions = isAdmin ? '<span style="color:var(--text-muted);font-size:11px">Admin protetto</span>' : `
+        <div class="action-btns">
+          ${isActive
+            ? `<button class="btn-xs btn-xs-danger" onclick="toggleUser('${u.username}')">Disattiva</button>`
+            : `<button class="btn-xs btn-xs-success" onclick="toggleUser('${u.username}')">Attiva</button>`
+          }
+          <button class="btn-xs btn-xs-outline" onclick="openChangePwd('${u.username}')">Password</button>
+          ${u.role==='pro' ? `<button class="btn-xs btn-xs-outline" onclick="openExtend('${u.username}','${u.expires||''}')">Scadenza</button>` : ''}
+          ${u.role==='trial' ? `<button class="btn-xs btn-xs-outline" onclick="openResetTrial('${u.username}')">Reset trial</button>` : ''}
+          <button class="btn-xs btn-xs-danger" onclick="deleteUser('${u.username}')">Elimina</button>
+        </div>
+      `;
+
+      return `<tr>
+        <td style="font-weight:600">${u.username}</td>
+        <td><span class="role-badge ${u.role}">${u.role.toUpperCase()}</span></td>
+        <td>${statusDot}</td>
+        <td>${expiryCell}</td>
+        <td>${u.created||'—'}</td>
+        <td>${actions}</td>
+      </tr>`;
+    }).join('');
+
+  } catch(e) {
+    adminAlert('Errore caricamento utenti: ' + e.message, 'error');
   }
+}
+
+// ── ADMIN: CREATE USER ───────────────────────────────────────────────────
+function toggleRoleFields() {
+  const role = document.getElementById('new-role').value;
+  document.getElementById('field-expires').style.display = role === 'pro'    ? '' : 'none';
+  document.getElementById('field-uses').style.display    = role === 'trial'  ? '' : 'none';
+}
+
+function resetCreateForm() {
+  document.getElementById('new-username').value  = '';
+  document.getElementById('new-password').value  = '';
+  document.getElementById('new-role').value      = 'pro';
+  document.getElementById('new-expires').value   = '';
+  document.getElementById('new-uses').value      = '2';
+  toggleRoleFields();
+}
+
+async function createUser() {
+  const username = document.getElementById('new-username').value.trim().toLowerCase();
+  const password = document.getElementById('new-password').value;
+  const role     = document.getElementById('new-role').value;
+  const expires  = document.getElementById('new-expires').value;
+  const uses     = parseInt(document.getElementById('new-uses').value);
+
+  if (!username || !password) { adminAlert('Username e password obbligatori.', 'error'); return; }
+  if (!/^[a-z0-9_]{3,30}$/.test(username)) {
+    adminAlert('Username: solo lettere minuscole, numeri e underscore (3-30 caratteri).', 'error'); return;
+  }
+  if (password.length < 8) { adminAlert('Password minima 8 caratteri.', 'error'); return; }
+  if (role === 'pro' && !expires) { adminAlert('Seleziona la data di scadenza per account Pro.', 'error'); return; }
+
+  try {
+    const passwordHash = await sha256(password);
+    const res = await apiCall({
+      action: 'admin', token: sessionToken, operation: 'create_user',
+      username, passwordHash, role, expires, usesRemaining: uses
+    });
+    if (res.ok) {
+      adminAlert(`✓ ${res.message}`, 'success');
+      resetCreateForm();
+      loadUsers();
+    } else {
+      adminAlert(res.error, 'error');
+    }
+  } catch(e) {
+    adminAlert('Errore: ' + e.message, 'error');
+  }
+}
+
+// ── ADMIN: ROW ACTIONS ───────────────────────────────────────────────────
+async function toggleUser(username) {
+  try {
+    const res = await apiCall({ action:'admin', token:sessionToken, operation:'toggle_user', username });
+    if (res.ok) { adminAlert(res.message,'success'); loadUsers(); }
+    else adminAlert(res.error,'error');
+  } catch(e) { adminAlert(e.message,'error'); }
+}
+
+async function deleteUser(username) {
+  if (!confirm(`Eliminare definitivamente l'utente "${username}"?`)) return;
+  try {
+    const res = await apiCall({ action:'admin', token:sessionToken, operation:'delete_user', username });
+    if (res.ok) { adminAlert(res.message,'success'); loadUsers(); }
+    else adminAlert(res.error,'error');
+  } catch(e) { adminAlert(e.message,'error'); }
+}
+
+// Change password modal
+function openChangePwd(username) {
+  adminTargetUser = username;
+  document.getElementById('modal-pwd-desc').textContent = `Nuova password per: ${username}`;
+  document.getElementById('modal-new-pwd').value = '';
+  showModal('modal-pwd');
+}
+
+async function confirmChangePassword() {
+  const pwd = document.getElementById('modal-new-pwd').value;
+  if (!pwd || pwd.length < 8) { toast('Password minima 8 caratteri'); return; }
+  try {
+    const newPasswordHash = await sha256(pwd);
+    const res = await apiCall({ action:'admin', token:sessionToken, operation:'change_password', username:adminTargetUser, newPasswordHash });
+    if (res.ok) { adminAlert(res.message,'success'); closeModal('modal-pwd'); }
+    else adminAlert(res.error,'error');
+  } catch(e) { adminAlert(e.message,'error'); closeModal('modal-pwd'); }
+}
+
+// Extend pro modal
+function openExtend(username, currentExpiry) {
+  adminTargetUser = username;
+  document.getElementById('modal-extend-desc').textContent = `Scadenza attuale per ${username}: ${currentExpiry||'non impostata'}`;
+  document.getElementById('modal-extend-date').value = currentExpiry || '';
+  showModal('modal-extend');
+}
+
+async function confirmExtend() {
+  const newDate = document.getElementById('modal-extend-date').value;
+  if (!newDate) { toast('Seleziona una data'); return; }
+  try {
+    const res = await apiCall({ action:'admin', token:sessionToken, operation:'update_user', username:adminTargetUser, field:'expires', value:newDate });
+    if (res.ok) { adminAlert('✓ Scadenza aggiornata','success'); closeModal('modal-extend'); loadUsers(); }
+    else adminAlert(res.error,'error');
+  } catch(e) { adminAlert(e.message,'error'); closeModal('modal-extend'); }
+}
+
+// Reset trial modal
+function openResetTrial(username) {
+  adminTargetUser = username;
+  document.getElementById('modal-trial-desc').textContent = `Reset utilizzi per: ${username}`;
+  showModal('modal-trial');
+}
+
+async function confirmResetTrial() {
+  const uses = parseInt(document.getElementById('modal-trial-uses').value);
+  try {
+    const res = await apiCall({ action:'admin', token:sessionToken, operation:'reset_trial', username:adminTargetUser, newUses:uses });
+    if (res.ok) { adminAlert(res.message,'success'); closeModal('modal-trial'); loadUsers(); }
+    else adminAlert(res.error,'error');
+  } catch(e) { adminAlert(e.message,'error'); closeModal('modal-trial'); }
+}
+
+// ── DATE FORMAT ──────────────────────────────────────────────────────────
+function formatDate(dateStr) {
+  if (!dateStr) return '—';
+  try {
+    return new Date(dateStr).toLocaleDateString('it-IT');
+  } catch { return dateStr; }
+}
+
+// ── MAMMOTH.JS (DOCX reader) ─────────────────────────────────────────────
+// Caricato da CDN in testa al body — se non disponibile, avvisa l'utente
+window.addEventListener('error', e => {
+  if (e.filename && e.filename.includes('mammoth')) {
+    console.warn('mammoth.js non caricato — upload DOCX non disponibile');
+  }
+}, true);
+
+// ── INIT ─────────────────────────────────────────────────────────────────
+window.addEventListener('DOMContentLoaded', () => {
+  setupDropZone('master-drop', 'master-doc', 'master-count');
+  setupDropZone('target-drop', 'target-doc', 'target-count');
+  toggleRoleFields();
+
+  // Chiudi modal cliccando overlay
+  document.querySelectorAll('.modal-overlay').forEach(overlay => {
+    overlay.addEventListener('click', e => {
+      if (e.target === overlay) overlay.classList.remove('show');
+    });
+  });
 });
 </script>
+
+<!-- mammoth.js per parsing DOCX (CDN affidabile, no API key richiesta) -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
 </body>
 </html>
