@@ -535,6 +535,7 @@ input[type="file"]{display:none}
 }
 
 /* ── TOAST ── */
+/* ── TOAST (successo / info — in basso) ── */
 #toast{
   position:fixed;bottom:28px;left:50%;
   transform:translateX(-50%) translateY(20px);
@@ -545,6 +546,45 @@ input[type="file"]{display:none}
   pointer-events:none;z-index:999;
 }
 #toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* ── ERROR BANNER (errori critici — centro schermo) ── */
+#error-banner-overlay{
+  display:none;position:fixed;inset:0;
+  background:rgba(0,0,0,.65);z-index:1200;
+  align-items:center;justify-content:center;
+}
+#error-banner-overlay.show{display:flex}
+#error-banner{
+  background:#1a0a0a;border:2px solid #cc3333;
+  border-radius:8px;padding:28px 32px;max-width:480px;width:90%;
+  font-family:var(--mono);position:relative;
+  box-shadow:0 0 40px rgba(204,51,51,.35);
+}
+#error-banner-icon{font-size:28px;margin-bottom:12px;display:block}
+#error-banner-title{
+  font-size:13px;letter-spacing:2px;text-transform:uppercase;
+  color:#ff4444;font-weight:700;margin-bottom:10px;
+}
+#error-banner-msg{
+  font-size:12px;color:#ffaaaa;line-height:1.7;
+  margin-bottom:20px;letter-spacing:.3px;
+}
+#error-banner-actions{display:flex;gap:10px;flex-wrap:wrap}
+#error-banner-retry{
+  background:#cc3333;color:#fff;border:none;
+  border-radius:4px;padding:8px 18px;font-size:11px;
+  font-family:var(--mono);letter-spacing:1px;text-transform:uppercase;
+  cursor:pointer;transition:background .2s;
+}
+#error-banner-retry:hover{background:#ff4444}
+#error-banner-close{
+  background:transparent;color:#ff8888;
+  border:1px solid #cc3333;border-radius:4px;
+  padding:8px 18px;font-size:11px;font-family:var(--mono);
+  letter-spacing:1px;text-transform:uppercase;cursor:pointer;
+  transition:all .2s;
+}
+#error-banner-close:hover{background:#cc333322}
 
 /* ── FOOTER ── */
 .app-footer{
@@ -961,7 +1001,7 @@ input[type="file"]{display:none}
   </div><!-- /view-admin -->
 
   <footer class="app-footer">
-    Brand DNA Engine v5.2 · Luciano Bettoli · SintesiDigitale · Google Gemini 2.5 Flash
+    Brand DNA Engine v5.2 · Luciano Bettoli · SintesiDigitale · Google Gemini 3.5 Flash
   </footer>
 
 </div><!-- /screen-app -->
@@ -1021,6 +1061,19 @@ input[type="file"]{display:none}
 </div>
 
 <div id="toast"></div>
+
+<!-- ERROR BANNER — errori critici visibili a centro schermo -->
+<div id="error-banner-overlay">
+  <div id="error-banner">
+    <span id="error-banner-icon">⚠</span>
+    <div id="error-banner-title">Errore</div>
+    <div id="error-banner-msg"></div>
+    <div id="error-banner-actions">
+      <button id="error-banner-retry" style="display:none" onclick="errorBannerRetry()">↻ Riprova</button>
+      <button id="error-banner-close" onclick="closeErrorBanner()">✕ Chiudi</button>
+    </div>
+  </div>
+</div>
 
 <script>
 // ══════════════════════════════════════════════════════════════════════════════
@@ -1094,11 +1147,60 @@ async function sha256(str) {
 }
 
 // ── UTILS ──────────────────────────────────────────────────────────────────
+// ── TOAST (messaggi successo / info — in basso, non bloccante) ──────────────
 function toast(msg, duration=3000) {
   const el = document.getElementById('toast');
   el.textContent = msg;
   el.classList.add('show');
   setTimeout(() => el.classList.remove('show'), duration);
+}
+
+// ── ERROR BANNER (errori critici — centro schermo, bloccante) ────────────────
+let _errorBannerRetryFn = null;
+
+function showErrorBanner(msg, retryFn) {
+  const overlay = document.getElementById('error-banner-overlay');
+  const msgEl   = document.getElementById('error-banner-msg');
+  const retryBtn= document.getElementById('error-banner-retry');
+  const titleEl = document.getElementById('error-banner-title');
+  const iconEl  = document.getElementById('error-banner-icon');
+
+  // Titolo e icona contestuali
+  if (msg.includes('429') || msg.includes('sovraccarico') || msg.includes('overload')) {
+    titleEl.textContent = 'Modello Sovraccarico';
+    iconEl.textContent  = '⏳';
+  } else if (msg.includes('scadut') || msg.includes('login') || msg.includes('sessione')) {
+    titleEl.textContent = 'Sessione Scaduta';
+    iconEl.textContent  = '🔐';
+  } else if (msg.includes('rete') || msg.includes('network') || msg.includes('HTTP')) {
+    titleEl.textContent = 'Errore di Rete';
+    iconEl.textContent  = '📡';
+  } else {
+    titleEl.textContent = 'Errore';
+    iconEl.textContent  = '⚠';
+  }
+
+  msgEl.textContent = msg;
+
+  if (retryFn) {
+    _errorBannerRetryFn = retryFn;
+    retryBtn.style.display = '';
+  } else {
+    _errorBannerRetryFn = null;
+    retryBtn.style.display = 'none';
+  }
+
+  overlay.classList.add('show');
+}
+
+function closeErrorBanner() {
+  document.getElementById('error-banner-overlay').classList.remove('show');
+  _errorBannerRetryFn = null;
+}
+
+function errorBannerRetry() {
+  closeErrorBanner();
+  if (_errorBannerRetryFn) _errorBannerRetryFn();
 }
 
 function showError(id, msg) {
@@ -1459,14 +1561,14 @@ Analizza il documento e restituisci SOLO JSON valido (no markdown, no backtick, 
 {"tone":"...","structure":"...","density":"...","lists":"...","opening":"...","closing":"...","vocabulary":"...","formality":"...","rules":["regola1","regola2","regola3","regola4","regola5","regola6"]}`;
   try {
     const res = await apiCall({ action:'generate', token:sessionToken, systemPrompt:sys, userMessage:'Analizza:\n\n'+master });
-    if (!res.ok) { toast('Errore: ' + res.error); return; }
+    if (!res.ok) { showErrorBanner(res.error, analyzeDNA); return; }
     brandDNA = JSON.parse(res.result.replace(/```json|```/g,'').trim());
     renderDNA(brandDNA);
     document.getElementById('apply-btn').disabled = false;
     toast('✓ Brand DNA acquisito con successo');
     if (currentRole === 'trial' && res.usesRemaining !== null)
       document.getElementById('trial-counter').textContent = res.usesRemaining;
-  } catch(e) { toast('Errore: ' + e.message); }
+  } catch(e) { showErrorBanner(e.message); }
   finally { ml.classList.remove('visible'); }
 }
 
@@ -1531,9 +1633,7 @@ Restituisci SOLO il documento riscritto.`;
 
   try {
     const res = await apiCall({ action:'generate', token:sessionToken, systemPrompt:sys, userMessage:'Documento da stilizzare:\n\n'+target });
-    if (!res.ok) { toast('Errore: ' + res.error); return; }
-
-    if (currentBrandMode === 'sintesi') {
+    if (!res.ok) { showErrorBanner(res.error, applyDNA); return; }
       outputText = '<!DOCTYPE html><html lang="it"><head><meta charset="UTF-8"><title>\u200B</title>' + SINTESI_FONTS + '<style>' + SINTESI_CSS + '</style></head><body>' + res.result + '</body></html>';
       const outputArea = document.getElementById('output-area');
       outputArea.innerHTML = '';
@@ -1563,7 +1663,7 @@ Restituisci SOLO il documento riscritto.`;
       document.getElementById('trial-counter').textContent = res.usesRemaining;
       if (res.usesRemaining <= 0) toast('⚠ Ultimo utilizzo trial consumato.', 5000);
     }
-  } catch(e) { toast('Errore: ' + e.message); }
+  } catch(e) { showErrorBanner(e.message, applyDNA); }
   finally { tl.classList.remove('visible'); }
 }
 
