@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Brand DNA Engine v5.1 · SintesiDigitale</title>
+<title>Brand DNA Engine v5.2 · SintesiDigitale</title>
 <style>
 :root {
   --bg:           #1a1712;
@@ -602,7 +602,7 @@ input[type="file"]{display:none}
 
     <button class="login-btn" id="login-btn" onclick="doLogin()">Entra nel Sistema →</button>
     <div class="login-err" id="login-err"></div>
-    <div class="login-version">v5.1.0 · SintesiDigitale</div>
+    <div class="login-version">v5.2.0 · SintesiDigitale</div>
   </div>
 </div>
 
@@ -841,7 +841,9 @@ input[type="file"]{display:none}
           </div>
           <div class="output-actions" id="output-actions" style="display:none">
             <button class="btn btn-primary" onclick="copyOutput()">⎘ Copia Testo</button>
-            <button class="btn btn-outline" onclick="downloadOutput()">↓ Scarica .txt</button>
+            <button class="btn btn-outline" onclick="downloadOutput()">↓ Scarica File</button>
+            <button class="btn btn-outline" id="btn-print" onclick="printOutput()" style="display:none">⎙ Stampa</button>
+            <button class="btn btn-primary" id="btn-export-pdf" onclick="exportPDF()" style="display:none">↓ Esporta PDF</button>
             <button class="btn btn-outline" onclick="saveToHistory()">◈ Salva in Storia</button>
           </div>
         </div>
@@ -959,7 +961,7 @@ input[type="file"]{display:none}
   </div><!-- /view-admin -->
 
   <footer class="app-footer">
-    Brand DNA Engine v5.1 · Luciano Bettoli · SintesiDigitale · Google Gemini 2.5 Flash
+    Brand DNA Engine v5.2 · Luciano Bettoli · SintesiDigitale · Google Gemini 2.5 Flash
   </footer>
 
 </div><!-- /screen-app -->
@@ -1069,7 +1071,9 @@ const SINTESI_CSS = `
   th { background: #000000; color: #FF6600; font-family: 'Montserrat', sans-serif; font-size: 10px; letter-spacing: 1px; text-transform: uppercase; padding: 8px 10px; text-align: left; }
   td { padding: 7px 10px; border-bottom: 1px solid #e0e0e0; }
   tr:nth-child(even) td { background: #f8f8f8; }
-  .cover { background: #000000; color: #ffffff; padding: 40px; margin: -15mm -18mm 30px; page-break-after: always; }
+  .cover { background: #000000; color: #ffffff; padding: 40px; margin: 0 0 30px; page-break-after: always; }
+  @media screen { .cover { margin: 0 0 30px; } }
+  @media print  { .cover { margin: -15mm -18mm 30px; padding: 40mm 18mm 20mm; } }
   .cover h1 { color: #FF6600; border-bottom: 2px solid #FF6600; font-size: 28px; }
   .cover p { color: #cccccc; font-size: 12px; }
   .footer-brand { text-align: center; font-size: 9px; letter-spacing: 2px; text-transform: uppercase; color: #999; margin-top: 30px; padding-top: 10px; border-top: 1px solid #e0e0e0; font-family: 'Montserrat', sans-serif; }
@@ -1534,15 +1538,26 @@ Restituisci SOLO il documento riscritto.`;
       const outputArea = document.getElementById('output-area');
       outputArea.innerHTML = '';
       const iframe = document.createElement('iframe');
-      iframe.style.cssText = 'width:100%;height:600px;border:none;border-radius:4px;background:#fff;';
+      iframe.style.cssText = 'width:100%;height:700px;border:none;border-radius:4px;background:#000;';
       iframe.srcdoc = outputText;
       outputArea.appendChild(iframe);
+      // FIX: empty-output è già stato rimosso da innerHTML='' — non accedere più
+      document.getElementById('output-actions').style.display = 'flex';
+      // Mostra bottoni stampa/PDF solo in modalità sintesi
+      document.getElementById('btn-print').style.display = '';
+      document.getElementById('btn-export-pdf').style.display = '';
     } else {
       outputText = res.result;
       renderOutputWithPages(res.result, getPageConfig());
+      // Per modalità non-sintesi, empty-output è ancora nel DOM (renderOutputWithPages usa innerHTML='')
+      // ma il div viene ricreato al logout, quindi usiamo un approccio safe
+      const emptyEl = document.getElementById('empty-output');
+      if (emptyEl) emptyEl.style.display = 'none';
+      document.getElementById('output-actions').style.display = 'flex';
+      // Nascondi bottoni stampa/PDF per modalità non-sintesi
+      document.getElementById('btn-print').style.display = 'none';
+      document.getElementById('btn-export-pdf').style.display = 'none';
     }
-    document.getElementById('empty-output').style.display = 'none';
-    document.getElementById('output-actions').style.display = 'flex';
     toast('✓ Brand DNA applicato con successo');
     if (currentRole === 'trial' && res.usesRemaining !== null) {
       document.getElementById('trial-counter').textContent = res.usesRemaining;
@@ -1570,17 +1585,52 @@ function renderDNA(dna) {
 
 // ── OUTPUT ACTIONS ────────────────────────────────────────────────────────
 function copyOutput() {
-  navigator.clipboard.writeText(outputText).then(() => toast('✓ Testo copiato negli appunti'));
+  // In modalità sintesi copia il testo pulito (senza tag HTML)
+  if (currentBrandMode === 'sintesi') {
+    const tmp = document.createElement('div');
+    tmp.innerHTML = outputText;
+    navigator.clipboard.writeText(tmp.textContent || tmp.innerText || '').then(() => toast('✓ Testo copiato negli appunti'));
+  } else {
+    navigator.clipboard.writeText(outputText).then(() => toast('✓ Testo copiato negli appunti'));
+  }
 }
 
 function downloadOutput() {
-  const blob = new Blob([outputText], { type: 'text/plain;charset=utf-8' });
+  const isSintesi = currentBrandMode === 'sintesi';
+  const blob = new Blob([outputText], { type: isSintesi ? 'text/html;charset=utf-8' : 'text/plain;charset=utf-8' });
+  const ext  = isSintesi ? '.html' : '.txt';
   const a    = document.createElement('a');
   a.href     = URL.createObjectURL(blob);
-  a.download = 'brand-dna-output-' + new Date().toISOString().slice(0,10) + '.txt';
+  a.download = 'brand-dna-output-' + new Date().toISOString().slice(0,10) + ext;
   a.click();
   URL.revokeObjectURL(a.href);
-  toast('✓ File scaricato');
+  toast('✓ File scaricato (' + ext + ')');
+}
+
+// ── STAMPA: apre l'HTML SintesiDigitale in una nuova finestra e chiama print() ──
+function printOutput() {
+  if (currentBrandMode !== 'sintesi') { toast('Stampa disponibile solo in modalità SintesiDigitale'); return; }
+  const win = window.open('', '_blank', 'width=900,height=700');
+  if (!win) { toast('⚠ Popup bloccato — consenti i popup per questo sito'); return; }
+  win.document.write(outputText);
+  win.document.close();
+  // Aspetta che i font Google siano caricati prima di stampare
+  win.onload = () => {
+    setTimeout(() => { win.focus(); win.print(); }, 800);
+  };
+}
+
+// ── ESPORTA PDF: usa la finestra di stampa con destinazione "Salva come PDF" ──
+function exportPDF() {
+  if (currentBrandMode !== 'sintesi') { toast('Export PDF disponibile solo in modalità SintesiDigitale'); return; }
+  toast('Apri la finestra di stampa → seleziona "Salva come PDF" come destinazione');
+  const win = window.open('', '_blank', 'width=900,height=700');
+  if (!win) { toast('⚠ Popup bloccato — consenti i popup per questo sito'); return; }
+  win.document.write(outputText);
+  win.document.close();
+  win.onload = () => {
+    setTimeout(() => { win.focus(); win.print(); }, 800);
+  };
 }
 
 function saveToHistory() {
@@ -1612,9 +1662,13 @@ function loadHistory(i) {
   const item = sessionHistory[i];
   if (!item) return;
   outputText = item.text;
-  document.getElementById('empty-output').style.display = 'none';
+  const emptyEl = document.getElementById('empty-output');
+  if (emptyEl) emptyEl.style.display = 'none';
   renderOutputWithPages(item.text, getPageConfig());
   document.getElementById('output-actions').style.display = 'flex';
+  // Nasconde bottoni stampa/PDF (la storia non sa la modalità originale)
+  document.getElementById('btn-print').style.display = 'none';
+  document.getElementById('btn-export-pdf').style.display = 'none';
   toast('✓ Documento caricato dalla storia');
 }
 
