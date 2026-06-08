@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Brand DNA Engine v5.0 · SintesiDigitale</title>
+<title>Brand DNA Engine v5.1 · SintesiDigitale</title>
 <style>
 :root {
   --bg:           #1a1712;
@@ -476,8 +476,60 @@ input[type="file"]{display:none}
 .admin-alert.success{background:var(--green-glow);border:1px solid rgba(39,174,96,.4);color:var(--green)}
 .admin-alert.error{background:var(--red-glow);border:1px solid rgba(192,57,43,.4);color:var(--red)}
 
-/* ── ORNAMENT ── */
-.ornament-divider{
+/* ── BRAND SELECTOR ── */
+.brand-selector{
+  grid-column:1/-1;
+  background:var(--panel);border:1px solid var(--gold-dim);
+  border-radius:10px;padding:18px 22px;
+  display:flex;align-items:center;gap:16px;flex-wrap:wrap;
+}
+.brand-selector-label{
+  font-size:11px;letter-spacing:2px;text-transform:uppercase;
+  color:var(--gold);font-family:var(--mono);flex-shrink:0;
+}
+.brand-tabs{display:flex;gap:8px;flex-wrap:wrap}
+.brand-tab{
+  padding:8px 18px;border-radius:var(--radius);
+  font-size:11px;letter-spacing:1px;text-transform:uppercase;
+  cursor:pointer;font-family:var(--mono);transition:all .2s;
+  background:transparent;border:1px solid var(--border);color:var(--text-dim);
+}
+.brand-tab:hover{border-color:var(--gold-dim);color:var(--text)}
+.brand-tab.active{background:var(--gold);color:#1a1712;font-weight:700;border-color:var(--gold)}
+.brand-tab-desc{
+  font-size:11px;color:var(--text-muted);font-family:var(--mono);
+  margin-left:auto;
+}
+.brand-mode-sintesi .panel-num{background:#FF6600}
+.sintesi-badge{
+  font-size:10px;padding:2px 8px;border-radius:10px;
+  background:rgba(255,102,0,.15);color:#FF6600;
+  border:1px solid rgba(255,102,0,.3);font-family:var(--mono);
+  letter-spacing:1px;margin-left:8px;
+}
+
+/* Brand Personalizzato form */
+.custom-brand-form{
+  grid-column:1/-1;
+  background:var(--panel);border:1px solid var(--border);
+  border-radius:10px;padding:20px 22px;display:none;
+}
+.custom-brand-form.show{display:block}
+.custom-form-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px}
+.custom-form-group{display:flex;flex-direction:column;gap:6px}
+.custom-form-label{font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--gold-dim);font-family:var(--mono)}
+.custom-form-input{
+  padding:8px 12px;background:var(--bg);border:1px solid var(--border);
+  border-radius:var(--radius);color:var(--text);font-size:12px;
+  font-family:inherit;transition:border-color .2s;
+}
+.custom-form-input:focus{outline:none;border-color:var(--gold)}
+.custom-form-textarea{
+  padding:8px 12px;background:var(--bg);border:1px solid var(--border);
+  border-radius:var(--radius);color:var(--text);font-size:12px;
+  font-family:Georgia,serif;line-height:1.6;resize:vertical;min-height:70px;
+}
+.custom-form-textarea:focus{outline:none;border-color:var(--gold)}
   grid-column:1/-1;display:flex;align-items:center;
   justify-content:center;color:var(--gold-dim);font-size:18px;
 }
@@ -550,7 +602,7 @@ input[type="file"]{display:none}
 
     <button class="login-btn" id="login-btn" onclick="doLogin()">Entra nel Sistema →</button>
     <div class="login-err" id="login-err"></div>
-    <div class="login-version">v5.0.0 · SintesiDigitale · Google Gemini</div>
+    <div class="login-version">v5.1.0 · SintesiDigitale</div>
   </div>
 </div>
 
@@ -597,8 +649,68 @@ input[type="file"]{display:none}
         <span class="pro-banner-text" id="pro-expiry">Scade il: —</span>
       </div>
 
+      <!-- BRAND SELECTOR -->
+      <div class="brand-selector full-width">
+        <span class="brand-selector-label">◈ Modalità Brand</span>
+        <div class="brand-tabs">
+          <button class="brand-tab active" id="tab-sintesi" onclick="setBrandMode('sintesi')">
+            SintesiDigitale <span class="sintesi-badge">PRESET</span>
+          </button>
+          <button class="brand-tab" id="tab-master" onclick="setBrandMode('master')">
+            Brand da Master
+          </button>
+          <button class="brand-tab" id="tab-custom" onclick="setBrandMode('custom')">
+            Brand Personalizzato
+          </button>
+        </div>
+        <span class="brand-tab-desc" id="brand-mode-desc">CSS hardcoded · costo minimo</span>
+      </div>
+
+      <!-- BRAND PERSONALIZZATO FORM -->
+      <div class="custom-brand-form full-width" id="custom-brand-form">
+        <div style="font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:var(--gold-dim);font-family:var(--mono);margin-bottom:14px">◈ Configurazione Brand Manuale</div>
+        <div class="custom-form-grid">
+          <div class="custom-form-group">
+            <label class="custom-form-label">Tono</label>
+            <input type="text" class="custom-form-input" id="cb-tone" placeholder="es. formale, autorevole">
+          </div>
+          <div class="custom-form-group">
+            <label class="custom-form-label">Formalità</label>
+            <input type="text" class="custom-form-input" id="cb-formality" placeholder="es. alto, medio">
+          </div>
+          <div class="custom-form-group">
+            <label class="custom-form-label">Struttura</label>
+            <input type="text" class="custom-form-input" id="cb-structure" placeholder="es. sezioni con titoli">
+          </div>
+          <div class="custom-form-group">
+            <label class="custom-form-label">Vocabolario</label>
+            <input type="text" class="custom-form-input" id="cb-vocabulary" placeholder="es. tecnico-professionale">
+          </div>
+          <div class="custom-form-group">
+            <label class="custom-form-label">Apertura tipica</label>
+            <input type="text" class="custom-form-input" id="cb-opening" placeholder="es. Gentile Cliente,">
+          </div>
+          <div class="custom-form-group">
+            <label class="custom-form-label">Chiusura tipica</label>
+            <input type="text" class="custom-form-input" id="cb-closing" placeholder="es. Cordiali saluti,">
+          </div>
+          <div class="custom-form-group">
+            <label class="custom-form-label">Liste</label>
+            <input type="text" class="custom-form-input" id="cb-lists" placeholder="es. puntate, numerate">
+          </div>
+          <div class="custom-form-group">
+            <label class="custom-form-label">Densità testo</label>
+            <input type="text" class="custom-form-input" id="cb-density" placeholder="es. alta, media">
+          </div>
+        </div>
+        <div class="custom-form-group" style="margin-bottom:14px">
+          <label class="custom-form-label">Regole aggiuntive (una per riga)</label>
+          <textarea class="custom-form-textarea" id="cb-rules" placeholder="es. Usa sempre il Lei&#10;Evita abbreviazioni&#10;Inizia con il contesto del problema"></textarea>
+        </div>
+      </div>
+
       <!-- STEP 1: MASTER TEMPLATE -->
-      <div class="panel">
+      <div class="panel" id="step1-panel">
         <div class="panel-header">
           <div class="panel-title-wrap">
             <div class="panel-num">1</div>
@@ -847,7 +959,7 @@ input[type="file"]{display:none}
   </div><!-- /view-admin -->
 
   <footer class="app-footer">
-    Brand DNA Engine v5.0 · Luciano Bettoli · SintesiDigitale · Google Gemini 2.5 Flash
+    Brand DNA Engine v5.1 · Luciano Bettoli · SintesiDigitale · Google Gemini 2.5 Flash
   </footer>
 
 </div><!-- /screen-app -->
@@ -927,7 +1039,48 @@ let sessionHistory  = [];
 let pageNumbersEnabled = false;
 let sessionStart    = null;
 let timerInterval   = null;
-let adminTargetUser = null; // per modali admin
+let adminTargetUser = null;
+let currentBrandMode = 'sintesi'; // 'sintesi' | 'master' | 'custom'
+
+// ── SINTESIDIGITALE CSS TEMPLATE (hardcoded) ──────────────────────────────
+const SINTESI_CSS = `
+  @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800&family=Inter:wght@400;500;600&display=swap');
+  @page { margin: 15mm 18mm; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Inter', sans-serif;
+    font-size: 11px; line-height: 1.75;
+    color: #000000; background: #ffffff;
+    padding: 0;
+  }
+  h1, h2, h3, h4 {
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 800; color: #000000;
+    page-break-after: avoid;
+  }
+  h1 { font-size: 22px; margin: 24px 0 12px; border-bottom: 3px solid #FF6600; padding-bottom: 8px; }
+  h2 { font-size: 16px; margin: 20px 0 10px; color: #FF6600; }
+  h3 { font-size: 13px; margin: 16px 0 8px; }
+  p  { margin-bottom: 10px; }
+  ul, ol { margin: 8px 0 12px 20px; }
+  li { margin-bottom: 4px; }
+  table { width: 100%; border-collapse: collapse; margin: 12px 0; page-break-inside: avoid; }
+  th { background: #000000; color: #FF6600; font-family: 'Montserrat', sans-serif; font-size: 10px; letter-spacing: 1px; text-transform: uppercase; padding: 8px 10px; text-align: left; }
+  td { padding: 7px 10px; border-bottom: 1px solid #e0e0e0; }
+  tr:nth-child(even) td { background: #f8f8f8; }
+  .cover { background: #000000; color: #ffffff; padding: 40px; margin: -15mm -18mm 30px; page-break-after: always; }
+  .cover h1 { color: #FF6600; border-bottom: 2px solid #FF6600; font-size: 28px; }
+  .cover p { color: #cccccc; font-size: 12px; }
+  .footer-brand { text-align: center; font-size: 9px; letter-spacing: 2px; text-transform: uppercase; color: #999; margin-top: 30px; padding-top: 10px; border-top: 1px solid #e0e0e0; font-family: 'Montserrat', sans-serif; }
+  blockquote { border-left: 3px solid #FF6600; padding-left: 14px; margin: 12px 0; color: #333; page-break-inside: avoid; }
+  code, pre { font-family: 'Courier New', monospace; background: #f5f5f5; padding: 2px 6px; border-radius: 3px; font-size: 10px; }
+  @media print {
+    body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    h1, h2, h3 { page-break-after: avoid; }
+    table, blockquote { page-break-inside: avoid; }
+    orphans: 4; widows: 4;
+  }
+`;
 
 // ── SHA-256 (lato client, solo per hash password prima di inviarle) ──────────
 async function sha256(str) {
@@ -1061,12 +1214,13 @@ async function doLogin() {
 }
 
 function doLogout() {
-  sessionToken  = null;
-  currentUser   = null;
-  currentRole   = null;
-  brandDNA      = null;
-  outputText    = '';
+  sessionToken   = null;
+  currentUser    = null;
+  currentRole    = null;
+  brandDNA       = null;
+  outputText     = '';
   sessionHistory = [];
+  currentBrandMode = 'sintesi';
   clearInterval(timerInterval);
 
   // Reset login form
@@ -1074,19 +1228,29 @@ function doLogout() {
   document.getElementById('inp-password').value = '';
   hideError('login-err');
 
-  // Reset UI
-  document.getElementById('trial-banner').style.display = 'none';
-  document.getElementById('pro-banner').style.display   = 'none';
+  // Reset UI — safe reset senza appendChild
+  document.getElementById('trial-banner').style.display  = 'none';
+  document.getElementById('pro-banner').style.display    = 'none';
   document.getElementById('nav-admin').classList.remove('show');
   document.getElementById('output-actions').style.display = 'none';
-  document.getElementById('empty-output').style.display   = 'flex';
-  document.getElementById('output-area').innerHTML = '';
-  document.getElementById('output-area').appendChild(document.getElementById('empty-output'));
   document.getElementById('dna-panel').classList.remove('visible');
   document.getElementById('apply-btn').disabled = true;
   document.getElementById('history-list').innerHTML =
     '<div class="history-empty">Nessun documento processato in questa sessione</div>';
 
+  // Reset output area in modo sicuro
+  document.getElementById('output-area').innerHTML =
+    '<div class="empty-output" id="empty-output"><div class="empty-icon">◆</div><div class="empty-text">Nessun output ancora</div></div>';
+
+  // Reset brand selector
+  document.querySelectorAll('.brand-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('tab-sintesi').classList.add('active');
+  document.getElementById('brand-mode-desc').textContent = 'CSS hardcoded · costo minimo · SintesiDigitale preset';
+  document.getElementById('custom-brand-form').classList.remove('show');
+  const step1Panel = document.getElementById('step1-panel');
+  if (step1Panel) step1Panel.style.display = 'none';
+
+  // Switch screen
   document.getElementById('screen-app').classList.remove('active');
   document.getElementById('screen-login').classList.add('active');
 
@@ -1252,45 +1416,133 @@ function renderOutputWithPages(text, pageConfig) {
   });
 }
 
+// ── BRAND MODE ────────────────────────────────────────────────────────────
+function setBrandMode(mode) {
+  currentBrandMode = mode;
+  document.querySelectorAll('.brand-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('tab-' + mode).classList.add('active');
+  const descMap = {
+    sintesi: 'CSS hardcoded · costo minimo · SintesiDigitale preset',
+    master:  'Analisi DNA da documento · carica il Master Template',
+    custom:  'Configurazione manuale · compila i campi brand'
+  };
+  document.getElementById('brand-mode-desc').textContent = descMap[mode];
+  const customForm = document.getElementById('custom-brand-form');
+  customForm.classList.toggle('show', mode === 'custom');
+  // Step 1 visibile solo in modalità master
+  const step1Panel = document.getElementById('step1-panel');
+  if (step1Panel) step1Panel.style.display = mode === 'master' ? '' : 'none';
+  // DNA panel visibile solo in master
+  if (mode !== 'master') {
+    brandDNA = null;
+    document.getElementById('dna-panel').classList.remove('visible');
+  }
+  // Apply button
+  const applyBtn = document.getElementById('apply-btn');
+  applyBtn.disabled = (mode === 'master') ? !brandDNA : false;
+  toast('Modalità: ' + {sintesi:'SintesiDigitale',master:'Brand da Master',custom:'Brand Personalizzato'}[mode]);
+}
+
 // ── ANALYZE DNA ──────────────────────────────────────────────────────────
 async function analyzeDNA() {
   const master = document.getElementById('master-doc').value.trim();
   if (!master) { toast('Inserisci il documento master'); return; }
-
   const ml = document.getElementById('master-loading');
   ml.classList.add('visible');
-
   const sys = `Sei un esperto di brand identity e comunicazione professionale.
 Analizza il documento e restituisci SOLO JSON valido (no markdown, no backtick, no testo extra):
 {"tone":"...","structure":"...","density":"...","lists":"...","opening":"...","closing":"...","vocabulary":"...","formality":"...","rules":["regola1","regola2","regola3","regola4","regola5","regola6"]}`;
-
   try {
-    const res = await apiCall({
-      action:       'generate',
-      token:        sessionToken,
-      systemPrompt: sys,
-      userMessage:  'Analizza:\n\n' + master
-    });
-
+    const res = await apiCall({ action:'generate', token:sessionToken, systemPrompt:sys, userMessage:'Analizza:\n\n'+master });
     if (!res.ok) { toast('Errore: ' + res.error); return; }
-
     brandDNA = JSON.parse(res.result.replace(/```json|```/g,'').trim());
     renderDNA(brandDNA);
     document.getElementById('apply-btn').disabled = false;
     toast('✓ Brand DNA acquisito con successo');
+    if (currentRole === 'trial' && res.usesRemaining !== null)
+      document.getElementById('trial-counter').textContent = res.usesRemaining;
+  } catch(e) { toast('Errore: ' + e.message); }
+  finally { ml.classList.remove('visible'); }
+}
 
-    // Aggiorna contatore trial
+// ── APPLY DNA ────────────────────────────────────────────────────────────
+async function applyDNA() {
+  const target = document.getElementById('target-doc').value.trim();
+  if (!target) { toast('Inserisci il documento da stilizzare'); return; }
+  if (currentBrandMode === 'master' && !brandDNA) { toast('Analizza prima il Master Template'); return; }
+  if (currentBrandMode === 'custom' && !document.getElementById('cb-tone').value.trim()) {
+    toast('Compila almeno il campo Tono nel Brand Personalizzato'); return;
+  }
+  if (currentRole === 'trial') {
+    const rem = parseInt(document.getElementById('trial-counter').textContent);
+    if (rem <= 0) { toast('⚠ Utilizzi trial esauriti.'); return; }
+  }
+  const tl = document.getElementById('target-loading');
+  tl.classList.add('visible');
+  document.getElementById('target-loading-text').textContent = 'Applicazione Brand DNA in corso...';
+
+  let sys = '';
+  if (currentBrandMode === 'sintesi') {
+    sys = `Sei un esperto di formattazione documenti per SintesiDigitale.
+Riscrivi il documento in HTML semantico pulito con queste regole di brand:
+- Tono: formale, autorevole, professionale, nessuna emoji decorativa
+- Struttura: sezioni con h1/h2/h3, paragrafi chiari
+- Cover: se il documento ha un titolo principale, crea un <div class="cover"> come prima sezione con il titolo in <h1>
+- Footer: aggiungi SEMPRE alla fine un <div class="footer-brand">SINTESIDIGITALE — Premium Digital Solutions · AI • Automation • Marketing</div>
+- Preserva TUTTO il contenuto informativo originale
+Restituisci SOLO l'HTML del corpo (no <!DOCTYPE>, no <html>, no <head>, no <style>).
+Usa solo: div, h1, h2, h3, h4, p, ul, ol, li, table, thead, tbody, tr, th, td, blockquote, strong, em, code.`;
+  } else if (currentBrandMode === 'master') {
+    sys = `Sei un esperto di brand consistency.
+Riscrivi il documento preservando TUTTO il contenuto informativo originale.
+Adatta esclusivamente forma, stile e struttura al Brand DNA:
+- Tono: ${brandDNA.tone}
+- Struttura: ${brandDNA.structure}
+- Densità: ${brandDNA.density}
+- Liste: ${brandDNA.lists}
+- Apertura: ${brandDNA.opening}
+- Chiusura: ${brandDNA.closing}
+- Vocabolario: ${brandDNA.vocabulary}
+- Formalità: ${brandDNA.formality}
+Regole: ${(brandDNA.rules||[]).map((r,i)=>`${i+1}. ${r}`).join(' | ')}
+Restituisci SOLO il documento riscritto.`;
+  } else {
+    const rules = (document.getElementById('cb-rules').value||'').split('\n').filter(r=>r.trim()).map((r,i)=>`${i+1}. ${r}`).join('\n');
+    sys = `Sei un esperto di brand consistency.
+Riscrivi il documento preservando TUTTO il contenuto informativo originale.
+Brand: Tono: ${document.getElementById('cb-tone').value} | Formalità: ${document.getElementById('cb-formality').value} | Struttura: ${document.getElementById('cb-structure').value} | Vocabolario: ${document.getElementById('cb-vocabulary').value} | Apertura: ${document.getElementById('cb-opening').value} | Chiusura: ${document.getElementById('cb-closing').value} | Liste: ${document.getElementById('cb-lists').value} | Densità: ${document.getElementById('cb-density').value}
+${rules ? 'Regole aggiuntive:\n'+rules : ''}
+Restituisci SOLO il documento riscritto.`;
+  }
+
+  try {
+    const res = await apiCall({ action:'generate', token:sessionToken, systemPrompt:sys, userMessage:'Documento da stilizzare:\n\n'+target });
+    if (!res.ok) { toast('Errore: ' + res.error); return; }
+
+    if (currentBrandMode === 'sintesi') {
+      outputText = '<!DOCTYPE html><html lang="it"><head><meta charset="UTF-8"><title>\u200B</title><style>' + SINTESI_CSS + '</style></head><body>' + res.result + '</body></html>';
+      const outputArea = document.getElementById('output-area');
+      outputArea.innerHTML = '';
+      const iframe = document.createElement('iframe');
+      iframe.style.cssText = 'width:100%;height:600px;border:none;border-radius:4px;background:#fff;';
+      iframe.srcdoc = outputText;
+      outputArea.appendChild(iframe);
+    } else {
+      outputText = res.result;
+      renderOutputWithPages(res.result, getPageConfig());
+    }
+    document.getElementById('empty-output').style.display = 'none';
+    document.getElementById('output-actions').style.display = 'flex';
+    toast('✓ Brand DNA applicato con successo');
     if (currentRole === 'trial' && res.usesRemaining !== null) {
       document.getElementById('trial-counter').textContent = res.usesRemaining;
+      if (res.usesRemaining <= 0) toast('⚠ Ultimo utilizzo trial consumato.', 5000);
     }
-
-  } catch(e) {
-    toast('Errore: ' + e.message);
-    console.error(e);
-  } finally {
-    ml.classList.remove('visible');
-  }
+  } catch(e) { toast('Errore: ' + e.message); }
+  finally { tl.classList.remove('visible'); }
 }
+
+
 
 function renderDNA(dna) {
   const fields = [
@@ -1304,80 +1556,6 @@ function renderDNA(dna) {
     `<li><span class="rule-num">${i+1}</span><span>${r}</span></li>`
   ).join('');
   document.getElementById('dna-panel').classList.add('visible');
-}
-
-// ── APPLY DNA ────────────────────────────────────────────────────────────
-async function applyDNA() {
-  const target = document.getElementById('target-doc').value.trim();
-  if (!target)   { toast('Inserisci il documento da stilizzare'); return; }
-  if (!brandDNA) { toast('Analizza prima il Master Template'); return; }
-
-  // Blocca trial se esaurito
-  if (currentRole === 'trial') {
-    const rem = parseInt(document.getElementById('trial-counter').textContent);
-    if (rem <= 0) {
-      toast('⚠ Utilizzi trial esauriti. Contatta l\'amministratore.');
-      return;
-    }
-  }
-
-  const tl = document.getElementById('target-loading');
-  tl.classList.add('visible');
-  document.getElementById('target-loading-text').textContent = 'Applicazione Brand DNA in corso...';
-
-  const sys = `Sei un esperto di brand consistency.
-Riscrivi il documento preservando TUTTO il contenuto informativo originale (dati, fatti, numeri, tecnicismi).
-Adatta esclusivamente forma, stile e struttura al Brand DNA fornito.
-
-Brand DNA:
-- Tono: ${brandDNA.tone}
-- Struttura: ${brandDNA.structure}
-- Densità: ${brandDNA.density}
-- Liste: ${brandDNA.lists}
-- Apertura tipica: ${brandDNA.opening}
-- Chiusura tipica: ${brandDNA.closing}
-- Vocabolario: ${brandDNA.vocabulary}
-- Formalità: ${brandDNA.formality}
-
-Regole stilistiche:
-${(brandDNA.rules||[]).map((r,i)=>`${i+1}. ${r}`).join('\n')}
-
-Restituisci SOLO il documento riscritto, senza commenti o introduzioni.`;
-
-  try {
-    const res = await apiCall({
-      action:       'generate',
-      token:        sessionToken,
-      systemPrompt: sys,
-      userMessage:  'Documento da stilizzare:\n\n' + target
-    });
-
-    if (!res.ok) {
-      toast('Errore: ' + res.error);
-      return;
-    }
-
-    outputText = res.result;
-    const pageConfig = getPageConfig();
-    document.getElementById('empty-output').style.display = 'none';
-    renderOutputWithPages(res.result, pageConfig);
-    document.getElementById('output-actions').style.display = 'flex';
-    toast('✓ Brand DNA applicato con successo');
-
-    // Aggiorna contatore trial
-    if (currentRole === 'trial' && res.usesRemaining !== null) {
-      document.getElementById('trial-counter').textContent = res.usesRemaining;
-      if (res.usesRemaining <= 0) {
-        toast('⚠ Ultimo utilizzo trial consumato.', 5000);
-      }
-    }
-
-  } catch(e) {
-    toast('Errore: ' + e.message);
-    console.error(e);
-  } finally {
-    tl.classList.remove('visible');
-  }
 }
 
 // ── OUTPUT ACTIONS ────────────────────────────────────────────────────────
