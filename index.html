@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Brand DNA Engine v5.2 · SintesiDigitale</title>
+<title>Brand DNA Engine v5.3 · SintesiDigitale</title>
 <style>
 :root {
   --bg:           #1a1712;
@@ -642,7 +642,7 @@ input[type="file"]{display:none}
 
     <button class="login-btn" id="login-btn" onclick="doLogin()">Entra nel Sistema →</button>
     <div class="login-err" id="login-err"></div>
-    <div class="login-version">v5.2.0 · SintesiDigitale</div>
+    <div class="login-version">v5.3.0 · SintesiDigitale</div>
   </div>
 </div>
 
@@ -1001,7 +1001,7 @@ input[type="file"]{display:none}
   </div><!-- /view-admin -->
 
   <footer class="app-footer">
-    Brand DNA Engine v5.2 · Luciano Bettoli · SintesiDigitale · Google Gemini 3.5 Flash
+    Brand DNA Engine v5.3 · Luciano Bettoli · SintesiDigitale · Google Gemini 3.5 Flash
   </footer>
 
 </div><!-- /screen-app -->
@@ -1604,19 +1604,7 @@ async function applyDNA() {
 Converti il documento in HTML semantico seguendo ESATTAMENTE queste regole:
 
 STRUTTURA OBBLIGATORIA:
-1. COVER (prima sezione): 
-<div class="cover">
-  <div class="cover-top">
-    <div class="cover-logo-bar"><img src="__LOGO_SRC__" alt="logo"><span>SintesiDigitale</span></div>
-    <div class="cover-divider"></div>
-    <h1>[TITOLO DOCUMENTO]</h1>
-    <p class="cover-subtitle">[Sottotitolo o descrizione breve]</p>
-  </div>
-  <div class="cover-bottom">
-    <div class="cover-meta">[se presenti: <div class="cover-meta-item"><div class="cover-meta-label">Versione</div><div class="cover-meta-value">X.X</div></div> e/o <div class="cover-meta-item"><div class="cover-meta-label">Data</div><div class="cover-meta-value">...</div></div>]</div>
-    <div class="cover-footer-credits">SintesiDigitale — Premium Digital Solutions · AI • Automation • Marketing</div>
-  </div>
-</div>
+1. PRIMA RIGA — titolo documento: <h1 data-cover-title="true">[TITOLO DOCUMENTO]</h1> (obbligatorio, deve essere il primo tag)
 2. CORPO: usa h2 per sezioni principali, h3 per sottosezioni, p per paragrafi
 3. TABELLE: usa sempre <table><thead><tr><th>...</th></tr></thead><tbody><tr><td>...</td></tr></tbody></table>
 4. FOOTER (ultima riga): <div class="footer-brand">SINTESIDIGITALE — Premium Digital Solutions · AI • Automation • Marketing</div>
@@ -1658,8 +1646,33 @@ Restituisci SOLO il documento riscritto.`;
     if (!res.ok) { showErrorBanner(res.error, applyDNA); return; }
 
     if (currentBrandMode === 'sintesi') {
-      const resultWithLogo = res.result.replace('__LOGO_SRC__', LOGO_DATA_URI);
-      outputText = '<!DOCTYPE html><html lang="it"><head><meta charset="UTF-8"><title>\u200B</title>' + SINTESI_FONTS + '<style>' + SINTESI_CSS + '</style></head><body>' + resultWithLogo + '</body></html>';
+      // Estrai titolo dal primo h1 generato da Gemini
+      const _tmpDiv = document.createElement('div');
+      _tmpDiv.innerHTML = res.result;
+      const _h1 = _tmpDiv.querySelector('h1[data-cover-title="true"], h1');
+      const _docTitle = _h1 ? _h1.textContent.trim() : 'Documento Professionalizzato';
+      // Rimuovi l'h1 originale dal corpo (verrà mostrato nella cover)
+      if (_h1) _h1.remove();
+      const _bodyContent = _tmpDiv.innerHTML;
+
+      // Costruisci cover lato client — logo garantito, nessuna dipendenza da Gemini
+      const today = new Date().toLocaleDateString('it-IT', {year:'numeric',month:'long',day:'numeric'});
+      const _coverHTML = `<div class="cover">
+  <div class="cover-top">
+    <div class="cover-logo-bar"><img src="${LOGO_DATA_URI}" alt="logo"><span>SintesiDigitale</span></div>
+    <div class="cover-divider"></div>
+    <h1>${_docTitle}</h1>
+    <p class="cover-subtitle">Documento Professionalizzato</p>
+  </div>
+  <div class="cover-bottom">
+    <div class="cover-meta">
+      <div class="cover-meta-item"><div class="cover-meta-label">Data</div><div class="cover-meta-value">${today}</div></div>
+    </div>
+    <div class="cover-footer-credits">SintesiDigitale — Premium Digital Solutions · AI • Automation • Marketing</div>
+  </div>
+</div>`;
+
+      outputText = '<!DOCTYPE html><html lang="it"><head><meta charset="UTF-8"><title>\u200B</title>' + SINTESI_FONTS + '<style>' + SINTESI_CSS + '</style></head><body>' + _coverHTML + _bodyContent + '</body></html>';
       const outputArea = document.getElementById('output-area');
       outputArea.innerHTML = '';
       const iframe = document.createElement('iframe');
