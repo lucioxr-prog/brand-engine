@@ -1124,11 +1124,21 @@ const SINTESI_CSS = `
   th { background: #000000; color: #FF6600; font-family: 'Montserrat', sans-serif; font-size: 10px; letter-spacing: 1px; text-transform: uppercase; padding: 8px 10px; text-align: left; }
   td { padding: 7px 10px; border-bottom: 1px solid #e0e0e0; }
   tr:nth-child(even) td { background: #f8f8f8; }
-  .cover { background: #000000; color: #ffffff; padding: 40px; margin: 0 0 30px; page-break-after: always; text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 80vh; }
-  @media screen { .cover { margin: 0 0 30px; min-height: 60vh; } }
-  @media print  { .cover { margin: -15mm -18mm 30px; padding: 40mm 18mm 20mm; min-height: 100vh; } }
-  .cover h1 { color: #FF6600; border-bottom: 2px solid #FF6600; font-size: 28px; text-align: center; width: 100%; padding-bottom: 12px; }
-  .cover p { color: #cccccc; font-size: 12px; text-align: center; }
+  .cover { background: #ffffff; color: #000000; margin: 0 0 30px; page-break-after: always; display: flex; flex-direction: column; min-height: 60vh; }
+  @media print { .cover { margin: -15mm -18mm 30px; min-height: 100vh; } }
+  .cover-top { background: #000000; padding: 24px 40px 20px; text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+  .cover-logo-bar { display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 12px; }
+  .cover-logo-bar img { width: 30px; height: 30px; object-fit: contain; }
+  .cover-logo-bar span { font-size: 10px; font-weight: 700; color: #ffffff; letter-spacing: 4px; text-transform: uppercase; font-family: 'Montserrat', sans-serif; }
+  .cover-divider { width: 36px; height: 2px; background: #FF6600; margin: 0 auto 12px; border-radius: 1px; }
+  .cover h1 { color: #FF6600; font-size: 22px; font-weight: 800; margin: 0 0 8px; letter-spacing: 1px; border: none; font-family: 'Montserrat', sans-serif; }
+  .cover-subtitle { font-size: 9px; color: #aaaaaa; letter-spacing: 2px; text-transform: uppercase; margin: 0; font-family: 'Montserrat', sans-serif; }
+  .cover-bottom { background: #ffffff; flex: 1; padding: 0 40px; text-align: center; border-top: 3px solid #FF6600; display: flex; flex-direction: column; align-items: center; justify-content: center; padding-bottom: 8%; }
+  .cover-meta { display: flex; justify-content: center; gap: 36px; margin-bottom: 20px; }
+  .cover-meta-item { text-align: center; }
+  .cover-meta-label { font-size: 9px; color: #999999; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 4px; }
+  .cover-meta-value { font-size: 13px; font-weight: 600; color: #222222; font-family: 'Montserrat', sans-serif; }
+  .cover-footer-credits { font-size: 8px; color: #cccccc; letter-spacing: 2px; text-transform: uppercase; border-top: 0.5px solid #eeeeee; padding-top: 12px; width: 100%; text-align: center; }
   .footer-brand { text-align: center; font-size: 9px; letter-spacing: 2px; text-transform: uppercase; color: #999; margin-top: 30px; padding-top: 10px; border-top: 1px solid #e0e0e0; font-family: 'Montserrat', sans-serif; }
   blockquote { border-left: 3px solid #FF6600; padding-left: 14px; margin: 12px 0; color: #333; page-break-inside: avoid; }
   code, pre { font-family: 'Courier New', monospace; background: #f5f5f5; padding: 2px 6px; border-radius: 3px; font-size: 10px; }
@@ -1593,7 +1603,19 @@ async function applyDNA() {
 Converti il documento in HTML semantico seguendo ESATTAMENTE queste regole:
 
 STRUTTURA OBBLIGATORIA:
-1. COVER (prima sezione): <div class="cover"><h1>[TITOLO DOCUMENTO]</h1><p>[Sottotitolo o descrizione breve]</p><p>[Versione e data se presenti]</p></div>
+1. COVER (prima sezione): 
+<div class="cover">
+  <div class="cover-top">
+    <div class="cover-logo-bar"><img src="https://lucioxr-prog.github.io/brand-engine/logo.png" alt="logo"><span>SintesiDigitale</span></div>
+    <div class="cover-divider"></div>
+    <h1>[TITOLO DOCUMENTO]</h1>
+    <p class="cover-subtitle">[Sottotitolo o descrizione breve]</p>
+  </div>
+  <div class="cover-bottom">
+    <div class="cover-meta">[se presenti: <div class="cover-meta-item"><div class="cover-meta-label">Versione</div><div class="cover-meta-value">X.X</div></div> e/o <div class="cover-meta-item"><div class="cover-meta-label">Data</div><div class="cover-meta-value">...</div></div>]</div>
+    <div class="cover-footer-credits">SintesiDigitale — Premium Digital Solutions · AI • Automation • Marketing</div>
+  </div>
+</div>
 2. CORPO: usa h2 per sezioni principali, h3 per sottosezioni, p per paragrafi
 3. TABELLE: usa sempre <table><thead><tr><th>...</th></tr></thead><tbody><tr><td>...</td></tr></tbody></table>
 4. FOOTER (ultima riga): <div class="footer-brand">SINTESIDIGITALE — Premium Digital Solutions · AI • Automation • Marketing</div>
