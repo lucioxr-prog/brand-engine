@@ -1082,7 +1082,7 @@ input[type="file"]{display:none}
 //  Web App dopo il deploy.
 // ══════════════════════════════════════════════════════════════════════════════
 
-const WORKER_URL = 'https://script.google.com/macros/s/AKfycbyZWR1QhyUW7ayKKi7xCw6okY1crRB9RKCh0GxHoeMUpLJQlTf39KQR77L_Ehk4wQPI/exec';
+const WORKER_URL = 'https://script.google.com/macros/s/AKfycbx71NpFBvWxE7zq3JIVJur8lxwzmJ_Bt0t1FRVLCvt15Z4XJH67DbvX3_0UErieWrd5/exec';
 
 // ── STATE ──────────────────────────────────────────────────────────────────
 let sessionToken    = null;
@@ -1402,16 +1402,15 @@ async function readFileIntoTextarea(file, taId, countId) {
   if (name.endsWith('.txt') || name.endsWith('.md') || name.endsWith('.csv')) {
     ta.value = await file.text();
     updateCharCount(taId, countId);
-    toast(`✓ File caricato: ${file.name}`);
+    // upload silenzioso — nessun toast visibile
 
   } else if (name.endsWith('.docx')) {
-    toast('📄 DOCX — estrazione testo...');
     try {
       const ab = await file.arrayBuffer();
       const result = await mammoth.extractRawText({ arrayBuffer: ab });
       ta.value = result.value;
       updateCharCount(taId, countId);
-      toast(`✓ DOCX caricato: ${file.name}`);
+      // upload silenzioso — nessun toast visibile
     } catch(e) {
       toast('⚠ Impossibile leggere il DOCX. Incolla il testo manualmente.');
     }
