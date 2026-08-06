@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Brand DNA Engine v5.4 · SintesiDigitale</title>
+<title>Brand DNA Engine v6.0 · SintesiDigitale</title>
 <style>
 :root {
   --bg:           #1a1712;
@@ -619,30 +619,24 @@ input[type="file"]{display:none}
 </head>
 <body>
 
-<!-- ══ SCREEN: LOGIN ══ -->
-<div id="screen-login" class="screen active">
+<!-- ══ SCREEN: GATE (password d'ingresso, primo filtro) ══ -->
+<div id="screen-gate" class="screen active">
   <div class="login-card">
     <div class="login-monogram">LB</div>
     <div class="login-brand">Brand DNA Engine</div>
     <h1 class="login-title">Accesso Riservato</h1>
-    <div class="login-badge">🔐 Autenticazione Sicura v5.0</div>
+    <div class="login-badge">🔐 Area Riservata</div>
 
-    <div class="fg">
-      <label>Username</label>
-      <input type="text" id="inp-username" placeholder="username"
-        autocomplete="username" autocapitalize="none"
-        onkeydown="if(event.key==='Enter')document.getElementById('inp-password').focus()">
-    </div>
     <div class="fg">
       <label>Password</label>
-      <input type="password" id="inp-password" placeholder="••••••••••••"
+      <input type="password" id="gate-password" placeholder="••••••••••••"
         autocomplete="current-password"
-        onkeydown="if(event.key==='Enter')doLogin()">
+        onkeydown="if(event.key==='Enter')verificaPasswordAccesso()">
     </div>
 
-    <button class="login-btn" id="login-btn" onclick="doLogin()">Entra nel Sistema →</button>
-    <div class="login-err" id="login-err"></div>
-    <div class="login-version">v5.3.0 · SintesiDigitale</div>
+    <button class="login-btn" id="gate-btn" onclick="verificaPasswordAccesso()">Entra →</button>
+    <div class="login-err" id="gate-err"></div>
+    <div class="login-version">v6.0.0 · SintesiDigitale</div>
   </div>
 </div>
 
@@ -660,33 +654,30 @@ input[type="file"]{display:none}
     <div class="header-right">
       <div class="user-chip">
         <div class="user-chip-dot"></div>
-        <span class="user-chip-name" id="header-username">—</span>
-        <span class="role-badge" id="header-role-badge">—</span>
+        <span class="user-chip-name" id="license-status-text">3 generazioni gratuite disponibili</span>
       </div>
-      <div class="session-timer" id="session-timer">00:00</div>
-      <button class="btn-logout" onclick="doLogout()">⎋ Esci</button>
+      <button class="btn-outline" style="padding:5px 14px;font-size:10px" onclick="openLicenseModal()">🔑 Codice Licenza</button>
     </div>
   </header>
 
   <nav class="app-nav">
     <button class="nav-tab active" onclick="showView('view-engine',this)">◈ Brand Engine</button>
-    <button class="nav-tab admin-only" id="nav-admin" onclick="showView('view-admin',this)">⚙ Gestione Utenti</button>
   </nav>
 
   <!-- ── VIEW: ENGINE ── -->
   <div id="view-engine" class="view active">
     <main class="app-main">
 
-      <!-- Trial banner -->
-      <div id="trial-banner" class="trial-banner full-width" style="display:none">
-        <span class="trial-banner-text">⚡ Account Trial — Utilizzi disponibili:</span>
-        <span class="trial-counter" id="trial-counter">2</span>
+      <!-- Freemium banner -->
+      <div id="free-banner" class="trial-banner full-width">
+        <span class="trial-banner-text">🎁 Generazioni gratuite rimaste:</span>
+        <span class="trial-counter" id="free-counter">3</span>
       </div>
 
-      <!-- Pro banner -->
-      <div id="pro-banner" class="pro-banner full-width" style="display:none">
-        <span class="pro-banner-text">✓ Account Pro attivo</span>
-        <span class="pro-banner-text" id="pro-expiry">Scade il: —</span>
+      <!-- Licenza attiva banner -->
+      <div id="license-banner" class="pro-banner full-width" style="display:none">
+        <span class="pro-banner-text">✓ Licenza attiva</span>
+        <span class="pro-banner-text" id="license-expiry">Scade il: —</span>
       </div>
 
       <!-- BRAND SELECTOR -->
@@ -903,159 +894,26 @@ input[type="file"]{display:none}
     </main>
   </div><!-- /view-engine -->
 
-  <!-- ── VIEW: ADMIN ── -->
-  <div id="view-admin" class="view">
-    <div class="admin-main">
-
-      <div class="admin-alert" id="admin-alert"></div>
-
-      <!-- Stats -->
-      <div class="stats-row">
-        <div class="stat-card">
-          <div class="stat-num" id="stat-total">—</div>
-          <div class="stat-label">Utenti Totali</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-num" id="stat-pro">—</div>
-          <div class="stat-label">Utenti Pro</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-num" id="stat-trial">—</div>
-          <div class="stat-label">Account Trial</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-num" id="stat-expiring">—</div>
-          <div class="stat-label">In Scadenza (30gg)</div>
-        </div>
-      </div>
-
-      <!-- Crea nuovo utente -->
-      <div class="admin-section">
-        <div class="admin-section-title">◈ Crea Nuovo Utente</div>
-        <div class="create-user-form">
-          <div class="form-grid">
-            <div class="form-group">
-              <label class="form-label">Username</label>
-              <input type="text" class="form-input" id="new-username" placeholder="mario_rossi" autocapitalize="none">
-            </div>
-            <div class="form-group">
-              <label class="form-label">Password</label>
-              <input type="password" class="form-input" id="new-password" placeholder="••••••••">
-            </div>
-            <div class="form-group">
-              <label class="form-label">Ruolo</label>
-              <select class="form-select" id="new-role" onchange="toggleRoleFields()">
-                <option value="pro">Pro</option>
-                <option value="trial">Trial</option>
-              </select>
-            </div>
-            <div class="form-group" id="field-expires">
-              <label class="form-label">Scadenza (Pro)</label>
-              <input type="date" class="form-input" id="new-expires">
-            </div>
-            <div class="form-group" id="field-uses" style="display:none">
-              <label class="form-label">Utilizzi Trial</label>
-              <select class="form-select" id="new-uses">
-                <option value="2">2 utilizzi</option>
-                <option value="3">3 utilizzi</option>
-                <option value="5">5 utilizzi</option>
-              </select>
-              <span class="form-note">Default: 2</span>
-            </div>
-          </div>
-          <div class="btn-row">
-            <button class="btn btn-primary" onclick="createUser()">+ Crea Utente</button>
-            <button class="btn btn-outline" onclick="resetCreateForm()">Reset</button>
-          </div>
-        </div>
-      </div>
-
-      <!-- Lista utenti -->
-      <div class="admin-section">
-        <div class="admin-section-title" style="display:flex;align-items:center;justify-content:space-between">
-          <span>◈ Utenti Registrati</span>
-          <button class="btn btn-outline" style="padding:5px 14px;font-size:10px" onclick="loadUsers()">↻ Aggiorna</button>
-        </div>
-        <div style="background:var(--panel);border:1px solid var(--border);border-radius:10px;overflow:hidden">
-          <div style="overflow-x:auto">
-            <table class="users-table">
-              <thead>
-                <tr>
-                  <th>Utente</th>
-                  <th>Ruolo</th>
-                  <th>Stato</th>
-                  <th>Scadenza / Utilizzi</th>
-                  <th>Creato</th>
-                  <th>Azioni</th>
-                </tr>
-              </thead>
-              <tbody id="users-tbody">
-                <tr><td colspan="6" style="text-align:center;color:var(--text-muted);padding:20px">Caricamento...</td></tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-
-    </div>
-  </div><!-- /view-admin -->
-
   <footer class="app-footer">
-    Brand DNA Engine v5.4 · Luciano Bettoli · SintesiDigitale · Google Gemini 3.5 Flash
+    Brand DNA Engine v6.0 · Luciano Bettoli · SintesiDigitale · Google Gemini 3.5 Flash
   </footer>
 
 </div><!-- /screen-app -->
 
-<!-- ── MODAL: CHANGE PASSWORD ── -->
-<div class="modal-overlay" id="modal-pwd">
+<!-- ── MODAL: CODICE LICENZA (paywall) ── -->
+<div class="modal-overlay" id="modal-license">
   <div class="modal">
-    <div class="modal-title">Cambia Password</div>
-    <div class="modal-desc" id="modal-pwd-desc">Inserisci la nuova password per l'utente.</div>
+    <div class="modal-title">🔑 Inserisci Codice Licenza</div>
+    <div class="modal-desc" id="modal-license-desc">Hai esaurito le generazioni gratuite. Inserisci il codice ricevuto da SintesiDigitale per continuare senza limiti.</div>
     <div class="form-group" style="margin-top:8px">
-      <label class="form-label">Nuova Password</label>
-      <input type="password" class="form-input" id="modal-new-pwd" placeholder="••••••••"
-        onkeydown="if(event.key==='Enter')confirmChangePassword()">
+      <label class="form-label">Codice Licenza</label>
+      <input type="text" class="form-input" id="modal-license-code" placeholder="XXXX-XXXX" autocapitalize="characters"
+        onkeydown="if(event.key==='Enter')confirmLicenseCode()">
     </div>
+    <div class="login-err" id="license-err"></div>
     <div class="modal-actions">
-      <button class="btn btn-outline" onclick="closeModal('modal-pwd')">Annulla</button>
-      <button class="btn btn-primary" onclick="confirmChangePassword()">Salva Password</button>
-    </div>
-  </div>
-</div>
-
-<!-- ── MODAL: RESET TRIAL ── -->
-<div class="modal-overlay" id="modal-trial">
-  <div class="modal">
-    <div class="modal-title">Reset Utilizzi Trial</div>
-    <div class="modal-desc" id="modal-trial-desc">Reimposta il contatore utilizzi.</div>
-    <div class="form-group" style="margin-top:8px">
-      <label class="form-label">Nuovo numero utilizzi</label>
-      <select class="form-select" id="modal-trial-uses">
-        <option value="2">2 utilizzi</option>
-        <option value="3">3 utilizzi</option>
-        <option value="5">5 utilizzi</option>
-        <option value="10">10 utilizzi</option>
-      </select>
-    </div>
-    <div class="modal-actions">
-      <button class="btn btn-outline" onclick="closeModal('modal-trial')">Annulla</button>
-      <button class="btn btn-primary" onclick="confirmResetTrial()">Reset</button>
-    </div>
-  </div>
-</div>
-
-<!-- ── MODAL: EXTEND PRO ── -->
-<div class="modal-overlay" id="modal-extend">
-  <div class="modal">
-    <div class="modal-title">Estendi Scadenza Pro</div>
-    <div class="modal-desc" id="modal-extend-desc">Modifica la data di scadenza.</div>
-    <div class="form-group" style="margin-top:8px">
-      <label class="form-label">Nuova data scadenza</label>
-      <input type="date" class="form-input" id="modal-extend-date">
-    </div>
-    <div class="modal-actions">
-      <button class="btn btn-outline" onclick="closeModal('modal-extend')">Annulla</button>
-      <button class="btn btn-primary" onclick="confirmExtend()">Salva</button>
+      <button class="btn btn-outline" onclick="closeModal('modal-license')">Annulla</button>
+      <button class="btn btn-primary" id="license-confirm-btn" onclick="confirmLicenseCode()">Attiva Licenza</button>
     </div>
   </div>
 </div>
@@ -1077,7 +935,7 @@ input[type="file"]{display:none}
 
 <script>
 // ══════════════════════════════════════════════════════════════════════════════
-//  BRAND DNA ENGINE v5.0 — Frontend
+//  BRAND DNA ENGINE v6.0 — Frontend (Freemium + Licenza)
 //  IMPORTANTE: Sostituisci WORKER_URL con l'URL della tua Google Apps Script
 //  Web App dopo il deploy.
 // ══════════════════════════════════════════════════════════════════════════════
@@ -1085,17 +943,106 @@ input[type="file"]{display:none}
 const WORKER_URL = 'https://script.google.com/macros/s/AKfycbx71NpFBvWxE7zq3JIVJur8lxwzmJ_Bt0t1FRVLCvt15Z4XJH67DbvX3_0UErieWrd5/exec';
 
 // ── STATE ──────────────────────────────────────────────────────────────────
-let sessionToken    = null;
-let currentUser     = null;
-let currentRole     = null;
+const FREE_LIMIT    = 3;
+let deviceId         = null;
+let currentLicenseId = null; // null finché non viene validato un codice
+let freeRemaining    = FREE_LIMIT;
 let brandDNA        = null;
 let outputText      = '';
 let sessionHistory  = [];
 let pageNumbersEnabled = false;
-let sessionStart    = null;
-let timerInterval   = null;
-let adminTargetUser = null;
 let currentBrandMode = 'sintesi'; // 'sintesi' | 'master' | 'custom'
+
+// ── GATE PASSWORD (primo filtro, prima del freemium) ────────────────────────
+function enterApp() {
+  document.getElementById('screen-gate').classList.remove('active');
+  document.getElementById('screen-app').classList.add('active');
+}
+
+async function verificaPasswordAccesso() {
+  const pwd = document.getElementById('gate-password').value;
+  const btn = document.getElementById('gate-btn');
+  hideError('gate-err');
+
+  if (!pwd) { showError('gate-err', 'Inserisci la password.'); return; }
+
+  btn.disabled = true;
+  btn.textContent = 'Verifica...';
+  try {
+    const res = await apiCall({ action: 'verifica_password', password: pwd });
+    if (!res.ok) { showError('gate-err', res.error || 'Password non valida.'); return; }
+    localStorage.setItem('bde_gate_passed', '1');
+    enterApp();
+  } catch(e) {
+    showError('gate-err', 'Errore di connessione al server. Riprova.');
+    console.error(e);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Entra →';
+  }
+}
+
+// ── DEVICE ID + LICENZA (localStorage) ──────────────────────────────────────
+function getOrCreateDeviceId() {
+  let id = localStorage.getItem('bde_device_id');
+  if (!id) {
+    id = (crypto.randomUUID ? crypto.randomUUID() : 'dev-' + Date.now() + '-' + Math.random().toString(16).slice(2));
+    localStorage.setItem('bde_device_id', id);
+  }
+  return id;
+}
+
+function updateLicenseUI() {
+  const freeBanner    = document.getElementById('free-banner');
+  const licenseBanner = document.getElementById('license-banner');
+  const statusText    = document.getElementById('license-status-text');
+
+  if (currentLicenseId) {
+    freeBanner.style.display    = 'none';
+    licenseBanner.style.display = 'flex';
+    statusText.textContent      = '✓ Licenza attiva';
+  } else {
+    freeBanner.style.display    = 'flex';
+    licenseBanner.style.display = 'none';
+    document.getElementById('free-counter').textContent = freeRemaining;
+    statusText.textContent = freeRemaining + ' generazion' + (freeRemaining===1?'e':'i') + ' gratuit' + (freeRemaining===1?'a':'e') + ' disponibil' + (freeRemaining===1?'e':'i');
+  }
+}
+
+function openLicenseModal() {
+  hideError('license-err');
+  document.getElementById('modal-license-code').value = '';
+  showModal('modal-license');
+}
+
+async function confirmLicenseCode() {
+  const code = document.getElementById('modal-license-code').value.trim();
+  const btn  = document.getElementById('license-confirm-btn');
+  hideError('license-err');
+  if (!code) { showError('license-err', 'Inserisci il codice licenza.'); return; }
+
+  btn.disabled = true;
+  btn.textContent = 'Verifica in corso...';
+  try {
+    const res = await apiCall({ action: 'verifica_licenza', licenseId: code, deviceId });
+    if (!res.ok) {
+      showError('license-err', res.error || 'Codice non valido.');
+      return;
+    }
+    currentLicenseId = code;
+    localStorage.setItem('bde_license_id', code);
+    document.getElementById('license-expiry').textContent = 'Scade il: ' + formatDate(res.expires);
+    updateLicenseUI();
+    closeModal('modal-license');
+    toast('✓ Licenza attivata con successo');
+  } catch(e) {
+    showError('license-err', 'Errore di connessione al server. Riprova.');
+    console.error(e);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Attiva Licenza';
+  }
+}
 
 // ── SINTESIDIGITALE CSS TEMPLATE (hardcoded) ──────────────────────────────
 const SINTESI_FONTS = '<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">';
@@ -1150,12 +1097,6 @@ const SINTESI_CSS = `
     orphans: 4; widows: 4;
   }
 `;
-
-// ── SHA-256 (lato client, solo per hash password prima di inviarle) ──────────
-async function sha256(str) {
-  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
-  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
-}
 
 // ── UTILS ──────────────────────────────────────────────────────────────────
 // ── TOAST (messaggi successo / info — in basso, non bloccante) ──────────────
@@ -1225,13 +1166,6 @@ function hideError(id) {
   el.classList.remove('show');
 }
 
-function adminAlert(msg, type='success') {
-  const el = document.getElementById('admin-alert');
-  el.textContent = msg;
-  el.className = `admin-alert show ${type}`;
-  setTimeout(() => el.classList.remove('show'), 4000);
-}
-
 function showModal(id) { document.getElementById(id).classList.add('show') }
 function closeModal(id) { document.getElementById(id).classList.remove('show') }
 
@@ -1240,7 +1174,6 @@ function showView(viewId, tabEl) {
   document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
   document.getElementById(viewId).classList.add('active');
   tabEl.classList.add('active');
-  if (viewId === 'view-admin') loadUsers();
 }
 
 // ── API CALL al Worker (Apps Script) ────────────────────────────────────────
@@ -1259,135 +1192,6 @@ async function apiCall(payload) {
   });
   if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
   return resp.json();
-}
-
-// ── LOGIN ──────────────────────────────────────────────────────────────────
-async function doLogin() {
-  const username = document.getElementById('inp-username').value.trim().toLowerCase();
-  const password = document.getElementById('inp-password').value;
-  const btn      = document.getElementById('login-btn');
-
-  hideError('login-err');
-
-  if (!username || !password) {
-    showError('login-err', 'Inserisci username e password.');
-    return;
-  }
-
-  btn.disabled = true;
-  btn.textContent = 'Autenticazione...';
-
-  try {
-    const passwordHash = await sha256(password);
-    const res = await apiCall({ action: 'auth', username, passwordHash });
-
-    if (!res.ok) {
-      showError('login-err', res.error || 'Errore di autenticazione.');
-      return;
-    }
-
-    // Salva sessione
-    sessionToken   = res.token;
-    currentUser    = username;
-    currentRole    = res.role;
-    sessionStart   = Date.now();
-
-    // Aggiorna UI
-    document.getElementById('header-username').textContent = username;
-    const badge = document.getElementById('header-role-badge');
-    badge.textContent = res.role.toUpperCase();
-    badge.className   = `role-badge ${res.role}`;
-
-    // Mostra tab admin se admin
-    if (res.role === 'admin') {
-      document.getElementById('nav-admin').classList.add('show');
-    }
-
-    // Banners per Pro / Trial
-    if (res.role === 'trial') {
-      const banner = document.getElementById('trial-banner');
-      banner.style.display = 'flex';
-      document.getElementById('trial-counter').textContent = res.usesRemaining;
-    }
-    if (res.role === 'pro') {
-      const banner = document.getElementById('pro-banner');
-      banner.style.display = 'flex';
-      document.getElementById('pro-expiry').textContent =
-        'Scade il: ' + formatDate(res.expires);
-    }
-
-    // Switch screen
-    document.getElementById('screen-login').classList.remove('active');
-    document.getElementById('screen-app').classList.add('active');
-
-    startSessionTimer();
-
-  } catch(err) {
-    showError('login-err', 'Errore di connessione al server. Riprova.');
-    console.error(err);
-  } finally {
-    btn.disabled  = false;
-    btn.textContent = 'Entra nel Sistema →';
-  }
-}
-
-function doLogout() {
-  sessionToken   = null;
-  currentUser    = null;
-  currentRole    = null;
-  brandDNA       = null;
-  outputText     = '';
-  sessionHistory = [];
-  currentBrandMode = 'sintesi';
-  clearInterval(timerInterval);
-
-  // Reset login form
-  document.getElementById('inp-username').value = '';
-  document.getElementById('inp-password').value = '';
-  hideError('login-err');
-
-  // Reset UI — safe reset senza appendChild
-  document.getElementById('trial-banner').style.display  = 'none';
-  document.getElementById('pro-banner').style.display    = 'none';
-  document.getElementById('nav-admin').classList.remove('show');
-  document.getElementById('output-actions').style.display = 'none';
-  document.getElementById('dna-panel').classList.remove('visible');
-  document.getElementById('apply-btn').disabled = true;
-  document.getElementById('history-list').innerHTML =
-    '<div class="history-empty">Nessun documento processato in questa sessione</div>';
-
-  // Reset output area in modo sicuro
-  document.getElementById('output-area').innerHTML =
-    '<div class="empty-output" id="empty-output"><div class="empty-icon">◆</div><div class="empty-text">Nessun output ancora</div></div>';
-
-  // Reset brand selector
-  document.querySelectorAll('.brand-tab').forEach(t => t.classList.remove('active'));
-  document.getElementById('tab-sintesi').classList.add('active');
-  document.getElementById('brand-mode-desc').textContent = 'CSS hardcoded · costo minimo · SintesiDigitale preset';
-  document.getElementById('custom-brand-form').classList.remove('show');
-  const step1Panel = document.getElementById('step1-panel');
-  if (step1Panel) step1Panel.style.display = 'none';
-
-  // Switch screen
-  document.getElementById('screen-app').classList.remove('active');
-  document.getElementById('screen-login').classList.add('active');
-
-  // Torna al tab engine
-  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
-  document.getElementById('view-engine').classList.add('active');
-  document.querySelector('.nav-tab').classList.add('active');
-}
-
-// ── SESSION TIMER ──────────────────────────────────────────────────────────
-function startSessionTimer() {
-  const el = document.getElementById('session-timer');
-  timerInterval = setInterval(() => {
-    const d = Date.now() - sessionStart;
-    const m = Math.floor(d / 60000);
-    const s = Math.floor((d % 60000) / 1000);
-    el.textContent = `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
-  }, 1000);
 }
 
 // ── FILE HANDLING ──────────────────────────────────────────────────────────
@@ -1570,14 +1374,12 @@ async function analyzeDNA() {
 Analizza il documento e restituisci SOLO JSON valido (no markdown, no backtick, no testo extra):
 {"tone":"...","structure":"...","density":"...","lists":"...","opening":"...","closing":"...","vocabulary":"...","formality":"...","rules":["regola1","regola2","regola3","regola4","regola5","regola6"]}`;
   try {
-    const res = await apiCall({ action:'generate', token:sessionToken, systemPrompt:sys, userMessage:'Analizza:\n\n'+master });
+    const res = await apiCall({ action:'generate', deviceId, licenseId:currentLicenseId, step:'analyze', systemPrompt:sys, userMessage:'Analizza:\n\n'+master });
     if (!res.ok) { showErrorBanner(res.error, analyzeDNA); return; }
     brandDNA = JSON.parse(res.result.replace(/```json|```/g,'').trim());
     renderDNA(brandDNA);
     document.getElementById('apply-btn').disabled = false;
     toast('✓ Brand DNA acquisito con successo');
-    if (currentRole === 'trial' && res.usesRemaining !== null)
-      document.getElementById('trial-counter').textContent = res.usesRemaining;
   } catch(e) { showErrorBanner(e.message); }
   finally { ml.classList.remove('visible'); }
 }
@@ -1590,10 +1392,7 @@ async function applyDNA() {
   if (currentBrandMode === 'custom' && !document.getElementById('cb-tone').value.trim()) {
     toast('Compila almeno il campo Tono nel Brand Personalizzato'); return;
   }
-  if (currentRole === 'trial') {
-    const rem = parseInt(document.getElementById('trial-counter').textContent);
-    if (rem <= 0) { toast('⚠ Utilizzi trial esauriti.'); return; }
-  }
+  if (!currentLicenseId && freeRemaining <= 0) { openLicenseModal(); return; }
   const tl = document.getElementById('target-loading');
   tl.classList.add('visible');
   document.getElementById('target-loading-text').textContent = 'Applicazione Brand DNA in corso...';
@@ -1642,8 +1441,16 @@ Restituisci SOLO il documento riscritto.`;
   }
 
   try {
-    const res = await apiCall({ action:'generate', token:sessionToken, systemPrompt:sys, userMessage:'Documento da stilizzare:\n\n'+target });
-    if (!res.ok) { showErrorBanner(res.error, applyDNA); return; }
+    const res = await apiCall({ action:'generate', deviceId, licenseId:currentLicenseId, step:'apply', systemPrompt:sys, userMessage:'Documento da stilizzare:\n\n'+target });
+    if (!res.ok) {
+      if (res.paywall) {
+        if (res.licenseInvalid) { currentLicenseId = null; localStorage.removeItem('bde_license_id'); updateLicenseUI(); }
+        openLicenseModal();
+        return;
+      }
+      showErrorBanner(res.error, applyDNA);
+      return;
+    }
 
     if (currentBrandMode === 'sintesi') {
       // Estrai titolo dal primo h1 generato da Gemini
@@ -1697,9 +1504,10 @@ Restituisci SOLO il documento riscritto.`;
       document.getElementById('btn-export-pdf').style.display = 'none';
     }
     toast('✓ Brand DNA applicato con successo');
-    if (currentRole === 'trial' && res.usesRemaining !== null) {
-      document.getElementById('trial-counter').textContent = res.usesRemaining;
-      if (res.usesRemaining <= 0) toast('⚠ Ultimo utilizzo trial consumato.', 5000);
+    if (!currentLicenseId && res.freeRemaining !== null && res.freeRemaining !== undefined) {
+      freeRemaining = res.freeRemaining;
+      updateLicenseUI();
+      if (freeRemaining <= 0) toast('⚠ Generazioni gratuite esaurite. Inserisci un codice licenza per continuare.', 5000);
     }
   } catch(e) { showErrorBanner(e.message, applyDNA); }
   finally { tl.classList.remove('visible'); }
@@ -1816,205 +1624,6 @@ function clearHistory() {
   toast('Storia svuotata');
 }
 
-// ── ADMIN: LOAD USERS ────────────────────────────────────────────────────
-async function loadUsers() {
-  const tbody = document.getElementById('users-tbody');
-  tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--text-muted);padding:20px">Caricamento...</td></tr>';
-
-  try {
-    const res = await apiCall({ action: 'admin', token: sessionToken, operation: 'list_users' });
-    if (!res.ok) { adminAlert(res.error, 'error'); return; }
-
-    const users = res.users;
-    const today = new Date();
-    today.setHours(0,0,0,0);
-
-    // Stats
-    document.getElementById('stat-total').textContent = users.length;
-    document.getElementById('stat-pro').textContent   = users.filter(u => u.role==='pro').length;
-    document.getElementById('stat-trial').textContent = users.filter(u => u.role==='trial').length;
-
-    const expiringSoon = users.filter(u => {
-      if (u.role !== 'pro' || !u.expires) return false;
-      const exp = new Date(u.expires);
-      const diff = (exp - today) / (1000*60*60*24);
-      return diff >= 0 && diff <= 30;
-    });
-    document.getElementById('stat-expiring').textContent = expiringSoon.length;
-
-    if (!users.length) {
-      tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--text-muted);padding:20px">Nessun utente</td></tr>';
-      return;
-    }
-
-    tbody.innerHTML = users.map(u => {
-      const isAdmin   = u.role === 'admin';
-      const isActive  = u.active === true || u.active === 'true' || u.active === 'TRUE';
-      const statusDot = `<span class="status-dot ${isActive?'active':'inactive'}"></span>${isActive?'Attivo':'Disattivo'}`;
-
-      let expiryCell = '—';
-      if (u.role === 'pro' && u.expires) {
-        const exp  = new Date(u.expires);
-        const diff = Math.ceil((exp - today) / (1000*60*60*24));
-        if (diff < 0) {
-          expiryCell = `${u.expires} <span class="expired-badge">SCADUTO</span>`;
-        } else if (diff <= 30) {
-          expiryCell = `${u.expires} <span class="expiry-soon">tra ${diff}gg</span>`;
-        } else {
-          expiryCell = u.expires;
-        }
-      } else if (u.role === 'trial') {
-        const rem = u.usesRemaining !== null ? u.usesRemaining : 0;
-        expiryCell = `${rem} utilizzi rimasti`;
-      }
-
-      const actions = isAdmin ? '<span style="color:var(--text-muted);font-size:11px">Admin protetto</span>' : `
-        <div class="action-btns">
-          ${isActive
-            ? `<button class="btn-xs btn-xs-danger" onclick="toggleUser('${u.username}')">Disattiva</button>`
-            : `<button class="btn-xs btn-xs-success" onclick="toggleUser('${u.username}')">Attiva</button>`
-          }
-          <button class="btn-xs btn-xs-outline" onclick="openChangePwd('${u.username}')">Password</button>
-          ${u.role==='pro' ? `<button class="btn-xs btn-xs-outline" onclick="openExtend('${u.username}','${u.expires||''}')">Scadenza</button>` : ''}
-          ${u.role==='trial' ? `<button class="btn-xs btn-xs-outline" onclick="openResetTrial('${u.username}')">Reset trial</button>` : ''}
-          <button class="btn-xs btn-xs-danger" onclick="deleteUser('${u.username}')">Elimina</button>
-        </div>
-      `;
-
-      return `<tr>
-        <td style="font-weight:600">${u.username}</td>
-        <td><span class="role-badge ${u.role}">${u.role.toUpperCase()}</span></td>
-        <td>${statusDot}</td>
-        <td>${expiryCell}</td>
-        <td>${u.created||'—'}</td>
-        <td>${actions}</td>
-      </tr>`;
-    }).join('');
-
-  } catch(e) {
-    adminAlert('Errore caricamento utenti: ' + e.message, 'error');
-  }
-}
-
-// ── ADMIN: CREATE USER ───────────────────────────────────────────────────
-function toggleRoleFields() {
-  const role = document.getElementById('new-role').value;
-  document.getElementById('field-expires').style.display = role === 'pro'    ? '' : 'none';
-  document.getElementById('field-uses').style.display    = role === 'trial'  ? '' : 'none';
-}
-
-function resetCreateForm() {
-  document.getElementById('new-username').value  = '';
-  document.getElementById('new-password').value  = '';
-  document.getElementById('new-role').value      = 'pro';
-  document.getElementById('new-expires').value   = '';
-  document.getElementById('new-uses').value      = '2';
-  toggleRoleFields();
-}
-
-async function createUser() {
-  const username = document.getElementById('new-username').value.trim().toLowerCase();
-  const password = document.getElementById('new-password').value;
-  const role     = document.getElementById('new-role').value;
-  const expires  = document.getElementById('new-expires').value;
-  const uses     = parseInt(document.getElementById('new-uses').value);
-
-  if (!username || !password) { adminAlert('Username e password obbligatori.', 'error'); return; }
-  if (!/^[a-z0-9_]{3,30}$/.test(username)) {
-    adminAlert('Username: solo lettere minuscole, numeri e underscore (3-30 caratteri).', 'error'); return;
-  }
-  if (password.length < 8) { adminAlert('Password minima 8 caratteri.', 'error'); return; }
-  if (role === 'pro' && !expires) { adminAlert('Seleziona la data di scadenza per account Pro.', 'error'); return; }
-
-  try {
-    const passwordHash = await sha256(password);
-    const res = await apiCall({
-      action: 'admin', token: sessionToken, operation: 'create_user',
-      username, passwordHash, role, expires, usesRemaining: uses
-    });
-    if (res.ok) {
-      adminAlert(`✓ ${res.message}`, 'success');
-      resetCreateForm();
-      loadUsers();
-    } else {
-      adminAlert(res.error, 'error');
-    }
-  } catch(e) {
-    adminAlert('Errore: ' + e.message, 'error');
-  }
-}
-
-// ── ADMIN: ROW ACTIONS ───────────────────────────────────────────────────
-async function toggleUser(username) {
-  try {
-    const res = await apiCall({ action:'admin', token:sessionToken, operation:'toggle_user', username });
-    if (res.ok) { adminAlert(res.message,'success'); loadUsers(); }
-    else adminAlert(res.error,'error');
-  } catch(e) { adminAlert(e.message,'error'); }
-}
-
-async function deleteUser(username) {
-  if (!confirm(`Eliminare definitivamente l'utente "${username}"?`)) return;
-  try {
-    const res = await apiCall({ action:'admin', token:sessionToken, operation:'delete_user', username });
-    if (res.ok) { adminAlert(res.message,'success'); loadUsers(); }
-    else adminAlert(res.error,'error');
-  } catch(e) { adminAlert(e.message,'error'); }
-}
-
-// Change password modal
-function openChangePwd(username) {
-  adminTargetUser = username;
-  document.getElementById('modal-pwd-desc').textContent = `Nuova password per: ${username}`;
-  document.getElementById('modal-new-pwd').value = '';
-  showModal('modal-pwd');
-}
-
-async function confirmChangePassword() {
-  const pwd = document.getElementById('modal-new-pwd').value;
-  if (!pwd || pwd.length < 8) { toast('Password minima 8 caratteri'); return; }
-  try {
-    const newPasswordHash = await sha256(pwd);
-    const res = await apiCall({ action:'admin', token:sessionToken, operation:'change_password', username:adminTargetUser, newPasswordHash });
-    if (res.ok) { adminAlert(res.message,'success'); closeModal('modal-pwd'); }
-    else adminAlert(res.error,'error');
-  } catch(e) { adminAlert(e.message,'error'); closeModal('modal-pwd'); }
-}
-
-// Extend pro modal
-function openExtend(username, currentExpiry) {
-  adminTargetUser = username;
-  document.getElementById('modal-extend-desc').textContent = `Scadenza attuale per ${username}: ${currentExpiry||'non impostata'}`;
-  document.getElementById('modal-extend-date').value = currentExpiry || '';
-  showModal('modal-extend');
-}
-
-async function confirmExtend() {
-  const newDate = document.getElementById('modal-extend-date').value;
-  if (!newDate) { toast('Seleziona una data'); return; }
-  try {
-    const res = await apiCall({ action:'admin', token:sessionToken, operation:'update_user', username:adminTargetUser, field:'expires', value:newDate });
-    if (res.ok) { adminAlert('✓ Scadenza aggiornata','success'); closeModal('modal-extend'); loadUsers(); }
-    else adminAlert(res.error,'error');
-  } catch(e) { adminAlert(e.message,'error'); closeModal('modal-extend'); }
-}
-
-// Reset trial modal
-function openResetTrial(username) {
-  adminTargetUser = username;
-  document.getElementById('modal-trial-desc').textContent = `Reset utilizzi per: ${username}`;
-  showModal('modal-trial');
-}
-
-async function confirmResetTrial() {
-  const uses = parseInt(document.getElementById('modal-trial-uses').value);
-  try {
-    const res = await apiCall({ action:'admin', token:sessionToken, operation:'reset_trial', username:adminTargetUser, newUses:uses });
-    if (res.ok) { adminAlert(res.message,'success'); closeModal('modal-trial'); loadUsers(); }
-    else adminAlert(res.error,'error');
-  } catch(e) { adminAlert(e.message,'error'); closeModal('modal-trial'); }
-}
-
 // ── DATE FORMAT ──────────────────────────────────────────────────────────
 function formatDate(dateStr) {
   if (!dateStr) return '—';
@@ -2032,10 +1641,31 @@ window.addEventListener('error', e => {
 }, true);
 
 // ── INIT ─────────────────────────────────────────────────────────────────
-window.addEventListener('DOMContentLoaded', () => {
+window.addEventListener('DOMContentLoaded', async () => {
   setupDropZone('master-drop', 'master-doc', 'master-count');
   setupDropZone('target-drop', 'target-doc', 'target-count');
-  toggleRoleFields();
+
+  // ── Gate password: se gia' superato in precedenza, salta la schermata ────
+  if (localStorage.getItem('bde_gate_passed') === '1') {
+    enterApp();
+  }
+
+  // ── Init device/licenza: verifica solo stato utilizzo, nessun login ──────
+  deviceId = getOrCreateDeviceId();
+  const savedLicense = localStorage.getItem('bde_license_id');
+  try {
+    const res = await apiCall({ action:'stato_utilizzo', deviceId, licenseId: savedLicense || undefined });
+    if (res.ok) {
+      if (savedLicense && res.licenseValid) {
+        currentLicenseId = savedLicense;
+        document.getElementById('license-expiry').textContent = 'Scade il: ' + formatDate(res.expires);
+      } else if (savedLicense && !res.licenseValid) {
+        localStorage.removeItem('bde_license_id'); // licenza scaduta/disattivata nel frattempo
+      }
+      freeRemaining = res.freeRemaining;
+    }
+  } catch(e) { console.error('Errore verifica stato iniziale:', e); }
+  updateLicenseUI();
 
   // Stato iniziale brand: SintesiDigitale attivo, step1 nascosto
   const step1Panel = document.getElementById('step1-panel');
