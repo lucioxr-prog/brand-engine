@@ -798,6 +798,32 @@ input[type="file"]{display:none}
         <div style="font-size:11px;color:var(--text-muted);font-family:var(--mono);margin-top:4px">
           Campi vuoti? Nessun problema: l'app user&agrave; un kit sobrio neutro, mai il preset SintesiDigitale.
         </div>
+
+        <div style="border-top:1px solid var(--border);margin-top:18px;padding-top:16px">
+          <div style="font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:var(--gold-dim);font-family:var(--mono);margin-bottom:8px">&#9670; Estrai Brand Kit da Documento &mdash; LICENZA</div>
+          <div style="font-size:11px;color:var(--text-muted);margin-bottom:10px">Incolla o carica il tuo manuale di brand identity (colori, font, regole): la app legge il documento e compila tutto da sola.</div>
+          <div class="upload-row">
+            <button class="upload-btn" onclick="document.getElementById('kb-extract-file').click()">&#128206; Carica File</button>
+            <span class="upload-label">oppure trascina .txt / .md / .docx qui sotto</span>
+            <input type="file" id="kb-extract-file" accept=".txt,.md,.docx" onchange="handleFileInput(event,'kb-extract-doc','kb-extract-count')">
+          </div>
+          <div class="drop-zone" id="kb-extract-drop">
+            <textarea id="kb-extract-doc"
+              placeholder="Incolla qui il tuo Brand Kit: colori (HEX), font, pesi tipografici, regole da evitare..."
+              oninput="updateCharCount('kb-extract-doc','kb-extract-count')"></textarea>
+            <div class="drop-hint"><span>&#8681;</span><span>Drag & drop .txt &middot; .md &middot; .docx</span></div>
+          </div>
+          <div class="char-count" id="kb-extract-count">0 caratteri</div>
+          <div class="loading-wrap" id="kb-extract-loading">
+            <div class="spinner"></div>
+            <span class="loading-text">Estrazione Brand Kit in corso...</span>
+          </div>
+          <div class="btn-row">
+            <button class="btn btn-primary" onclick="estraiKitbrandDaDocumento()">&#9674; Estrai Brand Kit da Documento</button>
+            <button class="btn btn-outline" onclick="clearPanel('kb-extract-doc','kb-extract-count')">Svuota</button>
+          </div>
+          <div style="font-size:11px;color:var(--text-dim);font-family:var(--mono);margin-top:10px" id="kb-saved-indicator"></div>
+        </div>
       </div>
 
       <!-- STEP 1: MASTER TEMPLATE -->
@@ -1829,11 +1855,21 @@ function escapeHtml(s) {
     .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 }
 
-// ── KITBRAND CLIENTE (colori/font/nome azienda) ───────────────────────────────
+// ── KITBRAND CLIENTE (colori/font/nome azienda + estensione ricca) ───────────
 const KITBRAND_DEFAULT = {
   azienda: '', colorePrimario: '#1F3A5F', coloreAccento: '#3D7EA6',
   fontTitoli: 'Montserrat', fontCorpo: 'Inter'
 };
+
+// Valori di default per le proprieta' estese (usati quando non e' mai stata
+// fatta un'estrazione da documento: mantengono l'aspetto esistente invariato).
+const KITBRAND_ESTESO_DEFAULT = {
+  pesoTitoloH1: 700, pesoTitoloH2: 700, pesoTitoloH3: 700,
+  pesoCorpo: 400, pesoEnfasi: 700,
+  borderRadius: 3, evitaOmbre: false, regoleEvitare: []
+};
+
+let kitbrandEsteso = null; // popolato da estraiKitbrandDaDocumento() o localStorage
 
 function getKitbrandCliente() {
   const azienda = (document.getElementById('kb-azienda').value || '').trim();
@@ -1844,6 +1880,98 @@ function getKitbrandCliente() {
   return { azienda, colorePrimario, coloreAccento, fontTitoli, fontCorpo };
 }
 
+// ── ESTRAZIONE KITBRAND DA DOCUMENTO (paid, richiede licenza) ────────────────
+async function estraiKitbrandDaDocumento() {
+  const testo = document.getElementById('kb-extract-doc').value.trim();
+  if (!testo) { toast('Incolla o carica un documento con il tuo Brand Kit'); return; }
+  if (!currentLicenseId) { openLicenseModal(); return; }
+  const loading = document.getElementById('kb-extract-loading');
+  loading.classList.add('visible');
+  const sys = `Sei un esperto di brand identity. Leggi il documento di brand kit fornito ed estrai SOLO le informazioni esplicitamente presenti, restituendo SOLO JSON valido (no markdown, no backtick, no testo extra) con questa struttura esatta:
+{"azienda":"...","colorePrimario":"#HEX o null","coloreAccento":"#HEX o null","fontTitoli":"... o null","fontCorpo":"... o null","pesoTitoloH1":numero o null,"pesoTitoloH2":numero o null,"pesoTitoloH3":numero o null,"pesoCorpo":numero o null,"pesoEnfasi":numero o null,"borderRadius":numero_in_px o null,"evitaOmbre":true/false/null,"regoleEvitare":["..."]}
+Regole: colorePrimario e' il colore principale/dominante (sfondi, header). coloreAccento e' il colore per CTA/evidenziature/bordi. Se un dato non e' esplicitamente presente nel documento usa null (mai inventare). regoleEvitare e' una lista breve delle cose da evitare esplicitamente menzionate (es. "niente ombre esterne").`;
+  try {
+    const res = await apiCall({ action:'generate', deviceId, licenseId:currentLicenseId, step:'extract_kitbrand', modalita:'kitbrand_extract', systemPrompt:sys, userMessage:'Brand Kit:\n\n'+testo });
+    if (!res.ok) { showErrorBanner(res.error, estraiKitbrandDaDocumento); return; }
+    const estratto = JSON.parse(res.result.replace(/```json|```/g,'').trim());
+
+    if (estratto.azienda) document.getElementById('kb-azienda').value = estratto.azienda;
+    if (estratto.colorePrimario) document.getElementById('kb-colore-primario').value = estratto.colorePrimario;
+    if (estratto.coloreAccento) document.getElementById('kb-colore-accento').value = estratto.coloreAccento;
+    if (estratto.fontTitoli) impostaSelectSeDisponibile('kb-font-titoli', estratto.fontTitoli);
+    if (estratto.fontCorpo) impostaSelectSeDisponibile('kb-font-corpo', estratto.fontCorpo);
+
+    kitbrandEsteso = {
+      pesoTitoloH1: estratto.pesoTitoloH1 || KITBRAND_ESTESO_DEFAULT.pesoTitoloH1,
+      pesoTitoloH2: estratto.pesoTitoloH2 || KITBRAND_ESTESO_DEFAULT.pesoTitoloH2,
+      pesoTitoloH3: estratto.pesoTitoloH3 || KITBRAND_ESTESO_DEFAULT.pesoTitoloH3,
+      pesoCorpo:    estratto.pesoCorpo    || KITBRAND_ESTESO_DEFAULT.pesoCorpo,
+      pesoEnfasi:   estratto.pesoEnfasi   || KITBRAND_ESTESO_DEFAULT.pesoEnfasi,
+      borderRadius: (estratto.borderRadius != null) ? estratto.borderRadius : KITBRAND_ESTESO_DEFAULT.borderRadius,
+      evitaOmbre:   !!estratto.evitaOmbre,
+      regoleEvitare: Array.isArray(estratto.regoleEvitare) ? estratto.regoleEvitare : []
+    };
+
+    salvaKitbrandInLocalStorage();
+    aggiornaIndicatoreKitSalvato();
+    toast('✓ Brand Kit estratto e salvato con successo');
+  } catch(e) { showErrorBanner(e.message); }
+  finally { loading.classList.remove('visible'); }
+}
+
+function impostaSelectSeDisponibile(selectId, valore) {
+  const sel = document.getElementById(selectId);
+  const match = Array.from(sel.options).find(o => o.value.toLowerCase() === String(valore).toLowerCase());
+  if (match) sel.value = match.value;
+  // Se il font estratto non e' tra le opzioni disponibili, si lascia quello
+  // gia' selezionato invece di forzare un valore non presente nel <select>.
+}
+
+// ── PERSISTENZA KITBRAND (localStorage — un dispositivo = una licenza) ───────
+function salvaKitbrandInLocalStorage() {
+  try {
+    const dati = { kb: getKitbrandCliente(), esteso: kitbrandEsteso };
+    localStorage.setItem('bde_kitbrand_cliente', JSON.stringify(dati));
+  } catch (e) {}
+}
+
+function caricaKitbrandDaLocalStorage() {
+  let dati;
+  try { dati = JSON.parse(localStorage.getItem('bde_kitbrand_cliente') || 'null'); } catch (e) { dati = null; }
+  if (!dati) return;
+  if (dati.kb) {
+    if (dati.kb.azienda) document.getElementById('kb-azienda').value = dati.kb.azienda;
+    if (dati.kb.colorePrimario) document.getElementById('kb-colore-primario').value = dati.kb.colorePrimario;
+    if (dati.kb.coloreAccento) document.getElementById('kb-colore-accento').value = dati.kb.coloreAccento;
+    if (dati.kb.fontTitoli) impostaSelectSeDisponibile('kb-font-titoli', dati.kb.fontTitoli);
+    if (dati.kb.fontCorpo) impostaSelectSeDisponibile('kb-font-corpo', dati.kb.fontCorpo);
+  }
+  if (dati.esteso) kitbrandEsteso = dati.esteso;
+  aggiornaIndicatoreKitSalvato();
+}
+
+function svuotaKitbrandSalvato() {
+  try { localStorage.removeItem('bde_kitbrand_cliente'); } catch (e) {}
+  kitbrandEsteso = null;
+  ['kb-azienda'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('kb-colore-primario').value = KITBRAND_DEFAULT.colorePrimario;
+  document.getElementById('kb-colore-accento').value  = KITBRAND_DEFAULT.coloreAccento;
+  document.getElementById('kb-font-titoli').value = KITBRAND_DEFAULT.fontTitoli;
+  document.getElementById('kb-font-corpo').value  = KITBRAND_DEFAULT.fontCorpo;
+  aggiornaIndicatoreKitSalvato();
+  toast('Kitbrand svuotato');
+}
+
+function aggiornaIndicatoreKitSalvato() {
+  const el = document.getElementById('kb-saved-indicator');
+  if (!el) return;
+  let salvato = false;
+  try { salvato = !!localStorage.getItem('bde_kitbrand_cliente'); } catch (e) {}
+  el.innerHTML = salvato
+    ? '✓ Kitbrand salvato su questo dispositivo &mdash; <a href="#" onclick="svuotaKitbrandSalvato();return false;" style="color:var(--gold)">svuota</a>'
+    : '';
+}
+
 function buildKitbrandFonts(kb) {
   const famiglie = Array.from(new Set([kb.fontTitoli, kb.fontCorpo]))
     .map(f => f.replace(/ /g, '+') + ':wght@400;600;700;800')
@@ -1852,19 +1980,23 @@ function buildKitbrandFonts(kb) {
 }
 
 function buildKitbrandCss(kb) {
+  const est = kitbrandEsteso || KITBRAND_ESTESO_DEFAULT;
+  const radius = est.borderRadius != null ? est.borderRadius : KITBRAND_ESTESO_DEFAULT.borderRadius;
+  const ombraTabella = est.evitaOmbre ? 'none' : '0 1px 2px rgba(0,0,0,.04)';
   return `
   @page { margin: 15mm 18mm; }
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: '${kb.fontCorpo}', sans-serif; font-size: 11px; line-height: 1.75; color: #1a1a1a; background: #ffffff; }
-  h1, h2, h3, h4 { font-family: '${kb.fontTitoli}', sans-serif; font-weight: 700; color: #1a1a1a; page-break-after: avoid; }
-  h1 { font-size: 22px; margin: 24px 0 12px; border-bottom: 3px solid ${kb.coloreAccento}; padding-bottom: 8px; }
-  h2 { font-size: 16px; margin: 20px 0 10px; color: ${kb.coloreAccento}; }
-  h3 { font-size: 13px; margin: 16px 0 8px; }
+  body { font-family: '${kb.fontCorpo}', sans-serif; font-size: 11px; line-height: 1.75; color: #1a1a1a; background: #ffffff; font-weight: ${est.pesoCorpo}; }
+  h1, h2, h3, h4 { font-family: '${kb.fontTitoli}', sans-serif; color: #1a1a1a; page-break-after: avoid; }
+  h1 { font-size: 22px; margin: 24px 0 12px; border-bottom: 3px solid ${kb.coloreAccento}; padding-bottom: 8px; font-weight: ${est.pesoTitoloH1}; }
+  h2 { font-size: 16px; margin: 20px 0 10px; color: ${kb.coloreAccento}; font-weight: ${est.pesoTitoloH2}; }
+  h3 { font-size: 13px; margin: 16px 0 8px; font-weight: ${est.pesoTitoloH3}; }
+  strong, b { font-weight: ${est.pesoEnfasi}; }
   p  { margin-bottom: 10px; }
   ul, ol { margin: 8px 0 12px 20px; }
   li { margin-bottom: 4px; }
-  table { width: 100%; border-collapse: collapse; margin: 12px 0; page-break-inside: avoid; }
-  th { background: ${kb.colorePrimario}; color: #ffffff; font-family: '${kb.fontTitoli}', sans-serif; font-size: 10px; letter-spacing: 1px; text-transform: uppercase; padding: 8px 10px; text-align: left; }
+  table { width: 100%; border-collapse: collapse; margin: 12px 0; page-break-inside: avoid; box-shadow: ${ombraTabella}; }
+  th { background: ${kb.colorePrimario}; color: #ffffff; font-family: '${kb.fontTitoli}', sans-serif; font-size: 10px; letter-spacing: 1px; text-transform: uppercase; padding: 8px 10px; text-align: left; border-radius: ${radius}px ${radius}px 0 0; }
   td { padding: 7px 10px; border-bottom: 1px solid #e0e0e0; }
   tr:nth-child(even) td { background: #f8f8f8; }
   .cover { background: #ffffff; color: #000000; margin: 0 0 30px; page-break-after: always; display: flex; flex-direction: column; min-height: 60vh; }
@@ -1872,7 +2004,7 @@ function buildKitbrandCss(kb) {
   .cover-top { background: ${kb.colorePrimario}; padding: 24px 40px 20px; text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; }
   .cover-brand-text { font-size: 10px; font-weight: 700; color: #ffffff; letter-spacing: 4px; text-transform: uppercase; font-family: '${kb.fontTitoli}', sans-serif; margin-bottom: 12px; }
   .cover-divider { width: 36px; height: 2px; background: ${kb.coloreAccento}; margin: 0 auto 12px; border-radius: 1px; }
-  .cover h1 { color: #ffffff; font-size: 22px; font-weight: 700; margin: 0 0 8px; letter-spacing: 1px; border: none; font-family: '${kb.fontTitoli}', sans-serif; }
+  .cover h1 { color: #ffffff; font-size: 22px; font-weight: ${est.pesoTitoloH1}; margin: 0 0 8px; letter-spacing: 1px; border: none; font-family: '${kb.fontTitoli}', sans-serif; }
   .cover-subtitle { font-size: 9px; color: #d8d8d8; letter-spacing: 2px; text-transform: uppercase; margin: 0; font-family: '${kb.fontTitoli}', sans-serif; }
   .cover-bottom { background: #ffffff; flex: 1; padding: 0 40px; text-align: center; border-top: 3px solid ${kb.coloreAccento}; display: flex; flex-direction: column; align-items: center; justify-content: center; padding-bottom: 8%; }
   .cover-meta { display: flex; justify-content: center; gap: 36px; margin-bottom: 20px; }
@@ -1881,7 +2013,7 @@ function buildKitbrandCss(kb) {
   .cover-meta-value { font-size: 13px; font-weight: 600; color: #222222; font-family: '${kb.fontTitoli}', sans-serif; }
   .cover-footer-credits { font-size: 8px; color: #cccccc; letter-spacing: 2px; text-transform: uppercase; border-top: 0.5px solid #eeeeee; padding-top: 12px; width: 100%; text-align: center; }
   blockquote { border-left: 3px solid ${kb.coloreAccento}; padding-left: 14px; margin: 12px 0; color: #333; page-break-inside: avoid; }
-  code, pre { font-family: 'Courier New', monospace; background: #f5f5f5; padding: 2px 6px; border-radius: 3px; font-size: 10px; }
+  code, pre { font-family: 'Courier New', monospace; background: #f5f5f5; padding: 2px 6px; border-radius: ${Math.min(radius,3)}px; font-size: 10px; }
   @media print { body { -webkit-print-color-adjust: exact; print-color-adjust: exact; } }
   `;
 }
@@ -2018,6 +2150,11 @@ window.addEventListener('DOMContentLoaded', async () => {
   verificaSbloccoAdminDaUrl();
   setupDropZone('master-drop', 'master-doc', 'master-count');
   setupDropZone('target-drop', 'target-doc', 'target-count');
+  setupDropZone('kb-extract-drop', 'kb-extract-doc', 'kb-extract-count');
+  caricaKitbrandDaLocalStorage();
+  ['kb-azienda','kb-colore-primario','kb-colore-accento','kb-font-titoli','kb-font-corpo'].forEach(id => {
+    document.getElementById(id).addEventListener('change', () => { salvaKitbrandInLocalStorage(); aggiornaIndicatoreKitSalvato(); });
+  });
 
   // ── Device id sempre disponibile prima di qualunque controllo licenza ────
   deviceId = getOrCreateDeviceId();
