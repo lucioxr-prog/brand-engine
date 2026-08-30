@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Brand DNA Engine v6.0 · SintesiDigitale</title>
+<title>Brand DNA Engine v7.0 · SintesiDigitale</title>
 <style>
 :root {
   --bg:           #1a1712;
@@ -636,7 +636,7 @@ input[type="file"]{display:none}
 
     <button class="login-btn" id="gate-btn" onclick="verificaPasswordAccesso()">Entra →</button>
     <div class="login-err" id="gate-err"></div>
-    <div class="login-version">v6.0.0 · SintesiDigitale</div>
+    <div class="login-version">v7.0.0 · SintesiDigitale</div>
   </div>
 </div>
 
@@ -654,7 +654,7 @@ input[type="file"]{display:none}
     <div class="header-right">
       <div class="user-chip">
         <div class="user-chip-dot"></div>
-        <span class="user-chip-name" id="license-status-text">3 generazioni gratuite disponibili</span>
+        <span class="user-chip-name" id="license-status-text">2 generazioni gratuite disponibili</span>
       </div>
       <button class="btn-outline" style="padding:5px 14px;font-size:10px" onclick="openLicenseModal()">🔑 Codice Licenza</button>
     </div>
@@ -671,7 +671,7 @@ input[type="file"]{display:none}
       <!-- Freemium banner -->
       <div id="free-banner" class="trial-banner full-width">
         <span class="trial-banner-text">🎁 Generazioni gratuite rimaste:</span>
-        <span class="trial-counter" id="free-counter">3</span>
+        <span class="trial-counter" id="free-counter">2</span>
       </div>
 
       <!-- Licenza attiva banner -->
@@ -684,17 +684,20 @@ input[type="file"]{display:none}
       <div class="brand-selector full-width">
         <span class="brand-selector-label">◈ Modalità Brand</span>
         <div class="brand-tabs">
-          <button class="brand-tab active" id="tab-sintesi" onclick="setBrandMode('sintesi')">
+          <button class="brand-tab" id="tab-sintesi" onclick="setBrandMode('sintesi')" style="display:none">
             SintesiDigitale <span class="sintesi-badge">PRESET</span>
           </button>
+          <button class="brand-tab active" id="tab-kitbrand" onclick="setBrandMode('kitbrand')">
+            Kitbrand Azienda
+          </button>
           <button class="brand-tab" id="tab-master" onclick="setBrandMode('master')">
-            Brand da Master
+            Brand da Master <span class="sintesi-badge">LICENZA</span>
           </button>
           <button class="brand-tab" id="tab-custom" onclick="setBrandMode('custom')">
-            Brand Personalizzato
+            Brand Personalizzato <span class="sintesi-badge">LICENZA</span>
           </button>
         </div>
-        <span class="brand-tab-desc" id="brand-mode-desc">CSS hardcoded · costo minimo</span>
+        <span class="brand-tab-desc" id="brand-mode-desc">Formattazione istantanea · zero costo · usa il tuo kitbrand</span>
       </div>
 
       <!-- BRAND PERSONALIZZATO FORM -->
@@ -737,6 +740,46 @@ input[type="file"]{display:none}
         <div class="custom-form-group" style="margin-bottom:14px">
           <label class="custom-form-label">Regole aggiuntive (una per riga)</label>
           <textarea class="custom-form-textarea" id="cb-rules" placeholder="es. Usa sempre il Lei&#10;Evita abbreviazioni&#10;Inizia con il contesto del problema"></textarea>
+        </div>
+      </div>
+
+      <!-- KITBRAND CLIENTE FORM -->
+      <div class="custom-brand-form show full-width" id="kitbrand-brand-form">
+        <div style="font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:var(--gold-dim);font-family:var(--mono);margin-bottom:14px">&#9670; Kitbrand della Tua Azienda</div>
+        <div class="custom-form-grid">
+          <div class="custom-form-group">
+            <label class="custom-form-label">Nome Azienda</label>
+            <input type="text" class="custom-form-input" id="kb-azienda" placeholder="es. Rossi Impianti Srl">
+          </div>
+          <div class="custom-form-group">
+            <label class="custom-form-label">Colore Primario</label>
+            <input type="color" class="custom-form-input" id="kb-colore-primario" value="#1F3A5F" style="height:38px;padding:2px">
+          </div>
+          <div class="custom-form-group">
+            <label class="custom-form-label">Colore Accento</label>
+            <input type="color" class="custom-form-input" id="kb-colore-accento" value="#3D7EA6" style="height:38px;padding:2px">
+          </div>
+          <div class="custom-form-group">
+            <label class="custom-form-label">Font Titoli</label>
+            <select class="custom-form-input" id="kb-font-titoli">
+              <option value="Montserrat">Montserrat</option>
+              <option value="Poppins">Poppins</option>
+              <option value="Georgia">Georgia (serif)</option>
+              <option value="Roboto">Roboto</option>
+            </select>
+          </div>
+          <div class="custom-form-group">
+            <label class="custom-form-label">Font Corpo</label>
+            <select class="custom-form-input" id="kb-font-corpo">
+              <option value="Inter">Inter</option>
+              <option value="Roboto">Roboto</option>
+              <option value="Georgia">Georgia (serif)</option>
+              <option value="Lato">Lato</option>
+            </select>
+          </div>
+        </div>
+        <div style="font-size:11px;color:var(--text-muted);font-family:var(--mono);margin-top:4px">
+          Campi vuoti? Nessun problema: l'app user&agrave; un kit sobrio neutro, mai il preset SintesiDigitale.
         </div>
       </div>
 
@@ -894,25 +937,41 @@ input[type="file"]{display:none}
   </div><!-- /view-engine -->
 
   <footer class="app-footer">
-    Brand DNA Engine v6.0 · Luciano Bettoli · SintesiDigitale · Google Gemini 3.5 Flash
+    Brand DNA Engine v7.0 · Luciano Bettoli · SintesiDigitale
   </footer>
 
 </div><!-- /screen-app -->
 
-<!-- ── MODAL: EMAIL (gate al primo utilizzo gratuito) ── -->
+<!-- ── MODAL: EMAIL + OTP (gate al primo utilizzo gratuito) ── -->
 <div class="modal-overlay" id="modal-email-gate">
   <div class="modal">
-    <div class="modal-title">✉ Prima di iniziare</div>
-    <div class="modal-desc">Inserisci la tua email per attivare le 3 generazioni gratuite. Nessuno spam, serve solo per riconoscerti.</div>
-    <div class="form-group" style="margin-top:8px">
-      <label class="form-label">Email</label>
-      <input type="email" class="form-input" id="modal-email-input" placeholder="nome@azienda.it"
-        onkeydown="if(event.key==='Enter')confirmEmailGate()">
+    <div id="email-gate-step-email">
+      <div class="modal-title">✉ Prima di iniziare</div>
+      <div class="modal-desc">Inserisci la tua email per ricevere il codice di accesso alle 2 generazioni gratuite. Nessuno spam.</div>
+      <div class="form-group" style="margin-top:8px">
+        <label class="form-label">Email</label>
+        <input type="email" class="form-input" id="modal-email-input" placeholder="nome@azienda.it"
+          onkeydown="if(event.key==='Enter')richiediOtpEmailGate()">
+      </div>
+      <div class="login-err" id="email-gate-err"></div>
+      <div class="modal-actions">
+        <button class="btn btn-outline" onclick="closeModal('modal-email-gate')">Annulla</button>
+        <button class="btn btn-primary" id="email-gate-confirm-btn" onclick="richiediOtpEmailGate()">Invia Codice</button>
+      </div>
     </div>
-    <div class="login-err" id="email-gate-err"></div>
-    <div class="modal-actions">
-      <button class="btn btn-outline" onclick="closeModal('modal-email-gate')">Annulla</button>
-      <button class="btn btn-primary" id="email-gate-confirm-btn" onclick="confirmEmailGate()">Continua</button>
+    <div id="email-gate-step-otp" style="display:none">
+      <div class="modal-title">🔢 Controlla la tua email</div>
+      <div class="modal-desc" id="otp-gate-desc">Ti abbiamo inviato un codice a 6 cifre. Inseriscilo qui sotto.</div>
+      <div class="form-group" style="margin-top:8px">
+        <label class="form-label">Codice Ricevuto</label>
+        <input type="text" class="form-input" id="modal-otp-input" placeholder="123456" maxlength="6"
+          onkeydown="if(event.key==='Enter')confirmOtpEmailGate()">
+      </div>
+      <div class="login-err" id="otp-gate-err"></div>
+      <div class="modal-actions">
+        <button class="btn btn-outline" onclick="richiediOtpEmailGate()">Rinvia codice</button>
+        <button class="btn btn-primary" id="otp-gate-confirm-btn" onclick="confirmOtpEmailGate()">Verifica</button>
+      </div>
     </div>
   </div>
 </div>
@@ -921,7 +980,7 @@ input[type="file"]{display:none}
 <div class="modal-overlay" id="modal-license">
   <div class="modal">
     <div class="modal-title">🔑 Inserisci Codice Licenza</div>
-    <div class="modal-desc" id="modal-license-desc">Hai esaurito le generazioni gratuite. Inserisci il codice ricevuto da SintesiDigitale per continuare senza limiti.</div>
+    <div class="modal-desc" id="modal-license-desc">Hai esaurito le generazioni gratuite. Inserisci il codice ricevuto da SintesiDigitale per continuare senza limiti — e per sbloccare le modalit\u00e0 "Brand da Master" e "Brand Personalizzato" con generazione premium AI.</div>
     <div class="form-group" style="margin-top:8px">
       <label class="form-label">Codice Licenza</label>
       <input type="text" class="form-input" id="modal-license-code" placeholder="XXXX-XXXX" autocapitalize="characters"
@@ -960,7 +1019,7 @@ input[type="file"]{display:none}
 const WORKER_URL = 'https://script.google.com/macros/s/AKfycbzyotTHwb1T17U8vHH9Ebg23up2QQLDgzvwLxA15vcT0eiTVmutgJYYkwmEoA80pCd9/exec';
 
 // ── STATE ──────────────────────────────────────────────────────────────────
-const FREE_LIMIT    = 3;
+const FREE_LIMIT    = 2;
 let deviceId         = null;
 let currentLicenseId = null; // null finché non viene validato un codice
 let freeRemaining    = FREE_LIMIT;
@@ -969,7 +1028,7 @@ let userFreeEmail    = null; // null finché non fornita al primo tentativo di g
 let outputText      = '';
 let sessionHistory  = [];
 let pageNumbersEnabled = false;
-let currentBrandMode = 'sintesi'; // 'sintesi' | 'master' | 'custom'
+let currentBrandMode = 'kitbrand'; // 'sintesi' | 'master' | 'custom' | 'kitbrand'
 
 // ── GATE PASSWORD (primo filtro, prima del freemium) ────────────────────────
 function enterApp() {
@@ -1030,19 +1089,53 @@ function updateLicenseUI() {
 function openEmailGateModal() {
   hideError('email-gate-err');
   document.getElementById('modal-email-input').value = userFreeEmail || '';
+  document.getElementById('email-gate-step-email').style.display = '';
+  document.getElementById('email-gate-step-otp').style.display = 'none';
   showModal('modal-email-gate');
 }
 
-function confirmEmailGate() {
+async function richiediOtpEmailGate() {
   const val = document.getElementById('modal-email-input').value.trim();
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val)) {
     showError('email-gate-err', 'Inserisci un indirizzo email valido.');
     return;
   }
-  userFreeEmail = val.toLowerCase();
-  try { localStorage.setItem('bde_free_email', userFreeEmail); } catch (e) {}
-  closeModal('modal-email-gate');
-  applyDNA(); // riprova ora che l'email è nota
+  const btn = document.getElementById('email-gate-confirm-btn');
+  hideError('email-gate-err');
+  btn.disabled = true; btn.textContent = 'Invio...';
+  try {
+    const res = await apiCall({ action: 'richiedi_otp', email: val.toLowerCase() });
+    if (!res.ok) { showError('email-gate-err', res.error || 'Impossibile inviare il codice.'); return; }
+    userFreeEmail = val.toLowerCase();
+    document.getElementById('otp-gate-desc').textContent = 'Codice inviato a ' + userFreeEmail + '. Valido 10 minuti.';
+    document.getElementById('email-gate-step-email').style.display = 'none';
+    document.getElementById('email-gate-step-otp').style.display = '';
+    document.getElementById('modal-otp-input').value = '';
+    hideError('otp-gate-err');
+  } catch(e) {
+    showError('email-gate-err', 'Errore di connessione al server. Riprova.');
+  } finally {
+    btn.disabled = false; btn.textContent = 'Invia Codice';
+  }
+}
+
+async function confirmOtpEmailGate() {
+  const codice = document.getElementById('modal-otp-input').value.trim();
+  if (!codice) { showError('otp-gate-err', 'Inserisci il codice ricevuto.'); return; }
+  const btn = document.getElementById('otp-gate-confirm-btn');
+  hideError('otp-gate-err');
+  btn.disabled = true; btn.textContent = 'Verifica...';
+  try {
+    const res = await apiCall({ action: 'verifica_otp', email: userFreeEmail, codice });
+    if (!res.ok) { showError('otp-gate-err', res.error || 'Codice non valido.'); return; }
+    try { localStorage.setItem('bde_free_email', userFreeEmail); } catch (e) {}
+    closeModal('modal-email-gate');
+    applyDNA(); // riprova ora che l'email è verificata
+  } catch(e) {
+    showError('otp-gate-err', 'Errore di connessione al server. Riprova.');
+  } finally {
+    btn.disabled = false; btn.textContent = 'Verifica';
+  }
 }
 
 function openLicenseModal() {
@@ -1375,17 +1468,19 @@ function renderOutputWithPages(text, pageConfig) {
 
 // ── BRAND MODE ────────────────────────────────────────────────────────────
 function setBrandMode(mode) {
+  if (mode === 'sintesi' && !isAdminSintesiSbloccato()) { toast('Preset riservato'); return; }
   currentBrandMode = mode;
   document.querySelectorAll('.brand-tab').forEach(t => t.classList.remove('active'));
   document.getElementById('tab-' + mode).classList.add('active');
   const descMap = {
-    sintesi: 'CSS hardcoded · costo minimo · SintesiDigitale preset',
-    master:  'Analisi DNA da documento · carica il Master Template',
-    custom:  'Configurazione manuale · compila i campi brand'
+    sintesi:  'CSS hardcoded · costo minimo · SintesiDigitale preset (riservato)',
+    kitbrand: 'Formattazione istantanea · zero costo · usa il tuo kitbrand',
+    master:   'Analisi DNA da documento · richiede licenza attiva',
+    custom:   'Configurazione manuale · richiede licenza attiva'
   };
   document.getElementById('brand-mode-desc').textContent = descMap[mode];
-  const customForm = document.getElementById('custom-brand-form');
-  customForm.classList.toggle('show', mode === 'custom');
+  document.getElementById('custom-brand-form').classList.toggle('show', mode === 'custom');
+  document.getElementById('kitbrand-brand-form').classList.toggle('show', mode === 'kitbrand');
   // Step 1 visibile solo in modalità master
   const step1Panel = document.getElementById('step1-panel');
   if (step1Panel) step1Panel.style.display = mode === 'master' ? '' : 'none';
@@ -1397,20 +1492,39 @@ function setBrandMode(mode) {
   // Apply button
   const applyBtn = document.getElementById('apply-btn');
   applyBtn.disabled = (mode === 'master') ? !brandDNA : false;
-  toast('Modalità: ' + {sintesi:'SintesiDigitale',master:'Brand da Master',custom:'Brand Personalizzato'}[mode]);
+  toast('Modalità: ' + {sintesi:'SintesiDigitale',kitbrand:'Kitbrand Azienda',master:'Brand da Master',custom:'Brand Personalizzato'}[mode]);
+}
+
+// ── ADMIN: sblocco preset SintesiDigitale (solo Luciano) ─────────────────────
+// Apri il link con ?admin=1 una volta: il tab preset resta sbloccato su
+// questo dispositivo/browser (localStorage). Gating solo di comodo lato UI,
+// non un vero controllo di sicurezza server-side.
+function isAdminSintesiSbloccato() {
+  return localStorage.getItem('bde_admin_sintesi') === '1';
+}
+function verificaSbloccoAdminDaUrl() {
+  const params = new URLSearchParams(window.location.search);
+  if (params.get('admin') === '1') {
+    localStorage.setItem('bde_admin_sintesi', '1');
+  }
+  if (isAdminSintesiSbloccato()) {
+    const tab = document.getElementById('tab-sintesi');
+    if (tab) tab.style.display = '';
+  }
 }
 
 // ── ANALYZE DNA ──────────────────────────────────────────────────────────
 async function analyzeDNA() {
   const master = document.getElementById('master-doc').value.trim();
   if (!master) { toast('Inserisci il documento master'); return; }
+  if (!currentLicenseId) { openLicenseModal(); return; }
   const ml = document.getElementById('master-loading');
   ml.classList.add('visible');
   const sys = `Sei un esperto di brand identity e comunicazione professionale.
 Analizza il documento e restituisci SOLO JSON valido (no markdown, no backtick, no testo extra):
 {"tone":"...","structure":"...","density":"...","lists":"...","opening":"...","closing":"...","vocabulary":"...","formality":"...","rules":["regola1","regola2","regola3","regola4","regola5","regola6"]}`;
   try {
-    const res = await apiCall({ action:'generate', deviceId, licenseId:currentLicenseId, step:'analyze', systemPrompt:sys, userMessage:'Analizza:\n\n'+master });
+    const res = await apiCall({ action:'generate', deviceId, licenseId:currentLicenseId, step:'analyze', modalita:'master', systemPrompt:sys, userMessage:'Analizza:\n\n'+master });
     if (!res.ok) { showErrorBanner(res.error, analyzeDNA); return; }
     brandDNA = JSON.parse(res.result.replace(/```json|```/g,'').trim());
     renderDNA(brandDNA);
@@ -1428,33 +1542,100 @@ async function applyDNA() {
   if (currentBrandMode === 'custom' && !document.getElementById('cb-tone').value.trim()) {
     toast('Compila almeno il campo Tono nel Brand Personalizzato'); return;
   }
-  if (!currentLicenseId && freeRemaining <= 0) { openLicenseModal(); return; }
-  if (!currentLicenseId && !userFreeEmail) { openEmailGateModal(); return; }
+
+  // ── Modalità senza AI (sintesi/kitbrand): parser nativo, zero Gemini ───────
+  if (currentBrandMode === 'sintesi' || currentBrandMode === 'kitbrand') {
+    if (!currentLicenseId && freeRemaining <= 0) { openLicenseModal(); return; }
+    if (!currentLicenseId && !userFreeEmail) { openEmailGateModal(); return; }
+
+    const tl = document.getElementById('target-loading');
+    tl.classList.add('visible');
+    document.getElementById('target-loading-text').textContent = 'Formattazione in corso...';
+
+    try {
+      // Il conteggio della generazione gratuita resta lato server anche qui:
+      // nessuna chiamata Gemini, ma la quota va comunque scalata.
+      if (!currentLicenseId) {
+        const usoRes = await apiCall({ action: 'consuma_generazione_free', deviceId, email: userFreeEmail });
+        if (!usoRes.ok) {
+          if (usoRes.otpRichiesto) { userFreeEmail = null; openEmailGateModal(); return; }
+          if (usoRes.paywall) { openLicenseModal(); return; }
+          showErrorBanner(usoRes.error, applyDNA);
+          return;
+        }
+        freeRemaining = usoRes.freeRemaining;
+      }
+
+      const nativo = formattaTestoNativo(target);
+      const docTitle = nativo.title;
+      const bodyHtml = nativo.bodyHtml;
+      const today = new Date().toLocaleDateString('it-IT', {year:'numeric',month:'long',day:'numeric'});
+
+      let coverHTML, cssFinale, fontsFinale;
+      if (currentBrandMode === 'sintesi') {
+        cssFinale = SINTESI_CSS;
+        fontsFinale = SINTESI_FONTS;
+        coverHTML = `<div class="cover">
+  <div class="cover-top">
+    <div class="cover-brand-text">SINTESIDIGITALE</div>
+    <div class="cover-divider"></div>
+    <h1>${docTitle}</h1>
+    <p class="cover-subtitle">Documento Professionalizzato</p>
+  </div>
+  <div class="cover-bottom">
+    <div class="cover-meta">
+      <div class="cover-meta-item"><div class="cover-meta-label">Data</div><div class="cover-meta-value">${today}</div></div>
+    </div>
+    <div class="cover-footer-credits">SintesiDigitale — Premium Digital Solutions · AI • Automation • Marketing</div>
+  </div>
+</div>`;
+      } else {
+        const kb = getKitbrandCliente();
+        const brandLabel = kb.azienda;
+        cssFinale = buildKitbrandCss(kb);
+        fontsFinale = buildKitbrandFonts(kb);
+        coverHTML = `<div class="cover">
+  <div class="cover-top">
+    ${brandLabel ? `<div class="cover-brand-text">${escapeHtml(brandLabel.toUpperCase())}</div><div class="cover-divider"></div>` : ''}
+    <h1>${docTitle}</h1>
+    <p class="cover-subtitle">Documento Professionalizzato</p>
+  </div>
+  <div class="cover-bottom">
+    <div class="cover-meta">
+      <div class="cover-meta-item"><div class="cover-meta-label">Data</div><div class="cover-meta-value">${today}</div></div>
+    </div>
+    <div class="cover-footer-credits">${brandLabel ? escapeHtml(brandLabel) + ' — ' : ''}Documento generato con Brand DNA Engine</div>
+  </div>
+</div>`;
+      }
+
+      outputText = '<!DOCTYPE html><html lang="it"><head><meta charset="UTF-8"><title>​</title>' + fontsFinale + '<style>' + cssFinale + '</style></head><body>' + coverHTML + bodyHtml + '</body></html>';
+      const outputArea = document.getElementById('output-area');
+      outputArea.innerHTML = '';
+      const iframe = document.createElement('iframe');
+      iframe.style.cssText = 'width:100%;height:700px;border:none;border-radius:4px;background:#000;';
+      iframe.srcdoc = outputText;
+      outputArea.appendChild(iframe);
+      document.getElementById('output-actions').style.display = 'flex';
+      document.getElementById('btn-print').style.display = '';
+      document.getElementById('btn-export-pdf').style.display = '';
+      toast('✓ Documento formattato con successo');
+      updateLicenseUI();
+      if (!currentLicenseId && freeRemaining <= 0) toast('⚠ Generazioni gratuite esaurite. Inserisci un codice licenza per continuare — con licenza sblocchi anche Master e Personalizzato con AI.', 5000);
+    } catch(e) { showErrorBanner(e.message, applyDNA); }
+    finally { tl.classList.remove('visible'); }
+    return;
+  }
+
+  // ── Modalità AI (master/custom): richiede SEMPRE licenza, mai gratis ──────
+  if (!currentLicenseId) { openLicenseModal(); return; }
+
   const tl = document.getElementById('target-loading');
   tl.classList.add('visible');
   document.getElementById('target-loading-text').textContent = 'Applicazione Brand DNA in corso...';
 
   let sys = '';
-  if (currentBrandMode === 'sintesi') {
-    sys = `Sei un esperto di formattazione documenti professionali per SintesiDigitale.
-Converti il documento in HTML semantico seguendo ESATTAMENTE queste regole:
-
-STRUTTURA OBBLIGATORIA:
-1. PRIMA RIGA — titolo documento: <h1 data-cover-title="true">[TITOLO DOCUMENTO]</h1> (obbligatorio, deve essere il primo tag)
-2. CORPO: usa h2 per sezioni principali, h3 per sottosezioni, p per paragrafi
-3. TABELLE: usa sempre <table><thead><tr><th>...</th></tr></thead><tbody><tr><td>...</td></tr></tbody></table>
-4. FOOTER (ultima riga): <div class="footer-brand">SINTESIDIGITALE — Premium Digital Solutions · AI • Automation • Marketing</div>
-
-REGOLE TASSATIVE:
-- Tono: formale, professionale, autorevole — ZERO emoji decorative
-- Preserva TUTTO il contenuto informativo originale (dati, numeri, nomi, tabelle)
-- NON aggiungere testo che non c'è nell'originale
-- Per elenchi usa <ul><li> o <ol><li>
-- Per codice/comandi usa <code>
-- Restituisci SOLO l'HTML del corpo — NO <!DOCTYPE>, NO <html>, NO <head>, NO <style>, NO markdown
-
-TAG PERMESSI: div, h1, h2, h3, h4, p, ul, ol, li, table, thead, tbody, tr, th, td, blockquote, strong, em, code, br`;
-  } else if (currentBrandMode === 'master') {
+  if (currentBrandMode === 'master') {
     sys = `Sei un esperto di brand consistency.
 Riscrivi il documento preservando TUTTO il contenuto informativo originale.
 Adatta esclusivamente forma, stile e struttura al Brand DNA:
@@ -1478,9 +1659,8 @@ Restituisci SOLO il documento riscritto.`;
   }
 
   try {
-    const res = await apiCall({ action:'generate', deviceId, licenseId:currentLicenseId, email:userFreeEmail || undefined, step:'apply', systemPrompt:sys, userMessage:'Documento da stilizzare:\n\n'+target });
+    const res = await apiCall({ action:'generate', deviceId, licenseId:currentLicenseId, step:'apply', modalita: currentBrandMode, systemPrompt:sys, userMessage:'Documento da stilizzare:\n\n'+target });
     if (!res.ok) {
-      if (res.emailRichiesta) { userFreeEmail = null; openEmailGateModal(); return; }
       if (res.paywall) {
         if (res.licenseInvalid) { currentLicenseId = null; localStorage.removeItem('bde_license_id'); updateLicenseUI(); }
         openLicenseModal();
@@ -1490,66 +1670,152 @@ Restituisci SOLO il documento riscritto.`;
       return;
     }
 
-    if (currentBrandMode === 'sintesi') {
-      // Estrai titolo dal primo h1 generato da Gemini
-      const _tmpDiv = document.createElement('div');
-      _tmpDiv.innerHTML = res.result;
-      const _h1 = _tmpDiv.querySelector('h1[data-cover-title="true"], h1');
-      const _docTitle = _h1 ? _h1.textContent.trim() : 'Documento Professionalizzato';
-      // Rimuovi l'h1 originale dal corpo (verrà mostrato nella cover)
-      if (_h1) _h1.remove();
-      const _bodyContent = _tmpDiv.innerHTML;
-
-      // Costruisci cover lato client — logo garantito, nessuna dipendenza da Gemini
-      const today = new Date().toLocaleDateString('it-IT', {year:'numeric',month:'long',day:'numeric'});
-      const _coverHTML = `<div class="cover">
-  <div class="cover-top">
-    <div class="cover-brand-text">SINTESIDIGITALE</div>
-    <div class="cover-divider"></div>
-    <h1>${_docTitle}</h1>
-    <p class="cover-subtitle">Documento Professionalizzato</p>
-  </div>
-  <div class="cover-bottom">
-    <div class="cover-meta">
-      <div class="cover-meta-item"><div class="cover-meta-label">Data</div><div class="cover-meta-value">${today}</div></div>
-    </div>
-    <div class="cover-footer-credits">SintesiDigitale — Premium Digital Solutions · AI • Automation • Marketing</div>
-  </div>
-</div>`;
-
-      outputText = '<!DOCTYPE html><html lang="it"><head><meta charset="UTF-8"><title>\u200B</title>' + SINTESI_FONTS + '<style>' + SINTESI_CSS + '</style></head><body>' + _coverHTML + _bodyContent + '</body></html>';
-      const outputArea = document.getElementById('output-area');
-      outputArea.innerHTML = '';
-      const iframe = document.createElement('iframe');
-      iframe.style.cssText = 'width:100%;height:700px;border:none;border-radius:4px;background:#000;';
-      iframe.srcdoc = outputText;
-      outputArea.appendChild(iframe);
-      // FIX: empty-output è già stato rimosso da innerHTML='' — non accedere più
-      document.getElementById('output-actions').style.display = 'flex';
-      // Mostra bottoni stampa/PDF solo in modalità sintesi
-      document.getElementById('btn-print').style.display = '';
-      document.getElementById('btn-export-pdf').style.display = '';
-    } else {
-      outputText = res.result;
-      renderOutputWithPages(res.result, getPageConfig());
-      // Per modalità non-sintesi, empty-output è ancora nel DOM (renderOutputWithPages usa innerHTML='')
-      // ma il div viene ricreato al logout, quindi usiamo un approccio safe
-      const emptyEl = document.getElementById('empty-output');
-      if (emptyEl) emptyEl.style.display = 'none';
-      document.getElementById('output-actions').style.display = 'flex';
-      // Nascondi bottoni stampa/PDF per modalità non-sintesi
-      document.getElementById('btn-print').style.display = 'none';
-      document.getElementById('btn-export-pdf').style.display = 'none';
-    }
+    outputText = res.result;
+    renderOutputWithPages(res.result, getPageConfig());
+    const emptyEl = document.getElementById('empty-output');
+    if (emptyEl) emptyEl.style.display = 'none';
+    document.getElementById('output-actions').style.display = 'flex';
+    document.getElementById('btn-print').style.display = 'none';
+    document.getElementById('btn-export-pdf').style.display = 'none';
     toast('✓ Brand DNA applicato con successo');
-    if (!currentLicenseId && res.freeRemaining !== null && res.freeRemaining !== undefined) {
-      freeRemaining = res.freeRemaining;
-      updateLicenseUI();
-      if (freeRemaining <= 0) toast('⚠ Generazioni gratuite esaurite. Inserisci un codice licenza per continuare.', 5000);
-    }
   } catch(e) { showErrorBanner(e.message, applyDNA); }
   finally { tl.classList.remove('visible'); }
 }
+
+// ── PARSER NATIVO (zero Gemini) — sintesi/kitbrand ────────────────────────────
+function formattaTestoNativo(testo) {
+  const righe = testo.replace(/\r\n/g, '\n').split('\n');
+  const blocchi = [];
+  let paragrafoCorrente = [];
+  let listaCorrente = null;
+  let titolo = null;
+
+  function chiudiParagrafo() {
+    if (paragrafoCorrente.length) {
+      blocchi.push('<p>' + escapeHtml(paragrafoCorrente.join(' ')) + '</p>');
+      paragrafoCorrente = [];
+    }
+  }
+  function chiudiLista() {
+    if (listaCorrente) {
+      blocchi.push('<ul>' + listaCorrente.map(v => '<li>' + escapeHtml(v) + '</li>').join('') + '</ul>');
+      listaCorrente = null;
+    }
+  }
+
+  for (let i = 0; i < righe.length; i++) {
+    const riga = righe[i].trim();
+
+    if (!riga) { chiudiParagrafo(); chiudiLista(); continue; }
+
+    if (riga.includes('\t')) {
+      chiudiParagrafo(); chiudiLista();
+      const celleTestata = riga.split('\t').map(c => c.trim());
+      const righeTabella = [celleTestata];
+      let j = i + 1;
+      while (j < righe.length && righe[j].includes('\t')) {
+        righeTabella.push(righe[j].split('\t').map(c => c.trim()));
+        j++;
+      }
+      i = j - 1;
+      const thead = '<thead><tr>' + righeTabella[0].map(c => '<th>' + escapeHtml(c) + '</th>').join('') + '</tr></thead>';
+      const tbody = '<tbody>' + righeTabella.slice(1).map(r => '<tr>' + r.map(c => '<td>' + escapeHtml(c) + '</td>').join('') + '</tr>').join('') + '</tbody>';
+      blocchi.push('<table>' + thead + tbody + '</table>');
+      continue;
+    }
+
+    if (/^([-•*]|\d+[.)])\s+/.test(riga)) {
+      chiudiParagrafo();
+      if (!listaCorrente) listaCorrente = [];
+      listaCorrente.push(riga.replace(/^([-•*]|\d+[.)])\s+/, ''));
+      continue;
+    }
+    chiudiLista();
+
+    const prossimaVuota = (i === righe.length - 1) || !righe[i + 1].trim();
+    if (riga.length < 70 && !/[.,;:]$/.test(riga) && prossimaVuota && paragrafoCorrente.length === 0) {
+      if (titolo === null) {
+        titolo = riga;
+      } else {
+        blocchi.push('<h2>' + escapeHtml(riga) + '</h2>');
+      }
+      continue;
+    }
+
+    paragrafoCorrente.push(riga);
+  }
+  chiudiParagrafo();
+  chiudiLista();
+
+  return {
+    title: titolo || 'Documento Professionalizzato',
+    bodyHtml: blocchi.join('\n')
+  };
+}
+
+function escapeHtml(s) {
+  return String(s || '')
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+
+// ── KITBRAND CLIENTE (colori/font/nome azienda) ───────────────────────────────
+const KITBRAND_DEFAULT = {
+  azienda: '', colorePrimario: '#1F3A5F', coloreAccento: '#3D7EA6',
+  fontTitoli: 'Montserrat', fontCorpo: 'Inter'
+};
+
+function getKitbrandCliente() {
+  const azienda = (document.getElementById('kb-azienda').value || '').trim();
+  const colorePrimario = document.getElementById('kb-colore-primario').value || KITBRAND_DEFAULT.colorePrimario;
+  const coloreAccento  = document.getElementById('kb-colore-accento').value  || KITBRAND_DEFAULT.coloreAccento;
+  const fontTitoli = document.getElementById('kb-font-titoli').value || KITBRAND_DEFAULT.fontTitoli;
+  const fontCorpo  = document.getElementById('kb-font-corpo').value  || KITBRAND_DEFAULT.fontCorpo;
+  return { azienda, colorePrimario, coloreAccento, fontTitoli, fontCorpo };
+}
+
+function buildKitbrandFonts(kb) {
+  const famiglie = Array.from(new Set([kb.fontTitoli, kb.fontCorpo]))
+    .map(f => f.replace(/ /g, '+') + ':wght@400;600;700;800')
+    .join('&family=');
+  return `<link href="https://fonts.googleapis.com/css2?family=${famiglie}&display=swap" rel="stylesheet">`;
+}
+
+function buildKitbrandCss(kb) {
+  return `
+  @page { margin: 15mm 18mm; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: '${kb.fontCorpo}', sans-serif; font-size: 11px; line-height: 1.75; color: #1a1a1a; background: #ffffff; }
+  h1, h2, h3, h4 { font-family: '${kb.fontTitoli}', sans-serif; font-weight: 700; color: #1a1a1a; page-break-after: avoid; }
+  h1 { font-size: 22px; margin: 24px 0 12px; border-bottom: 3px solid ${kb.coloreAccento}; padding-bottom: 8px; }
+  h2 { font-size: 16px; margin: 20px 0 10px; color: ${kb.coloreAccento}; }
+  h3 { font-size: 13px; margin: 16px 0 8px; }
+  p  { margin-bottom: 10px; }
+  ul, ol { margin: 8px 0 12px 20px; }
+  li { margin-bottom: 4px; }
+  table { width: 100%; border-collapse: collapse; margin: 12px 0; page-break-inside: avoid; }
+  th { background: ${kb.colorePrimario}; color: #ffffff; font-family: '${kb.fontTitoli}', sans-serif; font-size: 10px; letter-spacing: 1px; text-transform: uppercase; padding: 8px 10px; text-align: left; }
+  td { padding: 7px 10px; border-bottom: 1px solid #e0e0e0; }
+  tr:nth-child(even) td { background: #f8f8f8; }
+  .cover { background: #ffffff; color: #000000; margin: 0 0 30px; page-break-after: always; display: flex; flex-direction: column; min-height: 60vh; }
+  @media print { .cover { margin: -15mm -18mm 30px; min-height: 100vh; } }
+  .cover-top { background: ${kb.colorePrimario}; padding: 24px 40px 20px; text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+  .cover-brand-text { font-size: 10px; font-weight: 700; color: #ffffff; letter-spacing: 4px; text-transform: uppercase; font-family: '${kb.fontTitoli}', sans-serif; margin-bottom: 12px; }
+  .cover-divider { width: 36px; height: 2px; background: ${kb.coloreAccento}; margin: 0 auto 12px; border-radius: 1px; }
+  .cover h1 { color: #ffffff; font-size: 22px; font-weight: 700; margin: 0 0 8px; letter-spacing: 1px; border: none; font-family: '${kb.fontTitoli}', sans-serif; }
+  .cover-subtitle { font-size: 9px; color: #d8d8d8; letter-spacing: 2px; text-transform: uppercase; margin: 0; font-family: '${kb.fontTitoli}', sans-serif; }
+  .cover-bottom { background: #ffffff; flex: 1; padding: 0 40px; text-align: center; border-top: 3px solid ${kb.coloreAccento}; display: flex; flex-direction: column; align-items: center; justify-content: center; padding-bottom: 8%; }
+  .cover-meta { display: flex; justify-content: center; gap: 36px; margin-bottom: 20px; }
+  .cover-meta-item { text-align: center; }
+  .cover-meta-label { font-size: 9px; color: #999999; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 4px; }
+  .cover-meta-value { font-size: 13px; font-weight: 600; color: #222222; font-family: '${kb.fontTitoli}', sans-serif; }
+  .cover-footer-credits { font-size: 8px; color: #cccccc; letter-spacing: 2px; text-transform: uppercase; border-top: 0.5px solid #eeeeee; padding-top: 12px; width: 100%; text-align: center; }
+  blockquote { border-left: 3px solid ${kb.coloreAccento}; padding-left: 14px; margin: 12px 0; color: #333; page-break-inside: avoid; }
+  code, pre { font-family: 'Courier New', monospace; background: #f5f5f5; padding: 2px 6px; border-radius: 3px; font-size: 10px; }
+  @media print { body { -webkit-print-color-adjust: exact; print-color-adjust: exact; } }
+  `;
+}
+
 
 
 
@@ -1570,7 +1836,7 @@ function renderDNA(dna) {
 // ── OUTPUT ACTIONS ────────────────────────────────────────────────────────
 function copyOutput() {
   // In modalità sintesi copia il testo pulito (senza tag HTML)
-  if (currentBrandMode === 'sintesi') {
+  if (currentBrandMode === 'sintesi' || currentBrandMode === 'kitbrand') {
     const tmp = document.createElement('div');
     tmp.innerHTML = outputText;
     navigator.clipboard.writeText(tmp.textContent || tmp.innerText || '').then(() => toast('✓ Testo copiato negli appunti'));
@@ -1580,7 +1846,7 @@ function copyOutput() {
 }
 
 function downloadOutput() {
-  const isSintesi = currentBrandMode === 'sintesi';
+  const isSintesi = currentBrandMode === 'sintesi' || currentBrandMode === 'kitbrand';
   const blob = new Blob([outputText], { type: isSintesi ? 'text/html;charset=utf-8' : 'text/plain;charset=utf-8' });
   const ext  = isSintesi ? '.html' : '.txt';
   const a    = document.createElement('a');
@@ -1593,7 +1859,7 @@ function downloadOutput() {
 
 // ── STAMPA: apre l'HTML SintesiDigitale in una nuova finestra e chiama print() ──
 function printOutput() {
-  if (currentBrandMode !== 'sintesi') { toast('Stampa disponibile solo in modalità SintesiDigitale'); return; }
+  if (currentBrandMode !== 'sintesi' && currentBrandMode !== 'kitbrand') { toast('Stampa disponibile solo in modalità Sintesi/Kitbrand'); return; }
   const win = window.open('', '_blank', 'width=900,height=700');
   if (!win) { toast('⚠ Popup bloccato — consenti i popup per questo sito'); return; }
   win.document.write(outputText);
@@ -1606,7 +1872,7 @@ function printOutput() {
 
 // ── ESPORTA PDF: usa la finestra di stampa con destinazione "Salva come PDF" ──
 function exportPDF() {
-  if (currentBrandMode !== 'sintesi') { toast('Export PDF disponibile solo in modalità SintesiDigitale'); return; }
+  if (currentBrandMode !== 'sintesi' && currentBrandMode !== 'kitbrand') { toast('Export PDF disponibile solo in modalità Sintesi/Kitbrand'); return; }
   const win = window.open('', '_blank', 'width=900,height=700');
   if (!win) { toast('⚠ Popup bloccato — consenti i popup per questo sito'); return; }
   win.document.write(outputText);
@@ -1679,6 +1945,7 @@ window.addEventListener('error', e => {
 
 // ── INIT ─────────────────────────────────────────────────────────────────
 window.addEventListener('DOMContentLoaded', async () => {
+  verificaSbloccoAdminDaUrl();
   setupDropZone('master-drop', 'master-doc', 'master-count');
   setupDropZone('target-drop', 'target-doc', 'target-count');
 
