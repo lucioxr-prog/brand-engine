@@ -59,7 +59,9 @@ body{
   justify-content:center;font-size:24px;font-weight:700;
   color:#1a1712;margin:0 auto 14px;font-family:var(--mono);
   box-shadow:0 0 40px rgba(201,168,76,.3);
+  padding:13px;
 }
+.login-monogram img{width:100%;height:100%;object-fit:contain;display:block}
 .login-brand{color:var(--gold);font-size:12px;letter-spacing:3px;text-transform:uppercase;margin-bottom:6px}
 .login-title{font-size:24px;font-weight:400;margin-bottom:8px}
 .login-badge{
@@ -619,24 +621,39 @@ input[type="file"]{display:none}
 </head>
 <body>
 
-<!-- ══ SCREEN: GATE (password d'ingresso, primo filtro) ══ -->
+<!-- ══ SCREEN: GATE (ingresso: email + OTP, oppure link licenza diretto) ══ -->
 <div id="screen-gate" class="screen active">
   <div class="login-card">
-    <div class="login-monogram">LB</div>
+    <div class="login-monogram"><img src="data:image/png;base64,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" alt="SintesiDigitale"></div>
     <div class="login-brand">Brand DNA Engine</div>
-    <h1 class="login-title">Accesso Riservato</h1>
+    <h1 class="login-title">Accedi</h1>
     <div class="login-badge">🔐 Area Riservata</div>
 
-    <div class="fg">
-      <label>Password</label>
-      <input type="password" id="gate-password" placeholder="••••••••••••"
-        autocomplete="current-password"
-        onkeydown="if(event.key==='Enter')verificaPasswordAccesso()">
+    <div id="gate-step-email">
+      <div class="fg">
+        <label>Email</label>
+        <input type="email" id="gate-email" placeholder="nome@azienda.it"
+          onkeydown="if(event.key==='Enter')richiediOtpIngresso()">
+      </div>
+      <button class="login-btn" id="gate-email-btn" onclick="richiediOtpIngresso()">Invia Codice →</button>
     </div>
 
-    <button class="login-btn" id="gate-btn" onclick="verificaPasswordAccesso()">Entra →</button>
+    <div id="gate-step-otp" style="display:none">
+      <div class="fg">
+        <label>Codice Ricevuto</label>
+        <input type="text" id="gate-otp" placeholder="123456" maxlength="6"
+          onkeydown="if(event.key==='Enter')verificaOtpIngresso()">
+      </div>
+      <button class="login-btn" id="gate-otp-btn" onclick="verificaOtpIngresso()">Entra →</button>
+      <button class="login-btn" style="background:transparent;color:var(--text-dim);border:1px solid var(--border);margin-top:8px" onclick="richiediOtpIngresso()">Rinvia codice</button>
+    </div>
+
+    <div id="gate-step-licenza" style="display:none">
+      <div class="login-title" style="font-size:16px">Verifica licenza in corso...</div>
+    </div>
+
     <div class="login-err" id="gate-err"></div>
-    <div class="login-version">v7.0.0 · SintesiDigitale</div>
+    <div class="login-version">v7.1.0 · SintesiDigitale</div>
   </div>
 </div>
 
@@ -1030,32 +1047,85 @@ let sessionHistory  = [];
 let pageNumbersEnabled = false;
 let currentBrandMode = 'kitbrand'; // 'sintesi' | 'master' | 'custom' | 'kitbrand'
 
-// ── GATE PASSWORD (primo filtro, prima del freemium) ────────────────────────
+// ── GATE INGRESSO: email + OTP, oppure link licenza diretto ─────────────────
 function enterApp() {
   document.getElementById('screen-gate').classList.remove('active');
   document.getElementById('screen-app').classList.add('active');
 }
 
-async function verificaPasswordAccesso() {
-  const pwd = document.getElementById('gate-password').value;
-  const btn = document.getElementById('gate-btn');
+function mostraStepGate(step) {
+  document.getElementById('gate-step-email').style.display = step === 'email' ? '' : 'none';
+  document.getElementById('gate-step-otp').style.display = step === 'otp' ? '' : 'none';
+  document.getElementById('gate-step-licenza').style.display = step === 'licenza' ? '' : 'none';
+}
+
+async function richiediOtpIngresso() {
+  const val = document.getElementById('gate-email').value.trim();
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val)) {
+    showError('gate-err', 'Inserisci un indirizzo email valido.');
+    return;
+  }
+  const btn = document.getElementById('gate-email-btn');
   hideError('gate-err');
-
-  if (!pwd) { showError('gate-err', 'Inserisci la password.'); return; }
-
-  btn.disabled = true;
-  btn.textContent = 'Verifica...';
+  btn.disabled = true; btn.textContent = 'Invio...';
   try {
-    const res = await apiCall({ action: 'verifica_password', password: pwd });
-    if (!res.ok) { showError('gate-err', res.error || 'Password non valida.'); return; }
-    localStorage.setItem('bde_gate_passed', '1');
+    const res = await apiCall({ action: 'richiedi_otp', email: val.toLowerCase() });
+    if (!res.ok) { showError('gate-err', res.error || 'Impossibile inviare il codice.'); return; }
+    userFreeEmail = val.toLowerCase();
+    document.getElementById('gate-otp').value = '';
+    mostraStepGate('otp');
+  } catch(e) {
+    showError('gate-err', 'Errore di connessione al server. Riprova.');
+  } finally {
+    btn.disabled = false; btn.textContent = 'Invia Codice →';
+  }
+}
+
+async function verificaOtpIngresso() {
+  const codice = document.getElementById('gate-otp').value.trim();
+  if (!codice) { showError('gate-err', 'Inserisci il codice ricevuto.'); return; }
+  const btn = document.getElementById('gate-otp-btn');
+  hideError('gate-err');
+  btn.disabled = true; btn.textContent = 'Verifica...';
+  try {
+    const res = await apiCall({ action: 'verifica_otp', email: userFreeEmail, codice });
+    if (!res.ok) { showError('gate-err', res.error || 'Codice non valido.'); return; }
+    try { localStorage.setItem('bde_free_email', userFreeEmail); } catch (e) {}
     enterApp();
   } catch(e) {
     showError('gate-err', 'Errore di connessione al server. Riprova.');
-    console.error(e);
   } finally {
-    btn.disabled = false;
-    btn.textContent = 'Entra →';
+    btn.disabled = false; btn.textContent = 'Entra →';
+  }
+}
+
+// ── LICENZA DIRETTA VIA LINK (?licenza=CODICE) ───────────────────────────────
+// Ritorna true se il caso e' stato gestito (link presente, con successo o
+// con errore mostrato), false se non c'era nessun link -> si procede col
+// normale ingresso email/OTP.
+async function provaIngressoConLinkLicenza() {
+  const params = new URLSearchParams(window.location.search);
+  const codice = params.get('licenza');
+  if (!codice) return false;
+
+  mostraStepGate('licenza');
+  hideError('gate-err');
+  try {
+    const res = await apiCall({ action: 'verifica_licenza', licenseId: codice, deviceId });
+    if (!res.ok) {
+      showError('gate-err', res.error || 'Link licenza non valido.');
+      mostraStepGate('email');
+      return true;
+    }
+    currentLicenseId = codice;
+    try { localStorage.setItem('bde_license_id', codice); } catch (e) {}
+    document.getElementById('license-expiry').textContent = 'Scade il: ' + formatDate(res.expires);
+    enterApp();
+    return true;
+  } catch(e) {
+    showError('gate-err', 'Errore di connessione al server. Riprova.');
+    mostraStepGate('email');
+    return true;
   }
 }
 
@@ -1949,15 +2019,20 @@ window.addEventListener('DOMContentLoaded', async () => {
   setupDropZone('master-drop', 'master-doc', 'master-count');
   setupDropZone('target-drop', 'target-doc', 'target-count');
 
-  // ── Gate password: se gia' superato in precedenza, salta la schermata ────
-  if (localStorage.getItem('bde_gate_passed') === '1') {
-    enterApp();
-  }
-
-  // ── Init device/licenza: verifica solo stato utilizzo, nessun login ──────
+  // ── Device id sempre disponibile prima di qualunque controllo licenza ────
   deviceId = getOrCreateDeviceId();
   const savedLicense = localStorage.getItem('bde_license_id');
   try { userFreeEmail = localStorage.getItem('bde_free_email') || null; } catch (e) {}
+
+  // ── 1) Link diretto con licenza (?licenza=CODICE): prova ad entrare subito ──
+  const handledByLink = await provaIngressoConLinkLicenza();
+
+  // ── 2) Nessun link: se email o licenza gia' verificate in precedenza, salta il gate ──
+  if (!handledByLink && (savedLicense || userFreeEmail)) {
+    enterApp();
+  }
+
+  // ── Init stato utilizzo/licenza (freeRemaining, validita', ecc.) ──────────
   try {
     const res = await apiCall({ action:'stato_utilizzo', deviceId, licenseId: savedLicense || undefined, email: userFreeEmail || undefined });
     if (res.ok) {
