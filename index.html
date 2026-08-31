@@ -698,7 +698,7 @@ input[type="file"]{display:none}
 
       <!-- Freemium banner -->
       <div id="free-banner" class="trial-banner full-width">
-        <span class="trial-banner-text">🎁 Generazioni gratuite rimaste:</span>
+        <span class="trial-banner-text">Generazioni gratuite rimaste:</span>
         <span class="trial-counter" id="free-counter">2</span>
       </div>
 
@@ -1196,7 +1196,7 @@ function updateLicenseUI() {
     } else {
       freeBanner.className = 'trial-banner full-width';
       freeBanner.innerHTML =
-        '<span class="trial-banner-text">🎁 Generazioni gratuite rimaste:</span>' +
+        '<span class="trial-banner-text">Generazioni gratuite rimaste:</span>' +
         '<span class="trial-counter" id="free-counter">' + freeRemaining + '</span>';
     }
     statusText.textContent = freeRemaining + ' generazion' + (freeRemaining===1?'e':'i') + ' gratuit' + (freeRemaining===1?'a':'e') + ' disponibil' + (freeRemaining===1?'e':'i');
