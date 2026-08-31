@@ -2201,6 +2201,9 @@ function formattaInline(s) {
   let t = escapeHtml(s);
   t = t.replace(/`([^`]+?)`/g, '<code>$1</code>');
   t = t.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+  // Corsivo Markdown standard (asterisco singolo). Va applicato DOPO il grassetto sopra,
+  // che ha gia' consumato le coppie di doppio asterisco — quelle rimaste sono singole.
+  t = t.replace(/\*([^*]+?)\*/g, '<em>$1</em>');
   return t;
 }
 
