@@ -1944,7 +1944,6 @@ async function applyDNA() {
       document.getElementById('output-actions').style.display = 'flex';
       document.getElementById('btn-print').style.display = '';
       document.getElementById('btn-export-pdf').style.display = '';
-      toast('✓ Documento formattato con successo');
       updateLicenseUI();
     } catch(e) { showErrorBanner(e.message, applyDNA); }
     finally { tl.classList.remove('visible'); }
