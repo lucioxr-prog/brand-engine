@@ -1505,6 +1505,10 @@ async function readFileIntoTextarea(file, taId, countId) {
         });
         testo += paginaTesto + '\n';
       }
+      // Rimuove righe boilerplate ricorrenti tipo "Pagina 1 di 3" (footer/header)
+      // che altrimenti possono finire scambiate per titolo o incollate nei paragrafi.
+      const REGEX_FOOTER_PAGINA = /\bpa(?:g(?:ina)?)?\.?\s*\d+\s*(?:di|of|\/)\s*\d+\b/i;
+      testo = testo.split('\n').filter(r => !REGEX_FOOTER_PAGINA.test(r)).join('\n');
       if (!testo.trim()) {
         toast('⚠ Nessun testo estratto (PDF scansionato/immagine?). Incolla il testo manualmente.');
         return;
