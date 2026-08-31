@@ -1818,7 +1818,6 @@ function setBrandMode(mode) {
   // Apply button
   const applyBtn = document.getElementById('apply-btn');
   applyBtn.disabled = (mode === 'master') ? !brandDNA : false;
-  toast('Modalità: ' + {sintesi:'SintesiDigitale',kitbrand:'Kitbrand Azienda',master:'Brand da Master',custom:'Brand Personalizzato'}[mode]);
 }
 
 // ── ADMIN: sblocco preset SintesiDigitale (solo Luciano) ─────────────────────
