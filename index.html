@@ -808,9 +808,7 @@ input[type="file"]{display:none}
         </div>
         <div style="font-size:11px;color:var(--text-muted);font-family:var(--mono);margin-top:4px">
           Campi vuoti? Nessun problema: l'app user&agrave; un kit sobrio neutro, mai il preset SintesiDigitale.
-        </div>
-        <div class="btn-row" style="margin-top:14px">
-          <button class="btn btn-outline" onclick="salvaKitbrandManualmente()">&#9674; Salva Kitbrand</button>
+          Si salvano da soli a ogni modifica.
         </div>
 
         <div style="border-top:1px solid var(--border);margin-top:18px;padding-top:16px">
@@ -834,9 +832,11 @@ input[type="file"]{display:none}
           </div>
           <div class="btn-row">
             <button class="btn btn-primary" onclick="estraiKitbrandDaDocumento()">&#9674; Estrai Brand Kit da Documento</button>
+            <button class="btn btn-outline" onclick="salvaKitbrandManualmente()">&#9674; Salva Kitbrand</button>
             <button class="btn btn-outline" onclick="clearPanel('kb-extract-doc','kb-extract-count')">Svuota</button>
           </div>
           <div style="font-size:11px;color:var(--text-dim);font-family:var(--mono);margin-top:10px" id="kb-saved-indicator"></div>
+          <div id="kb-dettagli-estratti"></div>
         </div>
       </div>
 
@@ -2262,7 +2262,7 @@ Regole: colorePrimario e' il colore principale/dominante (sfondi, header). color
       regoleEvitare: Array.isArray(estratto.regoleEvitare) ? estratto.regoleEvitare : []
     };
 
-    salvaKitbrandInLocalStorage();
+    salvaKitbrandInLocalStorage('ai');
     aggiornaIndicatoreKitSalvato();
     toast('✓ Brand Kit estratto e salvato con successo');
   } catch(e) { showErrorBanner(e.message); }
@@ -2278,9 +2278,12 @@ function impostaSelectSeDisponibile(selectId, valore) {
 }
 
 // ── PERSISTENZA KITBRAND (localStorage — un dispositivo = una licenza) ───────
-function salvaKitbrandInLocalStorage() {
+function salvaKitbrandInLocalStorage(origine) {
   try {
-    const dati = { kb: getKitbrandCliente(), esteso: kitbrandEsteso };
+    let precedente = null;
+    try { precedente = JSON.parse(localStorage.getItem('bde_kitbrand_cliente') || 'null'); } catch (e) {}
+    const origineFinale = origine || (precedente && precedente.origine) || 'manuale';
+    const dati = { kb: getKitbrandCliente(), esteso: kitbrandEsteso, origine: origineFinale, aggiornatoIl: Date.now() };
     localStorage.setItem('bde_kitbrand_cliente', JSON.stringify(dati));
   } catch (e) {}
 }
@@ -2314,15 +2317,46 @@ function svuotaKitbrandSalvato() {
 
 function aggiornaIndicatoreKitSalvato() {
   const el = document.getElementById('kb-saved-indicator');
+  if (el) {
+    let salvato = false;
+    try { salvato = !!localStorage.getItem('bde_kitbrand_cliente'); } catch (e) {}
+    el.innerHTML = salvato
+      ? '✓ Kitbrand salvato su questo dispositivo &mdash; <a href="#" onclick="svuotaKitbrandSalvato();return false;" style="color:var(--gold)">svuota</a>'
+      : '';
+  }
+  aggiornaDettagliKitbrandEstratti();
+}
+
+function aggiornaDettagliKitbrandEstratti() {
+  const el = document.getElementById('kb-dettagli-estratti');
   if (!el) return;
-  let salvato = false;
-  try { salvato = !!localStorage.getItem('bde_kitbrand_cliente'); } catch (e) {}
-  el.innerHTML = salvato
-    ? '✓ Kitbrand salvato su questo dispositivo &mdash; <a href="#" onclick="svuotaKitbrandSalvato();return false;" style="color:var(--gold)">svuota</a>'
-    : '';
+  let dati = null;
+  try { dati = JSON.parse(localStorage.getItem('bde_kitbrand_cliente') || 'null'); } catch (e) { dati = null; }
+  if (!dati || !dati.esteso) { el.innerHTML = ''; return; }
+  const est = dati.esteso;
+  const origineLabel = dati.origine === 'ai'
+    ? 'Estratto da documento (AI)'
+    : (dati.origine === 'manuale' ? 'Impostato manualmente' : 'Origine non tracciata (kitbrand salvato prima di questo aggiornamento)');
+  const quando = dati.aggiornatoIl ? new Date(dati.aggiornatoIl).toLocaleString('it-IT', { dateStyle: 'short', timeStyle: 'short' }) : '';
+  const regole = (Array.isArray(est.regoleEvitare) && est.regoleEvitare.length)
+    ? '<ul style="margin:4px 0 0 16px;padding:0">' + est.regoleEvitare.map(r => '<li>' + escapeHtml(r) + '</li>').join('') + '</ul>'
+    : '<span style="color:var(--text-dim)">nessuna</span>';
+  el.innerHTML = ''
+    + '<div style="font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--gold-dim);font-family:var(--mono);margin:14px 0 6px">&#9670; Dettagli Estratti</div>'
+    + '<div style="font-size:11px;color:var(--text-muted);line-height:1.7">'
+    + '<div><strong>Origine:</strong> ' + origineLabel + (quando ? ' &middot; ' + quando : '') + '</div>'
+    + '<div><strong>Pesi tipografici:</strong> H1 ' + est.pesoTitoloH1 + ', H2 ' + est.pesoTitoloH2 + ', H3 ' + est.pesoTitoloH3 + ', corpo ' + est.pesoCorpo + ', enfasi ' + est.pesoEnfasi + '</div>'
+    + '<div><strong>Border-radius:</strong> ' + est.borderRadius + 'px</div>'
+    + '<div><strong>Evita ombre:</strong> ' + (est.evitaOmbre ? 'Sì' : 'No') + '</div>'
+    + '<div style="margin-top:4px"><strong>Regole da evitare:</strong> ' + regole + '</div>'
+    + '</div>';
 }
 
 function salvaKitbrandManualmente() {
+  // Nessuna origine forzata: preserva quella gia' salvata (es. 'ai' se e' stato appena
+  // estratto un Brand Kit da documento) — questo bottone e' un salvataggio esplicito
+  // dell'intero pannello (campi manuali + eventuale estrazione), non una dichiarazione
+  // di origine manuale.
   salvaKitbrandInLocalStorage();
   aggiornaIndicatoreKitSalvato();
   toast('✓ Kitbrand salvato');
@@ -2553,7 +2587,7 @@ window.addEventListener('DOMContentLoaded', async () => {
   caricaKitbrandDaLocalStorage();
   caricaMasterDNADaLocalStorage();
   ['kb-azienda','kb-colore-primario','kb-colore-accento','kb-font-titoli','kb-font-corpo'].forEach(id => {
-    document.getElementById(id).addEventListener('change', () => { salvaKitbrandInLocalStorage(); aggiornaIndicatoreKitSalvato(); });
+    document.getElementById(id).addEventListener('change', () => { salvaKitbrandInLocalStorage('manuale'); aggiornaIndicatoreKitSalvato(); });
   });
 
   // ── Device id sempre disponibile prima di qualunque controllo licenza ────
