@@ -1438,6 +1438,160 @@ function setupDropZone(zoneId, taId, countId) {
   });
 }
 
+// ============ NUOVO ALGORITMO DI ESTRAZIONE CON RICOSTRUZIONE TABELLE ============
+function raggruppaRighePerY(items, tolleranzaY) {
+  const righeMappa = new Map();
+  items.forEach(it => {
+    const y = Math.round(it.transform[5]);
+    if (!righeMappa.has(y)) righeMappa.set(y, []);
+    righeMappa.get(y).push(it);
+  });
+  const ys = Array.from(righeMappa.keys()).sort((a, b) => b - a);
+  const righeUnite = [];
+  ys.forEach(y => {
+    const ultima = righeUnite[righeUnite.length - 1];
+    if (ultima && Math.abs(ultima.y - y) <= tolleranzaY) {
+      ultima.items.push(...righeMappa.get(y));
+    } else {
+      righeUnite.push({ y, items: [...righeMappa.get(y)] });
+    }
+  });
+  righeUnite.forEach(r => r.items.sort((a, b) => a.transform[4] - b.transform[4]));
+  return righeUnite;
+}
+
+function testoRiga(items, sogliaTab) {
+  let rigaTesto = '';
+  let fineXPrec = null;
+  items.forEach(it => {
+    const x = it.transform[4];
+    if (fineXPrec !== null) {
+      const gap = x - fineXPrec;
+      if (gap > sogliaTab) rigaTesto += '\t';
+      else if (gap > 1) rigaTesto += ' ';
+    }
+    rigaTesto += it.str;
+    fineXPrec = x + (it.width || 0);
+  });
+  return rigaTesto;
+}
+
+// trova il "salto" piu grande in un array di valori numerici, usato per separare due cluster (soglia bimodale)
+function sogliaBimodale(valori) {
+  const uniq = Array.from(new Set(valori)).sort((a, b) => a - b);
+  if (uniq.length < 2) return Infinity;
+  let maxJump = -1, soglia = uniq[uniq.length - 1] + 1;
+  for (let i = 0; i < uniq.length - 1; i++) {
+    const jump = uniq[i + 1] - uniq[i];
+    if (jump > maxJump) { maxJump = jump; soglia = (uniq[i] + uniq[i + 1]) / 2; }
+  }
+  return soglia;
+}
+
+// item "non vuoto": stringa con almeno un carattere non-spazio
+function itemsSignificativi(items) {
+  return items.filter(it => it.str && it.str.trim().length > 0);
+}
+
+const SOGLIA_TAB = 15;       // gap orizzontale minimo per considerare due item su colonne diverse
+const LARGH_PROSA_MIN = 150; // larghezza minima di un item singolo per considerarlo "prosa a riga piena"
+const TOLLERANZA_COLONNA = 15; // px entro cui due x0 sono la stessa colonna
+
+function clusterizzaColonne(x0Values) {
+  const uniq = Array.from(new Set(x0Values.map(v => Math.round(v * 10) / 10))).sort((a, b) => a - b);
+  const bande = [];
+  uniq.forEach(x => {
+    const ultima = bande[bande.length - 1];
+    if (ultima && (x - ultima.max) <= TOLLERANZA_COLONNA) {
+      ultima.max = x;
+    } else {
+      bande.push({ min: x, max: x });
+    }
+  });
+  return bande.map(b => (b.min + b.max) / 2);
+}
+
+function trovaBanda(x, bande) {
+  let migliore = 0, distMin = Infinity;
+  bande.forEach((bx, i) => {
+    const d = Math.abs(x - bx);
+    if (d < distMin) { distMin = d; migliore = i; }
+  });
+  return migliore;
+}
+
+// Prova a costruire un blocco-tabella a partire dall'indice `start` di righeUnite.
+// Ritorna null se non è una tabella valida, altrimenti { endIndex, righeTabella: [[cella,...], ...] }
+function provaTabella(righeUnite, start) {
+  const primaRiga = righeUnite[start];
+  const primiItems = itemsSignificativi(primaRiga.items);
+  if (primiItems.length < 2) return null; // serve almeno 2 "colonne" per iniziare
+  // la riga deve contenere un vero tab secondo la stessa logica usata storicamente
+  // (gap > SOGLIA_TAB calcolato sulla sequenza COMPLETA degli item, spazi inclusi) —
+  // così non scambiamo una riga di prosa normale (con più "run" di testo per font/stile,
+  // magari con spaziatura irregolare tra le parole) per una tabella.
+  if (!testoRiga(primaRiga.items, SOGLIA_TAB).includes('\t')) return null;
+
+  // estendi il blocco: continua finché la riga ha >=2 item significativi
+  let end = start;
+  const gapsY = [];
+  for (let k = start + 1; k < righeUnite.length; k++) {
+    const items = itemsSignificativi(righeUnite[k].items);
+    const isRigaProsa = items.length <= 1 && (items[0] ? (items[0].width || 0) > LARGH_PROSA_MIN : true);
+    if (isRigaProsa) break;
+    if (items.length === 0) break;
+    gapsY.push(righeUnite[k - 1].y - righeUnite[k].y);
+    end = k;
+  }
+  if (end === start) return null; // tabella di una sola riga visuale: non abbastanza segnale, lascia al fallback
+
+  // determina la soglia riga-vs-continuazione dai gap Y osservati
+  const sogliaRiga = gapsY.length >= 2 ? sogliaBimodale(gapsY) : (gapsY[0] ? gapsY[0] + 1 : Infinity);
+
+  // raggruppa le righe visuali [start..end] in righe logiche di tabella
+  const gruppiRiga = [];
+  let gruppoCorrente = [start];
+  for (let k = start + 1; k <= end; k++) {
+    const gap = righeUnite[k - 1].y - righeUnite[k].y;
+    if (gap > sogliaRiga) {
+      gruppiRiga.push(gruppoCorrente);
+      gruppoCorrente = [k];
+    } else {
+      gruppoCorrente.push(k);
+    }
+  }
+  gruppiRiga.push(gruppoCorrente);
+
+  // serve almeno 2 righe logiche per confermare che è una vera tabella (altrimenti troppo rischioso)
+  if (gruppiRiga.length < 2) return null;
+
+  // clusterizza le colonne usando gli x0 di tutti gli item significativi nel blocco
+  const tuttiItems = [];
+  for (let k = start; k <= end; k++) tuttiItems.push(...itemsSignificativi(righeUnite[k].items));
+  const bande = clusterizzaColonne(tuttiItems.map(it => it.transform[4]));
+  if (bande.length < 2) return null;
+
+  // costruisci le celle per ogni riga logica
+  let righeTabella = gruppiRiga.map(gruppo => {
+    const celle = new Array(bande.length).fill('');
+    gruppo.forEach(k => {
+      itemsSignificativi(righeUnite[k].items).forEach(it => {
+        const b = trovaBanda(it.transform[4], bande);
+        celle[b] = (celle[b] ? celle[b] + ' ' : '') + it.str.trim();
+      });
+    });
+    return celle.map(c => c.trim());
+  });
+
+  // rimuovi le colonne completamente vuote su tutte le righe (bande fantasma da clustering troppo fine)
+  const numColonne = bande.length;
+  const colonneVuote = new Array(numColonne).fill(true);
+  righeTabella.forEach(riga => riga.forEach((c, idx) => { if (c) colonneVuote[idx] = false; }));
+  righeTabella = righeTabella.map(riga => riga.filter((c, idx) => !colonneVuote[idx]));
+
+  return { endIndex: end, righeTabella };
+}
+
 async function readFileIntoTextarea(file, taId, countId) {
   const name = file.name.toLowerCase();
   const ta   = document.getElementById(taId);
@@ -1469,40 +1623,21 @@ async function readFileIntoTextarea(file, taId, countId) {
       for (let p = 1; p <= pdf.numPages; p++) {
         const page = await pdf.getPage(p);
         const tc = await page.getTextContent();
-        const righeMappa = new Map();
-        tc.items.forEach(it => {
-          const y = Math.round(it.transform[5]);
-          if (!righeMappa.has(y)) righeMappa.set(y, []);
-          righeMappa.get(y).push(it);
-        });
-        const ys = Array.from(righeMappa.keys()).sort((a, b) => b - a);
-        const righeUnite = [];
-        const TOLLERANZA_Y = 2;
-        ys.forEach(y => {
-          const ultima = righeUnite[righeUnite.length - 1];
-          if (ultima && Math.abs(ultima.y - y) <= TOLLERANZA_Y) {
-            ultima.items.push(...righeMappa.get(y));
-          } else {
-            righeUnite.push({ y, items: [...righeMappa.get(y)] });
-          }
-        });
+        const righeUnite = raggruppaRighePerY(tc.items, 2);
         let paginaTesto = '';
-        righeUnite.forEach(riga => {
-          riga.items.sort((a, b) => a.transform[4] - b.transform[4]);
-          let rigaTesto = '';
-          let fineXPrec = null;
-          riga.items.forEach(it => {
-            const x = it.transform[4];
-            if (fineXPrec !== null) {
-              const gap = x - fineXPrec;
-              if (gap > 15) rigaTesto += '\t';
-              else if (gap > 1) rigaTesto += ' ';
-            }
-            rigaTesto += it.str;
-            fineXPrec = x + (it.width || 0);
-          });
-          paginaTesto += rigaTesto + '\n';
-        });
+        let i = 0;
+        while (i < righeUnite.length) {
+          const risultatoTabella = provaTabella(righeUnite, i);
+          if (risultatoTabella) {
+            risultatoTabella.righeTabella.forEach(cells => {
+              paginaTesto += cells.join('\t') + '\n';
+            });
+            i = risultatoTabella.endIndex + 1;
+          } else {
+            paginaTesto += testoRiga(righeUnite[i].items, SOGLIA_TAB) + '\n';
+            i++;
+          }
+        }
         testo += paginaTesto + '\n';
       }
       // Rimuove righe boilerplate ricorrenti tipo "Pagina 1 di 3" (footer/header)
