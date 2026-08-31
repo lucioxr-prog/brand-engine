@@ -1881,6 +1881,18 @@ function formattaTestoNativo(testo) {
       continue;
     }
 
+    const matchNumerato = riga.match(/^\d+[.)]\s+(.*)$/);
+    if (matchNumerato) {
+      const testoSenzaNumero = matchNumerato[1];
+      const sembraTitoloSezione = !listaCorrente && testoSenzaNumero.length < 70 && !testoSenzaNumero.includes(':') && !/[.,;:]$/.test(testoSenzaNumero);
+      if (sembraTitoloSezione) {
+        chiudiParagrafo();
+        chiudiLista();
+        blocchi.push('<h2>' + escapeHtml(testoSenzaNumero) + '</h2>');
+        continue;
+      }
+    }
+
     if (/^([-•*]|\d+[.)])\s+/.test(riga)) {
       chiudiParagrafo();
       if (!listaCorrente) listaCorrente = [];
