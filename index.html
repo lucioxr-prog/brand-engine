@@ -809,6 +809,9 @@ input[type="file"]{display:none}
         <div style="font-size:11px;color:var(--text-muted);font-family:var(--mono);margin-top:4px">
           Campi vuoti? Nessun problema: l'app user&agrave; un kit sobrio neutro, mai il preset SintesiDigitale.
         </div>
+        <div class="btn-row" style="margin-top:14px">
+          <button class="btn btn-outline" onclick="salvaKitbrandManualmente()">&#9674; Salva Kitbrand</button>
+        </div>
 
         <div style="border-top:1px solid var(--border);margin-top:18px;padding-top:16px">
           <div style="font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:var(--gold-dim);font-family:var(--mono);margin-bottom:8px">&#9670; Estrai Brand Kit da Documento &mdash; LICENZA</div>
@@ -944,6 +947,10 @@ input[type="file"]{display:none}
           <div class="dna-grid" id="dna-grid"></div>
           <div class="dna-rules-title">Regole stilistiche identificate</div>
           <ul class="dna-rules-list" id="rules-list"></ul>
+          <div class="btn-row" style="margin-top:16px">
+            <button class="btn btn-outline" onclick="salvaMasterDNA(false)">&#9674; Salva Brand DNA</button>
+          </div>
+          <div style="font-size:11px;color:var(--text-dim);font-family:var(--mono);margin-top:10px" id="master-dna-saved-indicator"></div>
         </div>
       </div>
 
@@ -1074,6 +1081,8 @@ const WORKER_URL = 'https://script.google.com/macros/s/AKfycbzyotTHwb1T17U8vHH9E
 
 // ── STATE ──────────────────────────────────────────────────────────────────
 const FREE_LIMIT    = 2;
+const LIMITE_CARATTERI_TARGET  = 40000;  // step 'apply' (master/custom) — stesso limite lato server
+const LIMITE_CARATTERI_ANALISI = 15000;  // step 'analyze'/'extract_kitbrand' — stesso limite lato server
 let deviceId         = null;
 let currentLicenseId = null; // null finché non viene validato un codice
 let freeRemaining    = FREE_LIMIT;
@@ -1810,9 +1819,11 @@ function setBrandMode(mode) {
   // Step 1 visibile solo in modalità master
   const step1Panel = document.getElementById('step1-panel');
   if (step1Panel) step1Panel.style.display = mode === 'master' ? '' : 'none';
-  // DNA panel visibile solo in master
-  if (mode !== 'master') {
-    brandDNA = null;
+  // DNA panel visibile solo in master — il Brand DNA resta in memoria/localStorage
+  // anche cambiando modalità (non va più perso ricambiando tab nella stessa sessione).
+  if (mode === 'master') {
+    if (brandDNA) renderDNA(brandDNA);
+  } else {
     document.getElementById('dna-panel').classList.remove('visible');
   }
   // Apply button
@@ -1842,6 +1853,7 @@ function verificaSbloccoAdminDaUrl() {
 async function analyzeDNA() {
   const master = document.getElementById('master-doc').value.trim();
   if (!master) { toast('Inserisci il documento master'); return; }
+  if (master.length > LIMITE_CARATTERI_ANALISI) { toast('⚠ Documento troppo lungo per l\'analisi (max ' + LIMITE_CARATTERI_ANALISI.toLocaleString('it-IT') + ' caratteri). Usa un estratto rappresentativo dello stile.', 5000); return; }
   if (!currentLicenseId) { openLicenseModal(); return; }
   const ml = document.getElementById('master-loading');
   ml.classList.add('visible');
@@ -1854,6 +1866,7 @@ Analizza il documento e restituisci SOLO JSON valido (no markdown, no backtick, 
     brandDNA = JSON.parse(res.result.replace(/```json|```/g,'').trim());
     renderDNA(brandDNA);
     document.getElementById('apply-btn').disabled = false;
+    salvaMasterDNA(true);
     toast('✓ Brand DNA acquisito con successo');
   } catch(e) { showErrorBanner(e.message); }
   finally { ml.classList.remove('visible'); }
@@ -1951,6 +1964,7 @@ async function applyDNA() {
   }
 
   // ── Modalità AI (master/custom): richiede SEMPRE licenza, mai gratis ──────
+  if (target.length > LIMITE_CARATTERI_TARGET) { toast('⚠ Documento troppo lungo (max ' + LIMITE_CARATTERI_TARGET.toLocaleString('it-IT') + ' caratteri). Dividilo in più parti e generale separatamente.', 5000); return; }
   if (!currentLicenseId) { openLicenseModal(); return; }
 
   const tl = document.getElementById('target-loading');
@@ -2155,6 +2169,7 @@ function getKitbrandCliente() {
 async function estraiKitbrandDaDocumento() {
   const testo = document.getElementById('kb-extract-doc').value.trim();
   if (!testo) { toast('Incolla o carica un documento con il tuo Brand Kit'); return; }
+  if (testo.length > LIMITE_CARATTERI_ANALISI) { toast('⚠ Documento troppo lungo per l\'analisi (max ' + LIMITE_CARATTERI_ANALISI.toLocaleString('it-IT') + ' caratteri). Usa un estratto rappresentativo.', 5000); return; }
   if (!currentLicenseId) { openLicenseModal(); return; }
   const loading = document.getElementById('kb-extract-loading');
   loading.classList.add('visible');
@@ -2240,6 +2255,51 @@ function aggiornaIndicatoreKitSalvato() {
   try { salvato = !!localStorage.getItem('bde_kitbrand_cliente'); } catch (e) {}
   el.innerHTML = salvato
     ? '✓ Kitbrand salvato su questo dispositivo &mdash; <a href="#" onclick="svuotaKitbrandSalvato();return false;" style="color:var(--gold)">svuota</a>'
+    : '';
+}
+
+function salvaKitbrandManualmente() {
+  salvaKitbrandInLocalStorage();
+  aggiornaIndicatoreKitSalvato();
+  toast('✓ Kitbrand salvato');
+}
+
+// ── PERSISTENZA BRAND DNA (Master Template) ─────────────────────────────────
+function salvaMasterDNA(silent) {
+  if (!brandDNA) { toast('Analizza prima il Master Template'); return; }
+  try { localStorage.setItem('bde_master_dna', JSON.stringify(brandDNA)); } catch (e) {}
+  aggiornaIndicatoreMasterDNASalvato();
+  if (!silent) toast('✓ Brand DNA salvato');
+}
+
+function caricaMasterDNADaLocalStorage() {
+  let dati = null;
+  try { dati = JSON.parse(localStorage.getItem('bde_master_dna') || 'null'); } catch (e) { dati = null; }
+  if (!dati) return;
+  brandDNA = dati;
+  if (currentBrandMode === 'master') {
+    renderDNA(brandDNA);
+    document.getElementById('apply-btn').disabled = false;
+  }
+  aggiornaIndicatoreMasterDNASalvato();
+}
+
+function svuotaMasterDNASalvato() {
+  try { localStorage.removeItem('bde_master_dna'); } catch (e) {}
+  brandDNA = null;
+  document.getElementById('dna-panel').classList.remove('visible');
+  if (currentBrandMode === 'master') document.getElementById('apply-btn').disabled = true;
+  aggiornaIndicatoreMasterDNASalvato();
+  toast('Brand DNA svuotato');
+}
+
+function aggiornaIndicatoreMasterDNASalvato() {
+  const el = document.getElementById('master-dna-saved-indicator');
+  if (!el) return;
+  let salvato = false;
+  try { salvato = !!localStorage.getItem('bde_master_dna'); } catch (e) {}
+  el.innerHTML = salvato
+    ? '✓ Brand DNA salvato su questo dispositivo &mdash; <a href="#" onclick="svuotaMasterDNASalvato();return false;" style="color:var(--gold)">svuota</a>'
     : '';
 }
 
@@ -2425,6 +2485,7 @@ window.addEventListener('DOMContentLoaded', async () => {
   setupDropZone('target-drop', 'target-doc', 'target-count');
   setupDropZone('kb-extract-drop', 'kb-extract-doc', 'kb-extract-count');
   caricaKitbrandDaLocalStorage();
+  caricaMasterDNADaLocalStorage();
   ['kb-azienda','kb-colore-primario','kb-colore-accento','kb-font-titoli','kb-font-corpo'].forEach(id => {
     document.getElementById(id).addEventListener('change', () => { salvaKitbrandInLocalStorage(); aggiornaIndicatoreKitSalvato(); });
   });
