@@ -804,14 +804,14 @@ input[type="file"]{display:none}
           <div style="font-size:11px;color:var(--text-muted);margin-bottom:10px">Incolla o carica il tuo manuale di brand identity (colori, font, regole): la app legge il documento e compila tutto da sola.</div>
           <div class="upload-row">
             <button class="upload-btn" onclick="document.getElementById('kb-extract-file').click()">&#128206; Carica File</button>
-            <span class="upload-label">oppure trascina .txt / .md / .docx qui sotto</span>
-            <input type="file" id="kb-extract-file" accept=".txt,.md,.docx" onchange="handleFileInput(event,'kb-extract-doc','kb-extract-count')">
+            <span class="upload-label">oppure trascina .txt / .md / .docx / .pdf qui sotto</span>
+            <input type="file" id="kb-extract-file" accept=".txt,.md,.docx,.pdf" onchange="handleFileInput(event,'kb-extract-doc','kb-extract-count')">
           </div>
           <div class="drop-zone" id="kb-extract-drop">
             <textarea id="kb-extract-doc"
               placeholder="Incolla qui il tuo Brand Kit: colori (HEX), font, pesi tipografici, regole da evitare..."
               oninput="updateCharCount('kb-extract-doc','kb-extract-count')"></textarea>
-            <div class="drop-hint"><span>&#8681;</span><span>Drag & drop .txt &middot; .md &middot; .docx</span></div>
+            <div class="drop-hint"><span>&#8681;</span><span>Drag & drop .txt &middot; .md &middot; .docx &middot; .pdf</span></div>
           </div>
           <div class="char-count" id="kb-extract-count">0 caratteri</div>
           <div class="loading-wrap" id="kb-extract-loading">
@@ -840,14 +840,14 @@ input[type="file"]{display:none}
         <div class="panel-body">
           <div class="upload-row">
             <button class="upload-btn" onclick="document.getElementById('master-file').click()">📎 Carica File</button>
-            <span class="upload-label">oppure trascina .txt / .md / .docx qui sotto</span>
-            <input type="file" id="master-file" accept=".txt,.md,.docx" onchange="handleFileInput(event,'master-doc','master-count')">
+            <span class="upload-label">oppure trascina .txt / .md / .docx / .pdf qui sotto</span>
+            <input type="file" id="master-file" accept=".txt,.md,.docx,.pdf" onchange="handleFileInput(event,'master-doc','master-count')">
           </div>
           <div class="drop-zone" id="master-drop">
             <textarea id="master-doc"
               placeholder="Incolla qui il documento master — lettera, email tipo, report, proposta...&#10;&#10;Tutto ciò che usi come standard del tuo stile comunicativo."
               oninput="updateCharCount('master-doc','master-count')"></textarea>
-            <div class="drop-hint"><span>⬇</span><span>Drag & drop .txt · .md · .docx</span></div>
+            <div class="drop-hint"><span>⬇</span><span>Drag & drop .txt · .md · .docx · .pdf</span></div>
           </div>
           <div class="char-count" id="master-count">0 caratteri</div>
           <div class="loading-wrap" id="master-loading">
@@ -875,14 +875,14 @@ input[type="file"]{display:none}
         <div class="panel-body">
           <div class="upload-row">
             <button class="upload-btn" onclick="document.getElementById('target-file').click()">📎 Carica File</button>
-            <span class="upload-label">oppure trascina .txt / .md / .docx qui sotto</span>
-            <input type="file" id="target-file" accept=".txt,.md,.docx" onchange="handleFileInput(event,'target-doc','target-count')">
+            <span class="upload-label">oppure trascina .txt / .md / .docx / .pdf qui sotto</span>
+            <input type="file" id="target-file" accept=".txt,.md,.docx,.pdf" onchange="handleFileInput(event,'target-doc','target-count')">
           </div>
           <div class="drop-zone" id="target-drop">
             <textarea id="target-doc"
               placeholder="Incolla qui il documento da riformattare...&#10;&#10;Il contenuto verrà preservato, il Brand DNA verrà applicato."
               oninput="updateCharCount('target-doc','target-count')"></textarea>
-            <div class="drop-hint"><span>⬇</span><span>Drag & drop .txt · .md · .docx</span></div>
+            <div class="drop-hint"><span>⬇</span><span>Drag & drop .txt · .md · .docx · .pdf</span></div>
           </div>
           <div class="char-count" id="target-count">0 caratteri</div>
 
@@ -1454,8 +1454,32 @@ async function readFileIntoTextarea(file, taId, countId) {
     } catch(e) {
       toast('⚠ Impossibile leggere il DOCX. Incolla il testo manualmente.');
     }
+  } else if (name.endsWith('.pdf')) {
+    if (!window.pdfjsLib) {
+      toast('⚠ Libreria PDF non disponibile. Incolla il testo manualmente.');
+      return;
+    }
+    try {
+      const ab = await file.arrayBuffer();
+      const pdf = await pdfjsLib.getDocument({ data: ab }).promise;
+      let testo = '';
+      for (let p = 1; p <= pdf.numPages; p++) {
+        const page = await pdf.getPage(p);
+        const content = await page.getTextContent();
+        testo += content.items.map(it => it.str).join(' ') + '\n\n';
+      }
+      if (!testo.trim()) {
+        toast('⚠ Nessun testo estratto (PDF scansionato/immagine?). Incolla il testo manualmente.');
+        return;
+      }
+      ta.value = testo.trim();
+      updateCharCount(taId, countId);
+      // upload silenzioso — nessun toast visibile
+    } catch(e) {
+      toast('⚠ Impossibile leggere il PDF. Incolla il testo manualmente.');
+    }
   } else {
-    toast('⚠ Formato non supportato. Usa .txt .md .docx');
+    toast('⚠ Formato non supportato. Usa .txt .md .docx .pdf');
   }
 }
 
@@ -2200,5 +2224,12 @@ window.addEventListener('DOMContentLoaded', async () => {
 
 <!-- mammoth.js per parsing DOCX (CDN affidabile, no API key richiesta) -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
+<!-- pdf.js per lettura testo da PDF (CDN affidabile, no API key richiesta) -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script>
+  if (window['pdfjsLib']) {
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+  }
+</script>
 </body>
 </html>
