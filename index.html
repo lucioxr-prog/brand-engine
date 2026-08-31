@@ -2049,6 +2049,27 @@ function formattaTestoNativo(testo) {
       continue;
     }
 
+    // Tabelle con colonne separate da " | " (tipiche di testo passato prima da un altro
+    // strumento AI, es. Gemini/ChatGPT usati manualmente dall'utente prima di incollare qui) —
+    // stessa logica del blocco tab sopra. Richiede un pipe con spazi attorno E almeno una riga
+    // successiva con lo stesso pattern, per evitare falsi positivi su prosa che contenga per
+    // caso un "|" isolato (una riga di tabella vera non è mai sola).
+    if (/\s\|\s/.test(riga) && i + 1 < righe.length && /\s\|\s/.test(righe[i + 1])) {
+      chiudiParagrafo(); chiudiLista();
+      const celleTestataPipe = riga.split('|').map(c => c.trim());
+      const righeTabellaPipe = [celleTestataPipe];
+      let jp = i + 1;
+      while (jp < righe.length && /\s\|\s/.test(righe[jp])) {
+        righeTabellaPipe.push(righe[jp].split('|').map(c => c.trim()));
+        jp++;
+      }
+      i = jp - 1;
+      const theadPipe = '<thead><tr>' + righeTabellaPipe[0].map(c => '<th>' + escapeHtml(c) + '</th>').join('') + '</tr></thead>';
+      const tbodyPipe = '<tbody>' + righeTabellaPipe.slice(1).map(r => '<tr>' + r.map(c => '<td>' + escapeHtml(c) + '</td>').join('') + '</tr>').join('') + '</tbody>';
+      blocchi.push('<table>' + theadPipe + tbodyPipe + '</table>');
+      continue;
+    }
+
     const matchNumerato = riga.match(/^\d+[.)]\s+(.*)$/);
     if (matchNumerato) {
       const testoSenzaNumero = matchNumerato[1];
