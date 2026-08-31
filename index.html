@@ -2000,7 +2000,6 @@ Restituisci SOLO il documento riscritto.`;
     document.getElementById('output-actions').style.display = 'flex';
     document.getElementById('btn-print').style.display = 'none';
     document.getElementById('btn-export-pdf').style.display = 'none';
-    toast('✓ Brand DNA applicato con successo');
   } catch(e) { showErrorBanner(e.message, applyDNA); }
   finally { tl.classList.remove('visible'); }
 }
