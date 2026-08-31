@@ -367,6 +367,17 @@ input[type="file"]{display:none}
 }
 .pro-banner-text{font-size:12px;color:var(--green);font-family:var(--mono)}
 
+.trial-banner.state-exhausted{
+  background:var(--gold-glow);border:1px solid rgba(201,168,76,.4);
+}
+.state-exhausted-msg{color:var(--gold)!important;display:flex;align-items:center;gap:8px}
+.btn-gold-inline{
+  font-family:var(--mono);font-size:10px;letter-spacing:.5px;font-weight:700;
+  color:#1a1712;background:var(--gold);border:none;border-radius:5px;padding:7px 14px;
+  cursor:pointer;white-space:nowrap;
+}
+.btn-gold-inline:hover{background:var(--gold-dim)}
+
 /* ── HISTORY ── */
 .history-section{background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden}
 .history-header{padding:14px 22px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
@@ -1022,7 +1033,7 @@ input[type="file"]{display:none}
 <!-- ── MODAL: CODICE LICENZA (paywall) ── -->
 <div class="modal-overlay" id="modal-license">
   <div class="modal">
-    <div class="modal-title">🔑 Inserisci Codice Licenza</div>
+    <div class="modal-title" id="modal-license-title">🔑 Inserisci Codice Licenza</div>
     <div class="modal-desc" id="modal-license-desc">Hai esaurito le generazioni gratuite. Inserisci il codice ricevuto da SintesiDigitale per continuare senza limiti — e per sbloccare le modalit\u00e0 "Brand da Master" e "Brand Personalizzato" con generazione premium AI.</div>
     <div class="form-group" style="margin-top:8px">
       <label class="form-label">Codice Licenza</label>
@@ -1177,7 +1188,17 @@ function updateLicenseUI() {
   } else {
     freeBanner.style.display    = 'flex';
     licenseBanner.style.display = 'none';
-    document.getElementById('free-counter').textContent = freeRemaining;
+    if (freeRemaining <= 0) {
+      freeBanner.className = 'trial-banner full-width state-exhausted';
+      freeBanner.innerHTML =
+        '<span class="trial-banner-text state-exhausted-msg">🔒 Generazioni gratuite terminate</span>' +
+        '<button class="btn-gold-inline" onclick="openLicenseModal(&quot;exhausted&quot;)">Sblocca con licenza</button>';
+    } else {
+      freeBanner.className = 'trial-banner full-width';
+      freeBanner.innerHTML =
+        '<span class="trial-banner-text">🎁 Generazioni gratuite rimaste:</span>' +
+        '<span class="trial-counter" id="free-counter">' + freeRemaining + '</span>';
+    }
     statusText.textContent = freeRemaining + ' generazion' + (freeRemaining===1?'e':'i') + ' gratuit' + (freeRemaining===1?'a':'e') + ' disponibil' + (freeRemaining===1?'e':'i');
   }
 }
@@ -1234,9 +1255,18 @@ async function confirmOtpEmailGate() {
   }
 }
 
-function openLicenseModal() {
+function openLicenseModal(reason) {
   hideError('license-err');
   document.getElementById('modal-license-code').value = '';
+  const titleEl = document.getElementById('modal-license-title');
+  const descEl  = document.getElementById('modal-license-desc');
+  if (reason === 'exhausted') {
+    titleEl.textContent = 'Hai usato le tue ' + FREE_LIMIT + ' generazioni gratuite';
+    descEl.textContent  = 'Con una licenza continui a formattare documenti senza limiti, e sblocchi anche le modalità "Brand da Master" e "Brand Personalizzato" con generazione premium AI.';
+  } else {
+    titleEl.textContent = '🔑 Inserisci Codice Licenza';
+    descEl.textContent  = 'Inserisci il codice ricevuto da SintesiDigitale per continuare senza limiti — e per sbloccare le modalità "Brand da Master" e "Brand Personalizzato" con generazione premium AI.';
+  }
   showModal('modal-license');
 }
 
@@ -1841,7 +1871,7 @@ async function applyDNA() {
 
   // ── Modalità senza AI (sintesi/kitbrand): parser nativo, zero Gemini ───────
   if (currentBrandMode === 'sintesi' || currentBrandMode === 'kitbrand') {
-    if (!currentLicenseId && freeRemaining <= 0) { openLicenseModal(); return; }
+    if (!currentLicenseId && freeRemaining <= 0) { openLicenseModal('exhausted'); return; }
     if (!currentLicenseId && !userFreeEmail) { openEmailGateModal(); return; }
 
     const tl = document.getElementById('target-loading');
@@ -1855,7 +1885,7 @@ async function applyDNA() {
         const usoRes = await apiCall({ action: 'consuma_generazione_free', deviceId, email: userFreeEmail });
         if (!usoRes.ok) {
           if (usoRes.otpRichiesto) { userFreeEmail = null; openEmailGateModal(); return; }
-          if (usoRes.paywall) { openLicenseModal(); return; }
+          if (usoRes.paywall) { openLicenseModal('exhausted'); return; }
           showErrorBanner(usoRes.error, applyDNA);
           return;
         }
@@ -1917,7 +1947,6 @@ async function applyDNA() {
       document.getElementById('btn-export-pdf').style.display = '';
       toast('✓ Documento formattato con successo');
       updateLicenseUI();
-      if (!currentLicenseId && freeRemaining <= 0) toast('⚠ Generazioni gratuite esaurite. Inserisci un codice licenza per continuare — con licenza sblocchi anche Master e Personalizzato con AI.', 5000);
     } catch(e) { showErrorBanner(e.message, applyDNA); }
     finally { tl.classList.remove('visible'); }
     return;
