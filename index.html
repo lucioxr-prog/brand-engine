@@ -900,8 +900,10 @@ input[type="file"]{display:none}
           </div>
           <div class="char-count" id="target-count">0 caratteri</div>
 
-          <!-- Page numbers -->
-          <div class="page-options">
+          <!-- Page numbers: disattivata dal fix del 2026-09-07 — si applicava solo all'output
+               testo grezzo (Master/Custom), ora sostituito dal rendering HTML brandizzato.
+               Da reimplementare come numerazione CSS @page se serve. -->
+          <div class="page-options" id="page-options-panel" style="display:none">
             <span class="page-options-label">◈ Numerazione Pagine</span>
             <div class="toggle-wrap">
               <div class="toggle" id="page-toggle" onclick="togglePageNumbers()"></div>
@@ -1089,6 +1091,7 @@ let freeRemaining    = FREE_LIMIT;
 let brandDNA        = null;
 let userFreeEmail    = null; // null finché non fornita al primo tentativo di generazione gratuita
 let outputText      = '';
+let outputIsHtml    = false;
 let sessionHistory  = [];
 let pageNumbersEnabled = false;
 let currentBrandMode = 'kitbrand'; // 'sintesi' | 'master' | 'custom' | 'kitbrand'
@@ -1956,6 +1959,7 @@ async function applyDNA() {
       iframe.style.cssText = 'width:100%;height:700px;border:none;border-radius:4px;background:#000;';
       iframe.srcdoc = outputText;
       outputArea.appendChild(iframe);
+      outputIsHtml = true;
       document.getElementById('output-actions').style.display = 'flex';
       document.getElementById('btn-print').style.display = '';
       document.getElementById('btn-export-pdf').style.display = '';
@@ -2009,13 +2013,40 @@ Restituisci SOLO il documento riscritto.`;
       return;
     }
 
-    outputText = res.result;
-    renderOutputWithPages(res.result, getPageConfig());
-    const emptyEl = document.getElementById('empty-output');
-    if (emptyEl) emptyEl.style.display = 'none';
+    // Il testo generato dall'AI (Markdown) viene passato allo stesso parser nativo
+    // usato da sintesi/kitbrand, per rispettare la regola §11 del Brand DNA:
+    // qualsiasi documento esportato deve rispettare le specifiche visive del brand.
+    const nativo = formattaTestoNativo(res.result);
+    const kb = getKitbrandCliente();
+    const brandLabel = kb.azienda;
+    const cssFinale = buildKitbrandCss(kb);
+    const fontsFinale = buildKitbrandFonts(kb);
+    const today = new Date().toLocaleDateString('it-IT', {year:'numeric',month:'long',day:'numeric'});
+    const coverHTML = `<div class="cover">
+  <div class="cover-top">
+    ${brandLabel ? `<div class="cover-brand-text">${escapeHtml(brandLabel.toUpperCase())}</div><div class="cover-divider"></div>` : ''}
+    <h1>${nativo.title}</h1>
+  </div>
+  <div class="cover-bottom">
+    <div class="cover-meta">
+      <div class="cover-meta-item"><div class="cover-meta-label">Data</div><div class="cover-meta-value">${today}</div></div>
+    </div>
+    <div class="cover-footer-credits">${brandLabel ? escapeHtml(brandLabel) : ''}</div>
+  </div>
+</div>`;
+    const closingHTML = brandLabel ? `<div class="doc-closing"><div class="doc-closing-name">${escapeHtml(brandLabel.toUpperCase())}</div></div>` : '';
+
+    outputText = '<!DOCTYPE html><html lang="it"><head><meta charset="UTF-8"><title>​</title>' + fontsFinale + '<style>' + cssFinale + '</style></head><body>' + coverHTML + nativo.bodyHtml + closingHTML + '</body></html>';
+    const outputArea = document.getElementById('output-area');
+    outputArea.innerHTML = '';
+    const iframe = document.createElement('iframe');
+    iframe.style.cssText = 'width:100%;height:700px;border:none;border-radius:4px;background:#000;';
+    iframe.srcdoc = outputText;
+    outputArea.appendChild(iframe);
+    outputIsHtml = true;
     document.getElementById('output-actions').style.display = 'flex';
-    document.getElementById('btn-print').style.display = 'none';
-    document.getElementById('btn-export-pdf').style.display = 'none';
+    document.getElementById('btn-print').style.display = '';
+    document.getElementById('btn-export-pdf').style.display = '';
   } catch(e) { showErrorBanner(e.message, applyDNA); }
   finally { tl.classList.remove('visible'); }
 }
@@ -2473,8 +2504,8 @@ function renderDNA(dna) {
 
 // ── OUTPUT ACTIONS ────────────────────────────────────────────────────────
 function copyOutput() {
-  // In modalità sintesi copia il testo pulito (senza tag HTML)
-  if (currentBrandMode === 'sintesi' || currentBrandMode === 'kitbrand') {
+  // Se l'output è HTML brandizzato copia il testo pulito (senza tag HTML)
+  if (outputIsHtml) {
     const tmp = document.createElement('div');
     tmp.innerHTML = outputText;
     navigator.clipboard.writeText(tmp.textContent || tmp.innerText || '').then(() => toast('✓ Testo copiato negli appunti'));
@@ -2484,9 +2515,8 @@ function copyOutput() {
 }
 
 function downloadOutput() {
-  const isSintesi = currentBrandMode === 'sintesi' || currentBrandMode === 'kitbrand';
-  const blob = new Blob([outputText], { type: isSintesi ? 'text/html;charset=utf-8' : 'text/plain;charset=utf-8' });
-  const ext  = isSintesi ? '.html' : '.txt';
+  const blob = new Blob([outputText], { type: outputIsHtml ? 'text/html;charset=utf-8' : 'text/plain;charset=utf-8' });
+  const ext  = outputIsHtml ? '.html' : '.txt';
   const a    = document.createElement('a');
   a.href     = URL.createObjectURL(blob);
   a.download = 'brand-dna-output-' + new Date().toISOString().slice(0,10) + ext;
@@ -2497,7 +2527,7 @@ function downloadOutput() {
 
 // ── STAMPA: apre l'HTML SintesiDigitale in una nuova finestra e chiama print() ──
 function printOutput() {
-  if (currentBrandMode !== 'sintesi' && currentBrandMode !== 'kitbrand') { toast('Stampa disponibile solo in modalità Sintesi/Kitbrand'); return; }
+  if (!outputIsHtml) { toast('Stampa disponibile solo per output brandizzato'); return; }
   const win = window.open('', '_blank', 'width=900,height=700');
   if (!win) { toast('⚠ Popup bloccato — consenti i popup per questo sito'); return; }
   win.document.write(outputText);
@@ -2510,7 +2540,7 @@ function printOutput() {
 
 // ── ESPORTA PDF: usa la finestra di stampa con destinazione "Salva come PDF" ──
 function exportPDF() {
-  if (currentBrandMode !== 'sintesi' && currentBrandMode !== 'kitbrand') { toast('Export PDF disponibile solo in modalità Sintesi/Kitbrand'); return; }
+  if (!outputIsHtml) { toast('Export PDF disponibile solo per output brandizzato'); return; }
   const win = window.open('', '_blank', 'width=900,height=700');
   if (!win) { toast('⚠ Popup bloccato — consenti i popup per questo sito'); return; }
   win.document.write(outputText);
@@ -2523,7 +2553,7 @@ function exportPDF() {
 function saveToHistory() {
   const preview = outputText.slice(0, 60).replace(/\n/g,' ') + '...';
   const now     = new Date().toLocaleString('it-IT', { hour:'2-digit', minute:'2-digit', day:'2-digit', month:'2-digit' });
-  sessionHistory.unshift({ text: outputText, preview, date: now });
+  sessionHistory.unshift({ text: outputText, preview, date: now, isHtml: outputIsHtml });
   renderHistory();
   toast('✓ Salvato in storia sessione');
 }
@@ -2549,13 +2579,20 @@ function loadHistory(i) {
   const item = sessionHistory[i];
   if (!item) return;
   outputText = item.text;
-  const emptyEl = document.getElementById('empty-output');
-  if (emptyEl) emptyEl.style.display = 'none';
-  renderOutputWithPages(item.text, getPageConfig());
+  outputIsHtml = !!item.isHtml;
+  const outputArea = document.getElementById('output-area');
+  outputArea.innerHTML = '';
+  if (outputIsHtml) {
+    const iframe = document.createElement('iframe');
+    iframe.style.cssText = 'width:100%;height:700px;border:none;border-radius:4px;background:#000;';
+    iframe.srcdoc = outputText;
+    outputArea.appendChild(iframe);
+  } else {
+    renderOutputWithPages(item.text, getPageConfig());
+  }
   document.getElementById('output-actions').style.display = 'flex';
-  // Nasconde bottoni stampa/PDF (la storia non sa la modalità originale)
-  document.getElementById('btn-print').style.display = 'none';
-  document.getElementById('btn-export-pdf').style.display = 'none';
+  document.getElementById('btn-print').style.display = outputIsHtml ? '' : 'none';
+  document.getElementById('btn-export-pdf').style.display = outputIsHtml ? '' : 'none';
   toast('✓ Documento caricato dalla storia');
 }
 
